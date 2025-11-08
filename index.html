@@ -242,6 +242,151 @@
             <textarea id="review-message" name="message" rows="4" required></textarea>
           </div>
           <button class="ghost-btn" type="submit">Odeslat k&nbsp;schválení</button>
+        </div>
+      </section>
+
+      <section class="section" id="past" aria-labelledby="past-title">
+        <div class="section-heading">
+          <h2 id="past-title">Předešlé akce &amp; atmosféra</h2>
+          <p class="section-subtitle">Mrkni, jak to u nás vypadá, a nalaď se na další večer.</p>
+        </div>
+        <div class="cards" data-past-list></div>
+        <div class="empty-state" data-past-empty hidden>
+          <p>Teprve začínáme! Přidej se na některou z nadcházejících akcí a pomoz tvořit historii Poznej &amp; Hraj.</p>
+        </div>
+      </section>
+
+      <section class="section" id="gallery" aria-labelledby="gallery-title">
+        <div class="section-heading">
+          <h2 id="gallery-title">Galerie &amp; atmosféra</h2>
+          <p class="section-subtitle">Momentky z akcí střídají komunitní slogany a logo projektu.</p>
+        </div>
+        <div class="gallery-grid" data-gallery-grid></div>
+        <div class="gallery-actions">
+          <button class="ghost-btn" type="button" data-open-lightbox>Prohlédnout na celé obrazovce</button>
+          <p class="muted">
+            Připravujeme automatickou synchronizaci s Google Drive i hashtag feedem z Instagramu. Označ fotky
+            <strong>@poznejahraj</strong> a sdílej zážitky!
+          </p>
+          <div class="chips" id="event-highlight"></div>
+        </div>
+      </div>
+    </header>
+
+      <section class="section" id="social" aria-labelledby="social-title">
+        <div class="section-heading">
+          <h2 id="social-title">Označ nás na IG</h2>
+          <p class="section-subtitle">
+            📸 Staň se součástí komunity! Sdílej své momenty z akcí, označ nás na Instagramu <strong>@poznejahraj</strong>
+            a tvá fotka se může objevit přímo na webu! 💫
+          </p>
+        </div>
+        <div class="social-callout">
+          <div class="social-text">
+            <h3>📸 Sdílej zážitky</h3>
+            <p>
+              Příběhy z akcí, backstage momenty i nové přátelství – to všechno chceme vidět. Přidej hashtag
+              <strong>#poznejahraj</strong> nebo označ profil, aby se fotky propsaly do galerie.
+            </p>
+            <div class="social-icons" aria-label="Sociální sítě">
+              <button type="button" class="social-btn" aria-label="Instagram (brzy online)">
+                <span aria-hidden="true">📷</span>
+                <span>Instagram</span>
+              </button>
+              <button type="button" class="social-btn" aria-label="Facebook (brzy online)">
+                <span aria-hidden="true">💬</span>
+                <span>Facebook</span>
+              </button>
+            </div>
+          </div>
+          <div class="social-preview" aria-hidden="true">
+            <div class="preview-card">
+              <span>„Každá hra je šance poznat někoho nového.“</span>
+            </div>
+            <div class="preview-card">
+              <span>„Zábava, přátelství, zážitky – bez bariér.“</span>
+            </div>
+          </div>
+        </div>
+        <div class="events-grid" id="events-list"></div>
+      </section>
+
+      <section class="section" id="poll" aria-labelledby="poll-title">
+        <div class="section-heading">
+          <h2 id="poll-title">Hlasuj o příštím tématu</h2>
+          <p class="section-subtitle">Tvůj hlas pomáhá ladit atmosféru dalších večerů.</p>
+        </div>
+        <div class="poll" data-poll></div>
+      </section>
+
+      <section class="section" id="reservation" aria-labelledby="reservation-title">
+        <div class="section-heading">
+          <h2 id="reservation-title">Rezervace místa</h2>
+          <p class="section-subtitle">
+            Vyplň formulář, odešleme ho přes Formspree a zároveň uložíme rezervaci do tvého zařízení.
+          </p>
+        </div>
+        <form class="reservation-form" id="reservation-form">
+          <div class="field">
+            <label for="reservation-event">Vyber akci</label>
+            <select id="reservation-event" name="event" required></select>
+          </div>
+          <div class="field">
+            <label for="reservation-name">Jméno a příjmení</label>
+            <input id="reservation-name" name="name" type="text" autocomplete="name" required />
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="reservation-email">E-mail</label>
+              <input id="reservation-email" name="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="field">
+              <label for="reservation-count">Počet osob</label>
+              <input id="reservation-count" name="count" type="number" min="1" max="10" value="1" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="reservation-note">Poznámka</label>
+            <textarea id="reservation-note" name="note" rows="3" placeholder="Preferuji týmové hry, můžu přijít později…"></textarea>
+          </div>
+          <div class="payment-info" data-payment-info>
+            <p><strong>Cena za osobu:</strong> <span data-price>—</span></p>
+            <p class="muted">Platba proběhne na místě. Integrace Stripe Checkout je připravena k propojení.</p>
+          </div>
+          <button class="primary-btn" type="submit">Odeslat rezervaci</button>
+          <p class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="section" id="reviews" aria-labelledby="reviews-title">
+        <div class="section-heading">
+          <h2 id="reviews-title">Recenze komunity</h2>
+          <p class="section-subtitle">Napiš, jak se ti akce líbila. Recenze zveřejníme po schválení adminem.</p>
+        </div>
+        <div class="reviews" data-review-list></div>
+        <form class="review-form" id="review-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="review-name">Jméno</label>
+              <input id="review-name" name="name" type="text" required />
+            </div>
+            <div class="field">
+              <label for="review-rating">Hodnocení</label>
+              <select id="review-rating" name="rating" required>
+                <option value="">Vyber</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="review-message">Recenze</label>
+            <textarea id="review-message" name="message" rows="4" required></textarea>
+          </div>
+          <button class="ghost-btn" type="submit">Odeslat k&nbsp;schválení</button>
           <p class="form-feedback" role="status" aria-live="polite"></p>
         </form>
       </section>
