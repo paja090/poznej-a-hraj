@@ -10,6 +10,9 @@
   --accent-green: #2bd786;
   --accent-amber: #ffc860;
   --accent-violet: #8f6fff;
+  --color-accent: var(--accent);
+  --color-text-muted: var(--text-secondary);
+  --color-text-primary: var(--text-primary);
   --chip: rgba(143, 118, 255, 0.12);
   --font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-lg: 24px;
