@@ -23,6 +23,9 @@
           <a class="chip" href="#anketa">Hlasovat o aktivitách</a>
           <a class="btn btn--ghost" href="#recenze">Naše komunita</a>
           <a class="btn btn--primary" href="#program">Zobrazit akce</a>
+          <button class="btn btn--ghost" type="button" id="admin-toggle">
+            Admin
+          </button>
           <button class="btn btn--edit" type="button" id="edit-toggle" aria-pressed="false">
             Režim úprav
           </button>
@@ -102,53 +105,7 @@
               </div>
               <a class="link" href="#galerie">Zobrazit fotky</a>
             </header>
-            <div class="schedule__list">
-              <article class="schedule-item">
-                <div class="schedule-item__date">
-                  <span class="schedule-item__day">7</span>
-                  <span>srpna</span>
-                </div>
-                <div class="schedule-item__content">
-                  <h3 data-editable="event-1-title">Večer her &amp; speed-fun</h3>
-                  <p data-editable="event-1-status">Rezervováno 17 / 24 míst</p>
-                </div>
-                <div class="schedule-item__meta">
-                  <span class="pill pill--green">Posledních 7 míst</span>
-                  <span data-editable="event-1-meta">18:30 · Bistro U dvou vikingských přátel</span>
-                </div>
-                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
-              </article>
-              <article class="schedule-item">
-                <div class="schedule-item__date">
-                  <span class="schedule-item__day">23</span>
-                  <span>srpna</span>
-                </div>
-                <div class="schedule-item__content">
-                  <h3 data-editable="event-2-title">Seznamovací herní večer</h3>
-                  <p data-editable="event-2-status">Rezervováno 25 / 30 míst</p>
-                </div>
-                <div class="schedule-item__meta">
-                  <span class="pill pill--amber">Rozšířená kapacita</span>
-                  <span data-editable="event-2-meta">19:00 · Herní klub Skandinávie</span>
-                </div>
-                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
-              </article>
-              <article class="schedule-item">
-                <div class="schedule-item__date">
-                  <span class="schedule-item__day">5</span>
-                  <span>září</span>
-                </div>
-                <div class="schedule-item__content">
-                  <h3 data-editable="event-3-title">Turnaj o krále večera</h3>
-                  <p data-editable="event-3-status">Rezervováno 12 / 20 míst</p>
-                </div>
-                <div class="schedule-item__meta">
-                  <span class="pill pill--violet">Včetně mini mastery</span>
-                  <span data-editable="event-3-meta">18:00 · Kavárna Na lodi</span>
-                </div>
-                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
-              </article>
-            </div>
+            <div class="schedule__list" id="schedule-list"></div>
           </section>
 
           <section class="card poll" id="anketa">
@@ -196,20 +153,21 @@
               </div>
               <a class="btn btn--ghost" href="#hero-form">Přidej fotku</a>
             </header>
-            <div class="gallery__grid">
-              <button class="gallery__tile" type="button">Friends</button>
-              <button class="gallery__tile" type="button">Cheers 07</button>
-              <button class="gallery__tile" type="button">Dancefloor</button>
-              <button class="gallery__tile" type="button">Story cards</button>
-              <button class="gallery__tile" type="button">Board zone</button>
-              <button class="gallery__tile" type="button">Chillout</button>
-              <button class="gallery__tile" type="button">Tasting</button>
-              <button class="gallery__tile" type="button">Aftertalk</button>
-            </div>
+            <div class="gallery__grid" id="gallery-grid"></div>
           </section>
         </div>
 
         <aside class="layout__aside">
+          <section class="card updates" id="informace">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="updates-title">Informace pro crew</h2>
+                <p data-editable="updates-text">Aktuální novinky a organizační detaily.</p>
+              </div>
+            </header>
+            <ul class="updates__list" id="info-list"></ul>
+          </section>
+
           <section class="card steps" id="jak-to-funguje">
             <header class="section-header">
               <div>
@@ -287,6 +245,116 @@
           <span data-editable="footer-text">Poznej &amp; Hraj · Udržitelná zábava v Brně.</span>
         </p>
       </footer>
+    </div>
+
+    <div class="admin-panel" id="admin-panel" aria-hidden="true">
+      <div class="admin-panel__overlay" id="admin-overlay" role="presentation"></div>
+      <div
+        class="admin-panel__content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-panel-title"
+      >
+        <header class="admin-panel__header">
+          <div>
+            <h2 id="admin-panel-title">Admin prostředí</h2>
+            <p class="admin-panel__subtitle">
+              Přidávej nové události, informace pro crew a dlaždice do galerie. Změny se ukládají do
+              tohoto prohlížeče.
+            </p>
+          </div>
+          <button class="btn btn--ghost" type="button" id="admin-close">Zavřít</button>
+        </header>
+
+        <div class="admin-panel__sections">
+          <section class="admin-section">
+            <header>
+              <h3>Události</h3>
+              <p>Plánuj termíny a doplň kapacitu i místo konání.</p>
+            </header>
+            <form class="admin-form" id="admin-event-form">
+              <div class="admin-form__grid">
+                <label>
+                  Den
+                  <input type="number" name="day" min="1" max="31" required />
+                </label>
+                <label>
+                  Měsíc
+                  <input type="text" name="month" placeholder="např. září" required />
+                </label>
+                <label>
+                  Název
+                  <input type="text" name="title" required />
+                </label>
+                <label>
+                  Stav / kapacita
+                  <input type="text" name="status" placeholder="Rezervováno 10 / 24 míst" required />
+                </label>
+                <label>
+                  Čas a místo
+                  <input type="text" name="meta" placeholder="18:00 · Bistro" required />
+                </label>
+                <label>
+                  Štítek
+                  <input type="text" name="badgeText" placeholder="Posledních 5 míst" />
+                </label>
+                <label>
+                  Barva štítku
+                  <select name="badgeVariant">
+                    <option value="green">Zelená</option>
+                    <option value="amber">Jantarová</option>
+                    <option value="violet">Fialová</option>
+                  </select>
+                </label>
+              </div>
+              <div class="admin-form__actions">
+                <button class="btn btn--primary" type="submit">Přidat událost</button>
+              </div>
+            </form>
+            <ul class="admin-list" id="admin-events-list"></ul>
+          </section>
+
+          <section class="admin-section">
+            <header>
+              <h3>Informace</h3>
+              <p>Vytvoř krátké oznámení nebo logistickou poznámku.</p>
+            </header>
+            <form class="admin-form" id="admin-info-form">
+              <label>
+                Text informace
+                <input type="text" name="info" placeholder="Doraz o 15 min dříve kvůli welcome drinku" required />
+              </label>
+              <div class="admin-form__actions">
+                <button class="btn btn--primary" type="submit">Přidat informaci</button>
+              </div>
+            </form>
+            <ul class="admin-list" id="admin-info-list"></ul>
+          </section>
+
+          <section class="admin-section">
+            <header>
+              <h3>Galerie</h3>
+              <p>Pojmenuj novou dlaždici s fotkou nebo atmosférou.</p>
+            </header>
+            <form class="admin-form" id="admin-gallery-form">
+              <label>
+                Název dlaždice
+                <input type="text" name="label" placeholder="Crew brunch" required />
+              </label>
+              <div class="admin-form__actions">
+                <button class="btn btn--primary" type="submit">Přidat fotku</button>
+              </div>
+            </form>
+            <ul class="admin-list" id="admin-gallery-list"></ul>
+          </section>
+        </div>
+
+        <footer class="admin-panel__footer">
+          <button class="btn btn--ghost" type="button" id="admin-reset-data">
+            Obnovit výchozí data
+          </button>
+        </footer>
+      </div>
     </div>
 
     <script src="script.js"></script>

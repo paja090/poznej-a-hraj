@@ -6,7 +6,7 @@ Jednostránková prezentace komunitní akce Poznej &amp; Hraj laděná do nočn�
 
 - `index.html` – hlavní stránka s hero kartou, programem, anketou, galerií a postranními boxy.
 - `style.css` – styly rozhraní, neonová paleta a responsivní layout.
-- `script.js` – logika ankety, práce s hlasováním, odezva formuláře a režim úprav obsahu.
+- `script.js` – logika ankety, práce s hlasováním, odezva formuláře, režim úprav obsahu a admin panel pro správu dat.
 - `assets/board-games.svg` – ilustrační grafika pro hero sekci.
 
 ## Lokální spuštění
@@ -24,3 +24,9 @@ A poté navštívit <http://localhost:8000>.
 - Klikni na tlačítko **Režim úprav** v horní liště pro odemčení textů s označením.
 - Upravený text se ukládá do prohlížeče (`localStorage`) a zůstane zachován i po obnovení stránky.
 - Pomocí tlačítka **Obnovit texty** lze vrátit původní znění jednotlivých bloků.
+
+## Admin prostředí
+
+- Tlačítkem **Admin** otevřeš panel se správou událostí, informačních hlášek a galerie.
+- Formuláře umožňují přidávat nové položky, které se okamžitě promítnou do programu a postranních sekcí.
+- Každá položka má možnost smazání, změny se ukládají do `localStorage` a můžeš je vrátit pomocí tlačítka **Obnovit výchozí data** v patičce panelu.
