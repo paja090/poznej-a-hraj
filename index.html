@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Poznej &amp; Hraj – Bistro u dvou vikinských přátel (verze 4)</title>
+    <meta
+      name="description"
+      content="Oficiální web bistro projektu Poznej &amp; Hraj – U dvou vikinských přátel. Objev stolní hry, ochutnej severské dobroty a užij si večer s přáteli."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero" id="uvod">
+      <nav class="nav">
+        <a class="logo" href="#uvod">Poznej &amp; Hraj</a>
+        <button class="nav__toggle" aria-expanded="false" aria-controls="primary-navigation">
+          <span class="nav__toggle-line"></span>
+          <span class="nav__toggle-line"></span>
+          <span class="nav__toggle-line"></span>
+          <span class="sr-only">Menu</span>
+        </button>
+        <ul class="nav__links" id="primary-navigation">
+          <li><a href="#menu">Menu</a></li>
+          <li><a href="#herna">Herna</a></li>
+          <li><a href="#program">Program</a></li>
+          <li><a href="#rezervace">Rezervace</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+        </ul>
+      </nav>
+      <div class="hero__content">
+        <h1>Bistro U dvou vikinských přátel</h1>
+        <p>
+          Verze 4 projektu Poznej &amp; Hraj přináší nezapomenutelný zážitek –
+          moderní bistro, stolní hry a severská atmosféra přímo v srdci města.
+        </p>
+        <a class="button" href="#rezervace">Rezervuj stůl</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="intro-heading">
+        <div class="intro__content">
+          <h2 id="intro-heading">Poznej &amp; Hraj – více než jen bistro</h2>
+          <p>
+            Jsme komunitní prostor, kde se potkává láska k dobrému jídlu a
+            nadšení pro deskové hry. Naši dva vikínští přátelé Magnus a Eira tě
+            provedou večerem plným chutí, příběhů a zábavy.
+          </p>
+          <ul class="intro__highlights">
+            <li>Autorské recepty inspirované Skandinávií.</li>
+            <li>Bohatá sbírka deskových a karetních her pro všechny úrovně.</li>
+            <li>Tematické večery, workshopy a turnaje pro jednotlivce i týmy.</li>
+          </ul>
+        </div>
+        <div class="intro__card">
+          <h3>Novinka verze 4</h3>
+          <p>
+            Vylepšili jsme rezervační systém, rozšířili herní knihovnu o 42 nových
+            titulů a přidali speciální "Severský brunch" každou sobotu.
+          </p>
+        </div>
+      </section>
+
+      <section class="menu" id="menu" aria-labelledby="menu-heading">
+        <h2 id="menu-heading">Severské menu</h2>
+        <div class="menu__grid">
+          <article class="menu__item">
+            <h3>Ranní probuzení Fjordu</h3>
+            <p>
+              Kváskový chleba s bylinkovým máslem, uzený losos, vejce pošírované v
+              koprové omáčce.
+            </p>
+            <span class="menu__price">189 Kč</span>
+          </article>
+          <article class="menu__item">
+            <h3>Valhala burger</h3>
+            <p>
+              Hovězí na jalovci, borůvkový relish, kozí sýr a pečené kořenové
+              hranolky.
+            </p>
+            <span class="menu__price">259 Kč</span>
+          </article>
+          <article class="menu__item">
+            <h3>Polární polévka</h3>
+            <p>
+              Krémová dýňová polévka se skořicí, lískovými oříšky a jablečnými
+              chipsy.
+            </p>
+            <span class="menu__price">129 Kč</span>
+          </article>
+          <article class="menu__item">
+            <h3>Eirin sladká odměna</h3>
+            <p>
+              Mandlový koláč s brusinkovou pěnou a medovinovým sirupem.
+            </p>
+            <span class="menu__price">149 Kč</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="herna" id="herna" aria-labelledby="herna-heading">
+        <div class="herna__content">
+          <h2 id="herna-heading">Herní doupě</h2>
+          <p>
+            Naše knihovna čítá přes 300 deskových her. Vikingové Magnus a Eira ti
+            doporučí, co si zahrát podle nálady i zkušeností.
+          </p>
+          <ul class="herna__list">
+            <li>Expresní doporučení podle času, který máš k dispozici.</li>
+            <li>Herní průvodci, kteří vysvětlí pravidla během pár minut.</li>
+            <li>Speciální "poznávací balíčky" pro nové hráče i rodiny.</li>
+          </ul>
+        </div>
+        <div class="herna__gallery">
+          <figure>
+            <img src="https://images.unsplash.com/photo-1600563440902-0b12f73e30b2?auto=format&fit=crop&w=900&q=80" alt="Skupina přátel hraje deskovou hru" loading="lazy" />
+            <figcaption>Večery s deskovkami u hořícího krbu.</figcaption>
+          </figure>
+          <figure>
+            <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80" alt="Detail na strategickou deskovou hru" loading="lazy" />
+            <figcaption>Turnaje, kde se rodí legendy.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="program" id="program" aria-labelledby="program-heading">
+        <h2 id="program-heading">Program &amp; události</h2>
+        <div class="timeline">
+          <article class="timeline__item">
+            <time datetime="2024-03-12">Úterý 12. 3.</time>
+            <h3>Workshop: Jak na kooperativní hry</h3>
+            <p>Nauč se vést tým a překonat vikinské výzvy společně.</p>
+          </article>
+          <article class="timeline__item">
+            <time datetime="2024-03-15">Pátek 15. 3.</time>
+            <h3>Magnusův turnaj v sáze "Runy severu"</h3>
+            <p>Hlavní cena: víkendový pobyt v severské sauně.</p>
+          </article>
+          <article class="timeline__item">
+            <time datetime="2024-03-17">Neděle 17. 3.</time>
+            <h3>Rodinné odpoledne s Eirou</h3>
+            <p>Tematické hry a kreativní dílny pro děti od 5 let.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="rezervace" id="rezervace" aria-labelledby="rezervace-heading">
+        <div class="rezervace__content">
+          <h2 id="rezervace-heading">Rezervace</h2>
+          <p>
+            Chceš mít jistotu, že bude místo pro tvůj tým dobrodruhů? Vyplň formulář
+            a my se ti ozveme do 24 hodin. Nebo volej přímo Magnusovi na
+            <a href="tel:+420777123456">+420 777 123 456</a>.
+          </p>
+          <form class="rezervace__form" aria-label="Rezervační formulář">
+            <label>
+              Jméno
+              <input type="text" name="name" required placeholder="Tvé jméno" />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" required placeholder="viking@priklad.cz" />
+            </label>
+            <label>
+              Datum návštěvy
+              <input type="date" name="date" required />
+            </label>
+            <label>
+              Počet dobrodruhů
+              <input type="number" name="people" min="1" max="20" value="2" />
+            </label>
+            <label>
+              Zpráva
+              <textarea name="message" rows="4" placeholder="Preferovaná hra, alergie..."></textarea>
+            </label>
+            <button type="submit" class="button button--dark">Odeslat</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="kontakt" id="kontakt" aria-labelledby="kontakt-heading">
+        <div class="kontakt__info">
+          <h2 id="kontakt-heading">Kde nás najdeš</h2>
+          <p>
+            Bistro U dvou vikinských přátel<br />
+            Krkonošská 42, 110 00 Praha 1
+          </p>
+          <p>
+            Otevírací doba:<br />
+            Po–Čt 10:00–22:00<br />
+            Pá–So 10:00–01:00<br />
+            Ne 10:00–20:00
+          </p>
+          <p>
+            Sleduj nás na
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">Instagramu</a>
+            a
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">Facebooku</a>.
+          </p>
+        </div>
+        <div class="kontakt__map">
+          <iframe
+            title="Mapa umístění bistra"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2563.0981852894664!2d14.42076!3d50.08804!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470b94e3e0ecf807%3A0x1b61bdeadbeef123!2sKrkono%C5%A1sk%C3%A1%2042%2C%20110%2000%20Praha!5e0!3m2!1scs!2scz!4v1700000000000!5m2!1scs!2scz"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__about">
+        <h2>Poznej &amp; Hraj – verze 4</h2>
+        <p>
+          Projekt vznikl z přátelství dvou cestovatelů, kteří si zamilovali deskové
+          hry a severskou kuchyni. Přijď sdílet zážitky, poznat nové lidi a
+          zahrát si legendární tituly.
+        </p>
+      </div>
+      <div class="footer__links">
+        <a href="#uvod">Nahoru</a>
+        <a href="#menu">Menu</a>
+        <a href="#herna">Herna</a>
+        <a href="#program">Program</a>
+        <a href="#rezervace">Rezervace</a>
+      </div>
+      <p class="footer__copy">© 2024 Poznej &amp; Hraj. Všechna práva vyhrazena.</p>
+    </footer>
+
+    <button class="back-to-top" type="button" aria-label="Zpět nahoru">
+      ↑
+    </button>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
