@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poznej &amp; Hraj</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar__brand">
+          <span class="topbar__mark" aria-hidden="true">&#x2728;</span>
+          <span class="topbar__name">Poznej &amp; Hraj</span>
+        </div>
+        <nav class="topbar__actions">
+          <a class="chip" href="#anketa">Hlasovat o aktivitách</a>
+          <a class="btn btn--ghost" href="#recenze">Naše komunita</a>
+          <a class="btn btn--primary" href="#program">Zobrazit akce</a>
+          <button class="btn btn--edit" type="button" id="edit-toggle" aria-pressed="false">
+            Režim úprav
+          </button>
+          <button
+            class="btn btn--ghost btn--reset"
+            type="button"
+            id="edit-reset"
+            hidden
+          >
+            Obnovit texty
+          </button>
+        </nav>
+      </header>
+
+      <main class="layout">
+        <div class="layout__primary">
+          <section class="card hero-card">
+            <header class="hero-card__header">
+              <span class="chip chip--gradient">Poznej &amp; Hraj</span>
+              <h1 data-editable="hero-title">Místo, kde se lidé potkávají přirozeně</h1>
+              <p data-editable="hero-text">
+                Žádné trapné ticho. Hry, zážitky a součástí jste především
+                ledoborce. Organizujeme výpravy, které se chceš vracet.
+              </p>
+            </header>
+            <div class="hero-card__meta">
+              <dl>
+                <div>
+                  <dt>Nadcházející termín</dt>
+                  <dd data-editable="hero-date">14. září · Brno</dd>
+                </div>
+                <div>
+                  <dt>Kapacita</dt>
+                  <dd data-editable="hero-capacity">24 míst · 6 crew leadů</dd>
+                </div>
+                <div>
+                  <dt>Bonus</dt>
+                  <dd data-editable="hero-bonus">
+                    Degustační stůl Bistra u dvou vikingských přátel
+                  </dd>
+                </div>
+              </dl>
+              <div class="hero-card__cta">
+                <button class="btn btn--primary" type="button">
+                  Přidat se k výpravě
+                </button>
+                <button class="btn btn--ghost" type="button">
+                  Zobrazit fotky z minula
+                </button>
+              </div>
+              <form class="hero-card__form" id="hero-form" aria-label="Zanechat e-mail">
+                <label for="hero-email">Chci vědět o dalším termínu</label>
+                <div class="hero-card__input-row">
+                  <input
+                    type="email"
+                    id="hero-email"
+                    name="email"
+                    placeholder="např. eli@bistro.cz"
+                    required
+                  />
+                  <button class="btn btn--accent" type="submit">Poslat</button>
+                </div>
+                <p class="form-hint" id="hero-form-hint">
+                  Odpovíme do 24 hodin a dáme ti vědět, jak to probíhá.
+                </p>
+              </form>
+            </div>
+          </section>
+
+          <section class="card schedule" id="program">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="schedule-title">Nadcházející akce</h2>
+                <p data-editable="schedule-text">
+                  Vyber termín a rezervuj místo pro sebe i své přátele.
+                </p>
+              </div>
+              <a class="link" href="#galerie">Zobrazit fotky</a>
+            </header>
+            <div class="schedule__list">
+              <article class="schedule-item">
+                <div class="schedule-item__date">
+                  <span class="schedule-item__day">7</span>
+                  <span>srpna</span>
+                </div>
+                <div class="schedule-item__content">
+                  <h3 data-editable="event-1-title">Večer her &amp; speed-fun</h3>
+                  <p data-editable="event-1-status">Rezervováno 17 / 24 míst</p>
+                </div>
+                <div class="schedule-item__meta">
+                  <span class="pill pill--green">Posledních 7 míst</span>
+                  <span data-editable="event-1-meta">18:30 · Bistro U dvou vikingských přátel</span>
+                </div>
+                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
+              </article>
+              <article class="schedule-item">
+                <div class="schedule-item__date">
+                  <span class="schedule-item__day">23</span>
+                  <span>srpna</span>
+                </div>
+                <div class="schedule-item__content">
+                  <h3 data-editable="event-2-title">Seznamovací herní večer</h3>
+                  <p data-editable="event-2-status">Rezervováno 25 / 30 míst</p>
+                </div>
+                <div class="schedule-item__meta">
+                  <span class="pill pill--amber">Rozšířená kapacita</span>
+                  <span data-editable="event-2-meta">19:00 · Herní klub Skandinávie</span>
+                </div>
+                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
+              </article>
+              <article class="schedule-item">
+                <div class="schedule-item__date">
+                  <span class="schedule-item__day">5</span>
+                  <span>září</span>
+                </div>
+                <div class="schedule-item__content">
+                  <h3 data-editable="event-3-title">Turnaj o krále večera</h3>
+                  <p data-editable="event-3-status">Rezervováno 12 / 20 míst</p>
+                </div>
+                <div class="schedule-item__meta">
+                  <span class="pill pill--violet">Včetně mini mastery</span>
+                  <span data-editable="event-3-meta">18:00 · Kavárna Na lodi</span>
+                </div>
+                <button class="btn btn--ghost" type="button">Zobrazit detaily</button>
+              </article>
+            </div>
+          </section>
+
+          <section class="card poll" id="anketa">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="poll-title">Co si dáme příště?</h2>
+                <p data-editable="poll-text">
+                  Hlasuj o aktivitě, kterou máme zařadit do programu.
+                </p>
+              </div>
+              <span class="pill pill--violet">Anketa komunity</span>
+            </header>
+            <form class="poll__form" aria-labelledby="poll-title">
+              <fieldset>
+                <legend id="poll-title" data-editable="poll-question">
+                  Která aktivita ti dává největší smysl?
+                </legend>
+                <div class="poll__options" id="poll-options"></div>
+                <label class="poll__option poll__option--custom">
+                  <span>Nebo přidej vlastní návrh</span>
+                  <input
+                    type="text"
+                    id="custom-option"
+                    name="custom-option"
+                    placeholder="Navrhni aktivitu"
+                    autocomplete="off"
+                  />
+                </label>
+              </fieldset>
+              <button class="btn btn--primary" type="submit">Odeslat hlas</button>
+            </form>
+            <div class="poll__results" aria-live="polite">
+              <h3 data-editable="poll-results-title">Průběžné výsledky</h3>
+              <ul id="poll-results"></ul>
+            </div>
+          </section>
+
+          <section class="card gallery" id="galerie">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="gallery-title">Galerie z crew</h2>
+                <p data-editable="gallery-text">
+                  Barvy, které tě přenesou zpět do atmosféry večera.
+                </p>
+              </div>
+              <a class="btn btn--ghost" href="#hero-form">Přidej fotku</a>
+            </header>
+            <div class="gallery__grid">
+              <button class="gallery__tile" type="button">Friends</button>
+              <button class="gallery__tile" type="button">Cheers 07</button>
+              <button class="gallery__tile" type="button">Dancefloor</button>
+              <button class="gallery__tile" type="button">Story cards</button>
+              <button class="gallery__tile" type="button">Board zone</button>
+              <button class="gallery__tile" type="button">Chillout</button>
+              <button class="gallery__tile" type="button">Tasting</button>
+              <button class="gallery__tile" type="button">Aftertalk</button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="layout__aside">
+          <section class="card steps" id="jak-to-funguje">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="how-title">Jak to funguje</h2>
+                <p data-editable="how-text">3 kroky a jsi součást crew.</p>
+              </div>
+            </header>
+            <ol>
+              <li>
+                <strong data-editable="how-step-1-title">Vyber si termín</strong>
+                <span data-editable="how-step-1-text">
+                  Každý týden jiná atmosféra i herní balíček.
+                </span>
+              </li>
+              <li>
+                <strong data-editable="how-step-2-title">Přijď o 15 min dřív</strong>
+                <span data-editable="how-step-2-text">
+                  Mentor tě přivítá, poznáš ostatní ještě před hrou.
+                </span>
+              </li>
+              <li>
+                <strong data-editable="how-step-3-title">Odnes si kontakty</strong>
+                <span data-editable="how-step-3-text">
+                  Odcházíš s partou, se kterou chceš pokračovat.
+                </span>
+              </li>
+            </ol>
+          </section>
+
+          <section class="card reviews" id="recenze">
+            <header class="section-header">
+              <div>
+                <h2 data-editable="reviews-title">Recenze</h2>
+                <p data-editable="reviews-text">Co říká crew / účastníci</p>
+              </div>
+            </header>
+            <ul class="reviews__list">
+              <li>
+                <blockquote>
+                  "<span data-editable="review-1-text">Nejlepší mix intro i party her. Odcházela jsem s úsměvem i novými kontakty.</span>"
+                </blockquote>
+                <cite data-editable="review-1-author">— Anonym · srpen</cite>
+              </li>
+              <li>
+                <blockquote>
+                  "<span data-editable="review-2-text">Bistro se postaralo o perfektní zázemí a tým vedl hry s energií.</span>"
+                </blockquote>
+                <cite data-editable="review-2-author">— Kája / účastníci</cite>
+              </li>
+              <li>
+                <blockquote>
+                  "<span data-editable="review-3-text">Díky aktivitám jsme se s přáteli opravdu poznali, nejen zahráli.</span>"
+                </blockquote>
+                <cite data-editable="review-3-author">— Crew lead</cite>
+              </li>
+            </ul>
+          </section>
+
+          <section class="card bonus">
+            <header>
+              <h2 data-editable="bonus-title">Bonus týdne</h2>
+            </header>
+            <p data-editable="bonus-text">
+              2 volná místa na degustační stůl od Bistra u dvou vikingských přátel
+              pro první přihlášené.
+            </p>
+            <button class="btn btn--accent" type="button">Zarezervovat</button>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <p>
+          &copy; <span id="current-year"></span>
+          <span data-editable="footer-text">Poznej &amp; Hraj · Udržitelná zábava v Brně.</span>
+        </p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
