@@ -6,7 +6,7 @@
     <title>Poznej &amp; Hraj – Seznamovací herní večery</title>
     <meta
       name="description"
-      content="Poznej &amp; Hraj je moderní platforma pro organizování seznamovacích herních večerů, rezervace míst, sdílení fotek a správu recenzí."
+      content="Poznej &amp; Hraj je moderní platforma pro seznamovací herní večery s rezervacemi, galerií a admin správou."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,1720 +14,486 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #05030d;
-        --bg-alt: #0a0720;
-        --surface: rgba(14, 10, 35, 0.85);
-        --surface-solid: #120b32;
-        --primary: #a855f7;
-        --primary-soft: rgba(168, 85, 247, 0.25);
-        --secondary: #38bdf8;
-        --accent: #f472b6;
-        --text: #f5f5ff;
-        --muted: #a5b4fc;
-        --success: #22c55e;
-        --warning: #facc15;
-        font-size: 16px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      ::selection {
-        background: var(--accent);
-        color: var(--bg);
-      }
-
-      body {
-        margin: 0;
-        font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at top, rgba(88, 28, 135, 0.35), transparent 55%),
-          radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.25), transparent 60%),
-          radial-gradient(circle at 80% 70%, rgba(244, 114, 182, 0.25), transparent 60%),
-          var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        scroll-behavior: smooth;
-      }
-
-      h1,
-      h2,
-      h3,
-      h4 {
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        margin: 0 0 0.5rem;
-      }
-
-      p {
-        margin: 0 0 1rem;
-        color: var(--muted);
-      }
-
-      a {
-        color: inherit;
-      }
-
-      header.hero {
-        padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 6vw, 6rem) 4rem;
-        background: linear-gradient(120deg, rgba(168, 85, 247, 0.22), transparent 65%),
-          linear-gradient(300deg, rgba(56, 189, 248, 0.18), transparent 70%);
-        position: relative;
-        overflow: hidden;
-      }
-
-      header.hero::after {
-        content: "";
-        position: absolute;
-        inset: 30% -20% -30% 55%;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent 65%);
-        filter: blur(90px);
-        opacity: 0.9;
-      }
-
-      nav {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        position: relative;
-        z-index: 2;
-      }
-
-      .logo {
-        font-weight: 700;
-        font-size: 1.5rem;
-        color: var(--text);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .logo span {
-        display: inline-flex;
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 50%;
-        background: linear-gradient(120deg, var(--primary), var(--secondary));
-        box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
-      }
-
-      .nav-links {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        gap: clamp(0.5rem, 2vw, 1.5rem);
-      }
-
-      .nav-links a {
-        text-decoration: none;
-        padding: 0.35rem 0.6rem;
-        border-radius: 999px;
-        font-size: 0.95rem;
-        color: var(--muted);
-        transition: color 0.2s ease, background 0.2s ease;
-      }
-
-      .nav-links a:hover,
-      .nav-links a:focus-visible {
-        color: var(--text);
-        background: rgba(255, 255, 255, 0.08);
-      }
-
-      .hero-content {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: clamp(1.5rem, 5vw, 3rem);
-        margin-top: clamp(2rem, 6vw, 4rem);
-        position: relative;
-        z-index: 2;
-      }
-
-      .hero-content h1 {
-        font-size: clamp(2.5rem, 6vw, 3.8rem);
-        line-height: 1.1;
-        margin-bottom: 1rem;
-      }
-
-      .hero-lede {
-        font-size: clamp(1rem, 2.5vw, 1.2rem);
-      }
-
-      .hero-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin: 1.25rem 0 2rem;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.45rem 0.85rem;
-        border-radius: 999px;
-        background: rgba(168, 85, 247, 0.18);
-        color: var(--text);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-
-      .primary-btn,
-      button.primary-btn {
-        padding: 0.75rem 1.6rem;
-        border-radius: 999px;
-        border: none;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        color: var(--text);
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        box-shadow: 0 0 30px rgba(168, 85, 247, 0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .primary-btn:hover,
-      .primary-btn:focus-visible {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 0 15px 35px rgba(56, 189, 248, 0.3);
-      }
-
-      .secondary-btn {
-        padding: 0.65rem 1.1rem;
-        border-radius: 12px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        background: rgba(15, 23, 42, 0.6);
-        color: var(--muted);
-        font-weight: 500;
-        cursor: pointer;
-        transition: border 0.2s ease, transform 0.2s ease;
-      }
-
-      .secondary-btn:hover,
-      .secondary-btn:focus-visible {
-        border-color: rgba(148, 163, 184, 0.6);
-        transform: translateY(-2px);
-      }
-
-      main {
-        padding: clamp(2rem, 4vw, 4rem) clamp(1.2rem, 6vw, 6rem) 6rem;
-        display: grid;
-        gap: clamp(3rem, 6vw, 5rem);
-      }
-
-      section {
-        position: relative;
-        z-index: 1;
-      }
-
-      .section-heading {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .section-heading h2 {
-        font-size: clamp(1.8rem, 4vw, 2.4rem);
-      }
-
-      .section-heading p {
-        max-width: 560px;
-      }
-
-      .glass-panel {
-        background: var(--surface);
-        border: 1px solid rgba(148, 163, 184, 0.12);
-        border-radius: 24px;
-        padding: clamp(1.2rem, 3vw, 2rem);
-        backdrop-filter: blur(24px);
-        box-shadow: 0 25px 60px rgba(8, 47, 73, 0.25);
-      }
-
-      .events-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: clamp(1.5rem, 3vw, 2rem);
-      }
-
-      .event-card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-        min-height: 100%;
-        border-radius: 20px;
-        padding: 1.5rem;
-        background: linear-gradient(160deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.45));
-        border: 1px solid rgba(168, 85, 247, 0.08);
-        box-shadow: 0 20px 45px rgba(76, 29, 149, 0.25);
-        transition: transform 0.2s ease, border 0.3s ease;
-      }
-
-      .event-card:hover {
-        transform: translateY(-6px);
-        border-color: rgba(168, 85, 247, 0.22);
-      }
-
-      .event-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem 0.85rem;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .event-meta span {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.25rem 0.65rem;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.12);
-      }
-
-      .event-availability {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-weight: 500;
-        color: var(--secondary);
-      }
-
-      .event-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin-top: auto;
-      }
-
-      .reservation-section {
-        display: grid;
-        gap: clamp(1.5rem, 3vw, 2.5rem);
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        align-items: start;
-      }
-
-      form {
-        display: grid;
-        gap: 1rem;
-      }
-
-      label {
-        display: grid;
-        gap: 0.35rem;
-        font-weight: 500;
-      }
-
-      input,
-      select,
-      textarea {
-        font: inherit;
-        padding: 0.75rem 0.9rem;
-        border-radius: 14px;
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        background: rgba(15, 23, 42, 0.5);
-        color: var(--text);
-        transition: border 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      input:focus-visible,
-      select:focus-visible,
-      textarea:focus-visible {
-        outline: none;
-        border-color: rgba(56, 189, 248, 0.6);
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 110px;
-      }
-
-      .status-message {
-        padding: 0.75rem 1rem;
-        border-radius: 16px;
-        font-size: 0.95rem;
-        line-height: 1.4;
-        display: none;
-      }
-
-      .status-message.success {
-        display: block;
-        background: rgba(34, 197, 94, 0.15);
-        border: 1px solid rgba(34, 197, 94, 0.35);
-        color: #bbf7d0;
-      }
-
-      .status-message.error {
-        display: block;
-        background: rgba(248, 113, 113, 0.16);
-        border: 1px solid rgba(248, 113, 113, 0.4);
-        color: #fecaca;
-      }
-
-      .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 0.9rem;
-      }
-
-      .gallery-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 18px;
-        border: 1px solid rgba(168, 85, 247, 0.15);
-        aspect-ratio: 1 / 1;
-        cursor: pointer;
-      }
-
-      .gallery-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-      }
-
-      .gallery-item:hover img {
-        transform: scale(1.08);
-      }
-
-      .lightbox {
-        position: fixed;
-        inset: 0;
-        background: rgba(2, 6, 23, 0.92);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        z-index: 50;
-      }
-
-      .lightbox.active {
-        display: flex;
-      }
-
-      .lightbox img {
-        max-width: min(90vw, 1000px);
-        max-height: 80vh;
-        border-radius: 24px;
-        box-shadow: 0 40px 120px rgba(76, 29, 149, 0.65);
-      }
-
-      .lightbox button {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        background: rgba(15, 23, 42, 0.75);
-        border: none;
-        color: var(--text);
-        font-size: 2rem;
-        cursor: pointer;
-        border-radius: 50%;
-        width: 3rem;
-        height: 3rem;
-      }
-
-      .poll-options {
-        display: grid;
-        gap: 1rem;
-        margin: 1rem 0 1.5rem;
-      }
-
-      .poll-option {
-        display: grid;
-        gap: 0.45rem;
-      }
-
-      .poll-option label {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        cursor: pointer;
-      }
-
-      .poll-progress {
-        position: relative;
-        height: 8px;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.2);
-        overflow: hidden;
-      }
-
-      .poll-progress span {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, var(--secondary), var(--accent));
-        transform-origin: left;
-        transition: transform 0.4s ease;
-      }
-
-      .reviews-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: clamp(1.2rem, 3vw, 2rem);
-      }
-
-      .review-card {
-        background: rgba(15, 23, 42, 0.7);
-        border-radius: 20px;
-        padding: 1.5rem;
-        border: 1px solid rgba(56, 189, 248, 0.12);
-        display: grid;
-        gap: 0.75rem;
-        min-height: 220px;
-      }
-
-      .review-stars {
-        color: #fde68a;
-        font-size: 1.05rem;
-        letter-spacing: 0.15rem;
-      }
-
-      .review-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .ig-section {
-        text-align: center;
-        background: linear-gradient(160deg, rgba(15, 23, 42, 0.88), rgba(5, 3, 13, 0.7));
-        border-radius: 28px;
-        padding: clamp(1.5rem, 5vw, 2.5rem);
-        border: 1px solid rgba(244, 114, 182, 0.2);
-        box-shadow: 0 30px 75px rgba(236, 72, 153, 0.2);
-      }
-
-      .ig-icons {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        font-size: 1.8rem;
-        margin: 1rem 0;
-        color: var(--accent);
-      }
-
-      .photo-marquee {
-        overflow: hidden;
-        border-radius: 24px;
-        border: 1px solid rgba(148, 163, 184, 0.12);
-        background: rgba(15, 23, 42, 0.6);
-      }
-
-      .marquee-track {
-        display: flex;
-        gap: 1rem;
-        width: max-content;
-        animation: marquee 28s linear infinite;
-      }
-
-      .marquee-track img {
-        height: 120px;
-        width: 200px;
-        object-fit: cover;
-        border-radius: 16px;
-        filter: saturate(1.2) brightness(0.95);
-      }
-
-      @keyframes marquee {
-        from {
-          transform: translateX(0);
-        }
-        to {
-          transform: translateX(-50%);
-        }
-      }
-
-      .admin-access {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        border: 1px dashed rgba(148, 163, 184, 0.3);
-        padding: 0.55rem 0.9rem;
-        border-radius: 12px;
-        cursor: pointer;
-        color: rgba(244, 114, 182, 0.85);
-        transition: border 0.2s ease, color 0.2s ease;
-      }
-
-      .admin-access:hover {
-        border-color: rgba(244, 114, 182, 0.6);
-        color: var(--text);
-      }
-
-      .admin-panel {
-        display: none;
-        flex-direction: column;
-        gap: 2rem;
-      }
-
-      .admin-panel.active {
-        display: flex;
-      }
-
-      .admin-sections {
-        display: grid;
-        gap: 2rem;
-      }
-
-      .admin-group {
-        display: grid;
-        gap: 1rem;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-      }
-
-      th,
-      td {
-        padding: 0.65rem 0.75rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-        text-align: left;
-      }
-
-      tr:last-child td {
-        border-bottom: none;
-      }
-
-      footer {
-        padding: 3rem 1.5rem;
-        text-align: center;
-        color: var(--muted);
-        background: rgba(5, 3, 13, 0.85);
-      }
-
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(2, 6, 23, 0.8);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        z-index: 40;
-      }
-
-      .modal-overlay.active {
-        display: flex;
-      }
-
-      .modal {
-        width: min(420px, 100%);
-        background: rgba(15, 23, 42, 0.92);
-        border-radius: 22px;
-        padding: 2rem;
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        display: grid;
-        gap: 1rem;
-      }
-
-      .modal header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .modal header h3 {
-        margin: 0;
-        font-size: 1.4rem;
-      }
-
-      .close-btn {
-        background: none;
-        border: none;
-        color: var(--muted);
-        font-size: 1.6rem;
-        cursor: pointer;
-      }
-
-      .chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        font-size: 0.8rem;
-        color: var(--muted);
-      }
-
-      .chips span {
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 1rem;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .scroll-area {
-        max-height: 340px;
-        overflow: auto;
-        padding-right: 0.5rem;
-      }
-
-      @media (max-width: 840px) {
-        .nav-links {
-          display: none;
-        }
-
-        .hero-content {
-          text-align: center;
-        }
-
-        .hero-badges {
-          justify-content: center;
-        }
-
-        .section-heading {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .section-heading p {
-          margin-bottom: 0.5rem;
-        }
-
-        .reservation-section {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 540px) {
-        main {
-          padding: 2rem 1.1rem 4rem;
-        }
-
-        header.hero {
-          padding: 1.8rem 1.1rem 3rem;
-        }
-
-        .hero-content h1 {
-          font-size: 2.4rem;
-        }
-
-        .event-card {
-          padding: 1.25rem;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="hero" id="uvod">
-      <nav>
-        <a class="logo" href="#uvod" aria-label="Poznej &amp; Hraj">
-          <span></span>
-          Poznej &amp; Hraj
+    <header class="hero" id="top">
+      <nav class="nav">
+        <a class="logo" href="#top" aria-label="Poznej &amp; Hraj domů">
+          <span class="logo-dot" aria-hidden="true"></span>
+          <span class="logo-text">Poznej &amp; Hraj</span>
         </a>
-        <ul class="nav-links">
-          <li><a href="#akce">Akce</a></li>
-          <li><a href="#rezervace">Rezervace</a></li>
-          <li><a href="#galerie">Galerie</a></li>
-          <li><a href="#recenze">Recenze</a></li>
-          <li><a href="#komunita">Komunita</a></li>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+          <span class="sr-only">Otevřít navigaci</span>
+          <span class="nav-toggle-line"></span>
+          <span class="nav-toggle-line"></span>
+          <span class="nav-toggle-line"></span>
+        </button>
+        <ul class="nav-links" id="primary-navigation">
+          <li><a href="#upcoming">Akce</a></li>
+          <li><a href="#past">Archiv</a></li>
+          <li><a href="#gallery">Galerie</a></li>
+          <li><a href="#poll">Anketa</a></li>
+          <li><a href="#reviews">Recenze</a></li>
+          <li><a href="#about">O nás</a></li>
         </ul>
       </nav>
-
       <div class="hero-content">
-        <div>
-          <div class="badge">Seznamovací herní večery</div>
-          <h1>Poznej nové lidi, hraj legendární hry, zažij neonovou noc.</h1>
+        <div class="hero-text">
+          <p class="eyebrow">Spojujeme lidi skrze zábavu</p>
+          <h1>Hraj, bav se, seznamuj se – přirozeně a s úsměvem.</h1>
           <p class="hero-lede">
-            Poznej &amp; Hraj je platforma pro interaktivní večery plné soutěží, deskovek a
-            neformálního seznamování. Vyber si akci, rezervuj místo a přidej se k naší komunitě.
+            Projekt Poznej &amp; Hraj přináší tematické večery plné her, soutěží a zážitků. Vyber si akci, rezervuj místo a
+            potkej nové přátele v neonové atmosféře.
           </p>
-          <div class="hero-badges">
-            <span class="badge">Live moderátoři</span>
-            <span class="badge">Herní turnaje</span>
-            <span class="badge">Foto koutek</span>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#upcoming">Prohlédnout akce</a>
+            <button class="ghost-btn" type="button" data-scroll="#reservation">Rezervovat místo</button>
           </div>
-          <button class="primary-btn" data-scroll="#rezervace">Rezervovat místo</button>
+          <div class="hero-highlights" role="list">
+            <div class="highlight" role="listitem">
+              <span class="highlight-icon" aria-hidden="true">🎮</span>
+              <div>
+                <h3>Tematické herní okruhy</h3>
+                <p>Od retro arkád přes deskovky až po interaktivní questy.</p>
+              </div>
+            </div>
+            <div class="highlight" role="listitem">
+              <span class="highlight-icon" aria-hidden="true">🤝</span>
+              <div>
+                <h3>Moderované seznámení</h3>
+                <p>Mentorovaný program, který pomáhá bourat bariéry.</p>
+              </div>
+            </div>
+            <div class="highlight" role="listitem">
+              <span class="highlight-icon" aria-hidden="true">💡</span>
+              <div>
+                <h3>Komunita a feedback</h3>
+                <p>Recenze, ankety i sdílení fotek – vše na jednom místě.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="glass-panel">
-          <h3>Co právě chystáme?</h3>
-          <p>
-            Každý měsíc nový tematický večer, speciální seznamovací aktivity a kurátorovaná knihovna
-            her. Kapacita je omezená, místa mizí rychle!
+        <div class="hero-showcase" aria-hidden="true">
+          <div class="showcase-card">
+            <p class="showcase-title">„Spojujeme lidi skrze zábavu, soutěže a společné zážitky.“</p>
+            <div class="showcase-grid">
+              <span>🏓 Ping-pong turnaje</span>
+              <span>🎤 Karaoke challenge</span>
+              <span>🧠 Pub kvízy</span>
+              <span>🪩 Silent disco</span>
+              <span>🃏 Party hry</span>
+              <span>🎲 Mega deskovky</span>
+            </div>
+            <div class="showcase-footer">Poznej &amp; Hraj crew</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section" id="upcoming" aria-labelledby="upcoming-title">
+        <div class="section-heading">
+          <h2 id="upcoming-title">Nadcházející akce</h2>
+          <p class="section-subtitle">Rezervuj si místo dřív, než se kapacita zaplní.</p>
+        </div>
+        <div class="cards" data-upcoming-list></div>
+        <div class="empty-state" data-upcoming-empty hidden>
+          <p>Aktuálně nemáme naplánované nové akce. Sleduj nás na sociálních sítích, ať o nic nepřijdeš!</p>
+        </div>
+      </section>
+
+      <section class="section" id="past" aria-labelledby="past-title">
+        <div class="section-heading">
+          <h2 id="past-title">Předešlé akce &amp; atmosféra</h2>
+          <p class="section-subtitle">Mrkni, jak to u nás vypadá, a nalaď se na další večer.</p>
+        </div>
+        <div class="cards" data-past-list></div>
+        <div class="empty-state" data-past-empty hidden>
+          <p>Teprve začínáme! Přidej se na některou z nadcházejících akcí a pomoz tvořit historii Poznej &amp; Hraj.</p>
+        </div>
+      </section>
+
+      <section class="section" id="gallery" aria-labelledby="gallery-title">
+        <div class="section-heading">
+          <h2 id="gallery-title">Galerie &amp; atmosféra</h2>
+          <p class="section-subtitle">Momentky z akcí střídají komunitní slogany a logo projektu.</p>
+        </div>
+        <div class="gallery-grid" data-gallery-grid></div>
+        <div class="gallery-actions">
+          <button class="ghost-btn" type="button" data-open-lightbox>Prohlédnout na celé obrazovce</button>
+          <p class="muted">
+            Připravujeme automatickou synchronizaci s Google Drive i hashtag feedem z Instagramu. Označ fotky
+            <strong>@poznejahraj</strong> a sdílej zážitky!
           </p>
           <div class="chips" id="event-highlight"></div>
         </div>
       </div>
     </header>
 
-    <main>
-      <section id="akce">
+      <section class="section" id="social" aria-labelledby="social-title">
         <div class="section-heading">
-          <div>
-            <h2>Nadcházející akce</h2>
-            <p>Vyber si atmosféru, která ti sedí. Každá akce obsahuje ledolamové hry, týmové výzvy a afterparty.</p>
+          <h2 id="social-title">Označ nás na IG</h2>
+          <p class="section-subtitle">
+            📸 Staň se součástí komunity! Sdílej své momenty z akcí, označ nás na Instagramu <strong>@poznejahraj</strong>
+            a tvá fotka se může objevit přímo na webu! 💫
+          </p>
+        </div>
+        <div class="social-callout">
+          <div class="social-text">
+            <h3>📸 Sdílej zážitky</h3>
+            <p>
+              Příběhy z akcí, backstage momenty i nové přátelství – to všechno chceme vidět. Přidej hashtag
+              <strong>#poznejahraj</strong> nebo označ profil, aby se fotky propsaly do galerie.
+            </p>
+            <div class="social-icons" aria-label="Sociální sítě">
+              <button type="button" class="social-btn" aria-label="Instagram (brzy online)">
+                <span aria-hidden="true">📷</span>
+                <span>Instagram</span>
+              </button>
+              <button type="button" class="social-btn" aria-label="Facebook (brzy online)">
+                <span aria-hidden="true">💬</span>
+                <span>Facebook</span>
+              </button>
+            </div>
           </div>
-          <button class="secondary-btn admin-access" id="admin-login" type="button" aria-expanded="false">
-            ⚙️ Admin přístup
-          </button>
+          <div class="social-preview" aria-hidden="true">
+            <div class="preview-card">
+              <span>„Každá hra je šance poznat někoho nového.“</span>
+            </div>
+            <div class="preview-card">
+              <span>„Zábava, přátelství, zážitky – bez bariér.“</span>
+            </div>
+          </div>
         </div>
         <div class="events-grid" id="events-list"></div>
       </section>
 
-      <section id="rezervace" class="reservation-section glass-panel">
-        <div>
-          <h2>Rezervace místa</h2>
-          <p>
-            Vyplň formulář a potvrď účast. Po odeslání ti přijde potvrzení na e-mail. Rezervace je
-            nezávazná – platba probíhá až na místě. Všechna data odesíláme bezpečně přes Formspree.
+      <section class="section" id="poll" aria-labelledby="poll-title">
+        <div class="section-heading">
+          <h2 id="poll-title">Hlasuj o příštím tématu</h2>
+          <p class="section-subtitle">Tvůj hlas pomáhá ladit atmosféru dalších večerů.</p>
+        </div>
+        <div class="poll" data-poll></div>
+      </section>
+
+      <section class="section" id="reservation" aria-labelledby="reservation-title">
+        <div class="section-heading">
+          <h2 id="reservation-title">Rezervace místa</h2>
+          <p class="section-subtitle">
+            Vyplň formulář, odešleme ho přes Formspree a zároveň uložíme rezervaci do tvého zařízení.
           </p>
-          <div class="status-message" id="reservation-status"></div>
         </div>
-        <form id="reservation-form">
-          <label>
-            Vyber akci
-            <select name="eventId" required id="reservation-event"></select>
-          </label>
-          <label>
-            Tvé jméno
-            <input type="text" name="name" autocomplete="name" required placeholder="Alex" />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" autocomplete="email" required placeholder="alex@email.cz" />
-          </label>
-          <label>
-            Datum
-            <input type="date" name="date" required />
-          </label>
-          <label>
-            Počet míst
-            <input type="number" name="people" min="1" max="20" value="1" required />
-          </label>
-          <label>
-            Vzkaz pro organizátory (volitelné)
-            <textarea name="message" placeholder="Preferované hry, alergie..."></textarea>
-          </label>
-          <button class="primary-btn" type="submit">Odeslat rezervaci</button>
-        </form>
-      </section>
-
-      <section id="galerie">
-        <div class="section-heading">
-          <div>
-            <h2>Galerie &amp; atmosféra</h2>
-            <p>Mrkni, jak to u nás žije. Všechny fotky najdeš i v komunitním archivu.</p>
+        <form class="reservation-form" id="reservation-form">
+          <div class="field">
+            <label for="reservation-event">Vyber akci</label>
+            <select id="reservation-event" name="event" required></select>
           </div>
-          <button class="secondary-btn" type="button" id="open-gallery">Zobrazit všechny</button>
-        </div>
-        <div class="glass-panel">
-          <div class="gallery-grid" id="gallery-grid"></div>
-        </div>
-      </section>
-
-      <section id="anketa" class="glass-panel">
-        <div class="section-heading">
-          <div>
-            <h2>Hlasuj o příštím tématu</h2>
-            <p>Dej vědět, o jaký večer máš zájem. Výsledky průběžně sleduje celý tým.</p>
+          <div class="field">
+            <label for="reservation-name">Jméno a příjmení</label>
+            <input id="reservation-name" name="name" type="text" autocomplete="name" required />
           </div>
-        </div>
-        <form id="poll-form">
-          <div class="poll-options" id="poll-options"></div>
-          <button class="primary-btn" type="submit">Odeslat hlas</button>
-        </form>
-        <div class="status-message" id="poll-status"></div>
-      </section>
-
-      <section id="recenze">
-        <div class="section-heading">
-          <div>
-            <h2>Recenze komunity</h2>
-            <p>Hráči a hráčky sdílejí své dojmy. Přidej se i ty – recenze čekají na schválení adminem.</p>
-          </div>
-        </div>
-        <div class="reviews-grid" id="reviews-list"></div>
-        <div class="glass-panel" style="margin-top: 2rem;">
-          <h3>Napiš vlastní recenzi</h3>
-          <form id="review-form">
-            <label>
-              Jméno / přezdívka
-              <input type="text" name="name" required placeholder="GameLover" />
-            </label>
-            <label>
-              Hodnocení
-              <select name="rating" required>
-                <option value="">Vyber...</option>
-                <option value="5">★★★★★ – legendární!</option>
-                <option value="4">★★★★☆ – skvělý večer</option>
-                <option value="3">★★★☆☆ – fajn zážitek</option>
-                <option value="2">★★☆☆☆ – má rezervy</option>
-                <option value="1">★☆☆☆☆ – potřeba zlepšit</option>
-              </select>
-            </label>
-            <label>
-              Tvoje zkušenost
-              <textarea name="text" required minlength="20" placeholder="Jaký byl program, moderátor, atmosféra..."></textarea>
-            </label>
-            <button class="primary-btn" type="submit">Odeslat recenzi</button>
-          </form>
-          <div class="status-message" id="review-status"></div>
-        </div>
-      </section>
-
-      <section id="komunita" class="ig-section">
-        <h2>📸 Označ nás na IG</h2>
-        <p>
-          Sdílej zážitky z našich akcí! Označ nás na Instagramu <strong>@poznejahraj</strong> a pomoz
-          rozšířit naši komunitu.
-        </p>
-        <div class="ig-icons" aria-hidden="true">
-          <span>📷</span>
-          <span>🎉</span>
-          <span>🕺</span>
-        </div>
-        <p>Najdeš nás i na Facebooku. Tvé fotky rotují v komunitním streamu níže.</p>
-      </section>
-
-      <section class="photo-marquee" aria-label="Komunitní stream fotek">
-        <div class="marquee-track" id="marquee-track"></div>
-      </section>
-
-      <section class="glass-panel admin-panel" id="admin-panel">
-        <header class="section-heading" style="margin-bottom: 0;">
-          <h2>Administrace</h2>
-          <button class="secondary-btn" type="button" id="admin-logout">Odhlásit</button>
-        </header>
-        <p style="margin-top: 0;">Spravuj akce, galerii, recenze a exportuj rezervace. Všechna data jsou ukládána v tvém prohlížeči.</p>
-        <div class="admin-sections">
-          <div class="glass-panel admin-group">
-            <h3>Nová akce</h3>
-            <form id="admin-event-form">
-              <label>Název akce<input name="title" type="text" required /></label>
-              <label>Datum<input name="date" type="date" required /></label>
-              <label>Kapacita<input name="capacity" type="number" min="5" max="120" required /></label>
-              <label>Popis<textarea name="description" required></textarea></label>
-              <label>Fotky akce (max 5)<input name="photos" type="file" accept="image/*" multiple /></label>
-              <button class="primary-btn" type="submit">Přidat akci</button>
-            </form>
-            <div class="status-message" id="admin-event-status"></div>
-          </div>
-
-          <div class="glass-panel admin-group">
-            <h3>Přehled rezervací</h3>
-            <div class="scroll-area">
-              <table aria-label="Rezervace">
-                <thead>
-                  <tr>
-                    <th>Akce</th>
-                    <th>Jméno</th>
-                    <th>Email</th>
-                    <th>Datum</th>
-                    <th>Místa</th>
-                  </tr>
-                </thead>
-                <tbody id="reservations-table"></tbody>
-              </table>
+          <div class="field-grid">
+            <div class="field">
+              <label for="reservation-email">E-mail</label>
+              <input id="reservation-email" name="email" type="email" autocomplete="email" required />
             </div>
-            <button class="secondary-btn" type="button" id="export-reservations">Export do CSV</button>
+            <div class="field">
+              <label for="reservation-count">Počet osob</label>
+              <input id="reservation-count" name="count" type="number" min="1" max="10" value="1" required />
+            </div>
           </div>
+          <div class="field">
+            <label for="reservation-note">Poznámka</label>
+            <textarea id="reservation-note" name="note" rows="3" placeholder="Preferuji týmové hry, můžu přijít později…"></textarea>
+          </div>
+          <div class="payment-info" data-payment-info>
+            <p><strong>Cena za osobu:</strong> <span data-price>—</span></p>
+            <p class="muted">Platba proběhne na místě. Integrace Stripe Checkout je připravena k propojení.</p>
+          </div>
+          <button class="primary-btn" type="submit">Odeslat rezervaci</button>
+          <p class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
 
-          <div class="glass-panel admin-group">
-            <h3>Schvalování recenzí</h3>
-            <div class="scroll-area" id="admin-reviews"></div>
+      <section class="section" id="reviews" aria-labelledby="reviews-title">
+        <div class="section-heading">
+          <h2 id="reviews-title">Recenze komunity</h2>
+          <p class="section-subtitle">Napiš, jak se ti akce líbila. Recenze zveřejníme po schválení adminem.</p>
+        </div>
+        <div class="reviews" data-review-list></div>
+        <form class="review-form" id="review-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="review-name">Jméno</label>
+              <input id="review-name" name="name" type="text" required />
+            </div>
+            <div class="field">
+              <label for="review-rating">Hodnocení</label>
+              <select id="review-rating" name="rating" required>
+                <option value="">Vyber</option>
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+              </select>
+            </div>
           </div>
+          <div class="field">
+            <label for="review-message">Recenze</label>
+            <textarea id="review-message" name="message" rows="4" required></textarea>
+          </div>
+          <button class="ghost-btn" type="submit">Odeslat k&nbsp;schválení</button>
+          <p class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
 
-          <div class="glass-panel admin-group">
-            <h3>Správa galerie</h3>
-            <form id="admin-gallery-form">
-              <label>Nové fotky<input name="gallery" type="file" accept="image/*" multiple /></label>
-              <button class="secondary-btn" type="submit">Nahrát do galerie</button>
-            </form>
-            <div class="status-message" id="admin-gallery-status"></div>
-            <div class="gallery-grid" id="admin-gallery"></div>
-          </div>
-
-          <div class="glass-panel admin-group">
-            <h3>Výsledky ankety</h3>
-            <div id="admin-poll"></div>
-            <button class="secondary-btn" type="button" id="reset-poll">Resetovat anketu</button>
-          </div>
+      <section class="section" id="about" aria-labelledby="about-title">
+        <div class="section-heading">
+          <h2 id="about-title">O projektu</h2>
+          <p class="section-subtitle">
+            Seznamovací večery s moderátory, programem a atmosférou, která podporuje přirozené poznávání.
+          </p>
+        </div>
+        <div class="about-grid">
+          <article class="about-card">
+            <h3>Jak to funguje</h3>
+            <p>
+              Každý večer má připravený storyline, mini turnaje i chill-out zónu. Tým moderátorů se stará o to, aby se
+              všichni cítili příjemně a bezpečně.
+            </p>
+          </article>
+          <article class="about-card">
+            <h3>Program &amp; doplňky</h3>
+            <p>
+              🎮 VR arény, 🏓 ping-pong, 🍻 ochutnávky craft piv, 💨 chill s vodní dýmkou i 🎤 karaoke battle. Vždy s
+              možností hlasovat o příštím tématu.
+            </p>
+          </article>
+          <article class="about-card">
+            <h3>Pro budoucnost</h3>
+            <p>
+              Připravujeme napojení na Stripe pro platby, Google Drive pro galerie a Firebase pro sdílené ankety. Kód je
+              připravený na rozšíření.
+            </p>
+          </article>
         </div>
       </section>
     </main>
 
-    <footer>
-      <p>© 2024 Poznej &amp; Hraj. Všechna data jsou ukládána lokálně v prohlížeči.</p>
+    <footer class="footer">
+      <div class="footer-top">
+        <p class="footer-title">Poznej &amp; Hraj</p>
+        <p class="muted">Komunitní večerní klub plný her, hudby a nových přátelství.</p>
+      </div>
+      <div class="footer-links">
+        <a href="mailto:ahoj@poznejahraj.cz">ahoj@poznejahraj.cz</a>
+        <a href="#reservation">Rezervace</a>
+        <a href="#top">Zpět nahoru</a>
+      </div>
+      <p class="muted">© <span data-current-year></span> Poznej &amp; Hraj. Všechna práva vyhrazena.</p>
     </footer>
 
-    <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal">
-        <header>
-          <h3 id="modal-title"></h3>
-          <button class="close-btn" type="button" aria-label="Zavřít" data-close>×</button>
+    <div class="photo-marquee" aria-hidden="true">
+      <div class="marquee-track" data-marquee></div>
+    </div>
+
+    <button class="admin-fab" type="button" aria-haspopup="dialog" aria-controls="admin-panel" data-admin-trigger>
+      ⚙️<span class="sr-only">Admin přístup</span>
+    </button>
+
+    <div class="admin-overlay" id="admin-panel" role="dialog" aria-modal="true" aria-labelledby="admin-title" hidden>
+      <div class="admin-dialog">
+        <header class="admin-header">
+          <h2 id="admin-title">Admin panel Poznej &amp; Hraj</h2>
+          <button class="icon-btn" type="button" data-admin-close aria-label="Zavřít panel">×</button>
         </header>
-        <div id="modal-content"></div>
+        <section class="admin-login" data-admin-login>
+          <p>Zadej heslo pro správu obsahu.</p>
+          <form id="admin-login-form">
+            <div class="field">
+              <label for="admin-password">Heslo</label>
+              <input id="admin-password" name="password" type="password" autocomplete="current-password" required />
+            </div>
+            <button class="primary-btn" type="submit">Přihlásit</button>
+            <p class="form-feedback" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+        <div class="admin-content" data-admin-content hidden>
+          <aside class="admin-tabs" role="tablist" aria-label="Správa sekcí">
+            <button role="tab" aria-selected="true" data-tab="events">🗓️ Akce</button>
+            <button role="tab" aria-selected="false" data-tab="poll">💬 Ankety</button>
+            <button role="tab" aria-selected="false" data-tab="gallery">📸 Galerie</button>
+            <button role="tab" aria-selected="false" data-tab="reservations">💌 Rezervace</button>
+            <button role="tab" aria-selected="false" data-tab="reviews">⭐ Recenze</button>
+            <button class="ghost-btn" type="button" data-admin-logout>Odhlásit</button>
+          </aside>
+          <div class="admin-panels">
+            <section class="admin-panel" data-panel="events" role="tabpanel">
+              <h3>Správa akcí</h3>
+              <form class="admin-form" id="event-form">
+                <input type="hidden" name="id" />
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="event-title">Název</label>
+                    <input id="event-title" name="title" type="text" required />
+                  </div>
+                  <div class="field">
+                    <label for="event-date">Datum</label>
+                    <input id="event-date" name="date" type="date" required />
+                  </div>
+                </div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="event-location">Místo</label>
+                    <input id="event-location" name="location" type="text" required />
+                  </div>
+                  <div class="field">
+                    <label for="event-price">Cena (Kč)</label>
+                    <input id="event-price" name="price" type="number" min="0" step="50" placeholder="Volitelné" />
+                  </div>
+                </div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="event-capacity">Kapacita</label>
+                    <input id="event-capacity" name="capacity" type="number" min="1" required />
+                  </div>
+                  <div class="field">
+                    <label for="event-spots">Volná místa</label>
+                    <input id="event-spots" name="spots" type="number" min="0" required />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="event-summary">Stručný popis</label>
+                  <textarea id="event-summary" name="summary" rows="3" required></textarea>
+                </div>
+                <div class="field">
+                  <label for="event-photos">Fotky (URL, odděl čárkou, max. 5)</label>
+                  <textarea id="event-photos" name="photos" rows="2" placeholder="https://drive.google.com/uc?id=..."></textarea>
+                </div>
+                <button class="primary-btn" type="submit">Uložit akci</button>
+                <button class="ghost-btn" type="button" data-reset-form>Vyčistit formulář</button>
+                <p class="form-feedback" role="status" aria-live="polite"></p>
+              </form>
+              <div class="admin-list" data-admin-events></div>
+            </section>
+            <section class="admin-panel" data-panel="poll" role="tabpanel" hidden>
+              <h3>Správa anket</h3>
+              <form class="admin-form" id="poll-form">
+                <div class="field">
+                  <label for="poll-question">Otázka</label>
+                  <input id="poll-question" name="question" type="text" required />
+                </div>
+                <div class="field">
+                  <label for="poll-options">Možnosti (po jedné na řádek)</label>
+                  <textarea id="poll-options" name="options" rows="4" required></textarea>
+                </div>
+                <div class="field">
+                  <label for="poll-active">Stav ankety</label>
+                  <select id="poll-active" name="active">
+                    <option value="true">Aktivní</option>
+                    <option value="false">Pozastaveno</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="poll-reset">Resetovat výsledky</label>
+                  <select id="poll-reset" name="reset">
+                    <option value="false" selected>Ne</option>
+                    <option value="true">Ano</option>
+                  </select>
+                </div>
+                <button class="primary-btn" type="submit">Aktualizovat anketu</button>
+                <p class="form-feedback" role="status" aria-live="polite"></p>
+              </form>
+            </section>
+            <section class="admin-panel" data-panel="gallery" role="tabpanel" hidden>
+              <h3>Správa galerie</h3>
+              <form class="admin-form" id="gallery-form">
+                <div class="field">
+                  <label for="gallery-url">URL fotky (Google Drive nebo jiný zdroj)</label>
+                  <input id="gallery-url" name="url" type="url" placeholder="https://drive.google.com/uc?id=..." required />
+                </div>
+                <div class="field">
+                  <label>
+                    <input type="checkbox" name="featured" /> Vybrat pro spodní pásek
+                  </label>
+                </div>
+                <button class="primary-btn" type="submit">Přidat fotku</button>
+                <p class="form-feedback" role="status" aria-live="polite"></p>
+              </form>
+              <div class="admin-list" data-admin-gallery></div>
+            </section>
+            <section class="admin-panel" data-panel="reservations" role="tabpanel" hidden>
+              <h3>Rezervace &amp; export</h3>
+              <div class="admin-actions">
+                <button class="ghost-btn" type="button" data-export-csv>Export do CSV</button>
+              </div>
+              <div class="admin-list" data-admin-reservations></div>
+            </section>
+            <section class="admin-panel" data-panel="reviews" role="tabpanel" hidden>
+              <h3>Recenze ke schválení</h3>
+              <div class="admin-list" data-admin-reviews></div>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
-      <button type="button" aria-label="Zavřít" data-lightbox-close>×</button>
-      <img src="" alt="Náhled fotografie" />
+    <div class="lightbox" data-lightbox hidden>
+      <button class="icon-btn" type="button" data-lightbox-close aria-label="Zavřít galerii">×</button>
+      <div class="lightbox-track" data-lightbox-track></div>
     </div>
-    <script>
-      const STORAGE_KEYS = {
-        EVENTS: "poznej-events",
-        RESERVATIONS: "poznej-reservations",
-        REVIEWS: "poznej-reviews",
-        GALLERY: "poznej-gallery",
-        POLL: "poznej-poll",
-        POLL_VOTE: "poznej-poll-vote",
-        ADMIN: "poznej-admin-session"
-      };
 
-      const defaultEvents = [
-        {
-          id: "event-neon",
-          title: "Neon Speed Dating &amp; Party Games",
-          date: new Date().toISOString().split("T")[0],
-          capacity: 40,
-          description:
-            "Večer plný ledolamových her, rychlých seznamovacích kol a neonových mini soutěží. Moderuje dvojice Leo &amp; Nina.",
-          tags: ["speed dating", "party", "nováčci"],
-          photos: [
-            "https://images.unsplash.com/photo-1529158062015-cad636e69505?auto=format&fit=crop&w=900&q=80",
-            "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=900&q=80"
-          ]
-        },
-        {
-          id: "event-quest",
-          title: "Quest Night: Únik z neonového labyrintu",
-          date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString().split("T")[0],
-          capacity: 32,
-          description:
-            "Týmová výzva inspirovaná únikovkami a kooperativními hrami. Souboj o čas, logiku i humor.",
-          tags: ["týmová hra", "mystery", "soutěž"],
-          photos: [
-            "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80",
-            "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=900&q=80",
-            "https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&fit=crop&w=900&q=80"
-          ]
-        },
-        {
-          id: "event-board",
-          title: "Board Game Mixer: Legends Tournament",
-          date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString().split("T")[0],
-          capacity: 48,
-          description:
-            "Kurátorovaná herní knihovna, průvodci, kteří vysvětlí pravidla, a semifinálový turnaj v moderních deskovkách.",
-          tags: ["turnaj", "deskovky", "networking"],
-          photos: [
-            "https://images.unsplash.com/photo-1545239351-ef35f43d514b?auto=format&fit=crop&w=900&q=80",
-            "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=900&q=80"
-          ]
-        }
-      ];
+    <template id="event-card-template">
+      <article class="card event-card">
+        <header>
+          <p class="event-date" data-event-date></p>
+          <h3 data-event-title></h3>
+        </header>
+        <p class="event-location" data-event-location></p>
+        <p class="event-summary" data-event-summary></p>
+        <ul class="event-meta">
+          <li data-event-capacity></li>
+          <li data-event-price></li>
+        </ul>
+        <div class="event-progress" aria-hidden="true">
+          <div class="event-progress-bar" data-event-progress></div>
+        </div>
+        <p class="event-spots" data-event-spots></p>
+        <button class="ghost-btn" type="button" data-reserve>Rezervovat</button>
+      </article>
+    </template>
 
-      const defaultReviews = [
-        {
-          id: crypto.randomUUID(),
-          name: "Petra",
-          rating: 5,
-          text: "Skvělý večer! Moderátoři nás dostali do hry během pár minut a poznala jsem spoustu nových lidí.",
-          approved: true,
-          createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3
-        },
-        {
-          id: crypto.randomUUID(),
-          name: "Martin",
-          rating: 4,
-          text: "Výborný mix party a deskovek. Hlavně Quest Night byl super intenzivní!",
-          approved: true,
-          createdAt: Date.now() - 1000 * 60 * 60 * 24 * 6
-        },
-        {
-          id: crypto.randomUUID(),
-          name: "Lucka",
-          rating: 5,
-          text: "Úžasná atmosféra, neonové dekorace a fotokoutek měly mega vibe. Díky!",
-          approved: true,
-          createdAt: Date.now() - 1000 * 60 * 60 * 24 * 9
-        }
-      ];
+    <template id="past-card-template">
+      <article class="card past-card">
+        <header>
+          <p class="event-date" data-event-date></p>
+          <h3 data-event-title></h3>
+        </header>
+        <p class="event-summary" data-event-summary></p>
+        <div class="mini-gallery" data-gallery></div>
+        <button class="ghost-btn" type="button" data-open-gallery>Zobrazit fotky</button>
+      </article>
+    </template>
 
-      const defaultGallery = [
-        "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?auto=format&fit=crop&w=900&q=80",
-        "https://images.unsplash.com/photo-1469307580733-007134b49301?auto=format&fit=crop&w=900&q=80",
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
-        "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=80",
-        "https://images.unsplash.com/photo-1461988091159-192b6df7054f?auto=format&fit=crop&w=900&q=80",
-        "https://images.unsplash.com/photo-1515169067865-5387ec356754?auto=format&fit=crop&w=900&q=80"
-      ];
+    <template id="gallery-item-template">
+      <figure class="gallery-item">
+        <img loading="lazy" decoding="async" data-gallery-image alt="" />
+      </figure>
+    </template>
 
-      const defaultPoll = {
-        options: [
-          { id: "retro", title: "Retro neon večer", description: "80's hudba, arkádové mini turnaje.", votes: 18 },
-          { id: "mystery", title: "Hra o trůny: aliance &amp; intriky", description: "Roleplay, kostýmy a taktika.", votes: 12 },
-          { id: "mask", title: "Masky &amp; kvízy", description: "Teambuilding s hádankami a rychlými kvízy.", votes: 9 }
-        ]
-      };
+    <template id="review-card-template">
+      <article class="review-card">
+        <div class="review-stars" data-review-stars></div>
+        <blockquote data-review-message></blockquote>
+        <footer>
+          <cite data-review-name></cite>
+          <p class="review-status" data-review-status></p>
+        </footer>
+      </article>
+    </template>
 
-      const state = {
-        events: [],
-        reservations: [],
-        reviews: [],
-        gallery: [],
-        poll: defaultPoll,
-        isAdmin: false
-      };
-
-      const els = {
-        eventsList: document.getElementById("events-list"),
-        reservationForm: document.getElementById("reservation-form"),
-        reservationEvent: document.getElementById("reservation-event"),
-        reservationStatus: document.getElementById("reservation-status"),
-        galleryGrid: document.getElementById("gallery-grid"),
-        marqueeTrack: document.getElementById("marquee-track"),
-        openGallery: document.getElementById("open-gallery"),
-        pollOptions: document.getElementById("poll-options"),
-        pollForm: document.getElementById("poll-form"),
-        pollStatus: document.getElementById("poll-status"),
-        reviewsList: document.getElementById("reviews-list"),
-        reviewForm: document.getElementById("review-form"),
-        reviewStatus: document.getElementById("review-status"),
-        adminLogin: document.getElementById("admin-login"),
-        adminPanel: document.getElementById("admin-panel"),
-        adminLogout: document.getElementById("admin-logout"),
-        adminEventForm: document.getElementById("admin-event-form"),
-        adminEventStatus: document.getElementById("admin-event-status"),
-        adminReviews: document.getElementById("admin-reviews"),
-        adminGalleryForm: document.getElementById("admin-gallery-form"),
-        adminGallery: document.getElementById("admin-gallery"),
-        adminGalleryStatus: document.getElementById("admin-gallery-status"),
-        reservationsTable: document.getElementById("reservations-table"),
-        exportReservations: document.getElementById("export-reservations"),
-        adminPoll: document.getElementById("admin-poll"),
-        resetPoll: document.getElementById("reset-poll"),
-        modal: document.getElementById("modal"),
-        modalTitle: document.getElementById("modal-title"),
-        modalContent: document.getElementById("modal-content"),
-        lightbox: document.getElementById("lightbox"),
-        lightboxImg: document.querySelector("#lightbox img"),
-        eventHighlight: document.getElementById("event-highlight")
-      };
-
-      function loadState() {
-        state.events = loadFromStorage(STORAGE_KEYS.EVENTS, defaultEvents);
-        state.reservations = loadFromStorage(STORAGE_KEYS.RESERVATIONS, []);
-        state.reviews = loadFromStorage(STORAGE_KEYS.REVIEWS, defaultReviews);
-        state.gallery = loadFromStorage(STORAGE_KEYS.GALLERY, defaultGallery);
-        state.poll = loadFromStorage(STORAGE_KEYS.POLL, defaultPoll);
-        state.isAdmin = Boolean(localStorage.getItem(STORAGE_KEYS.ADMIN));
-      }
-
-      function loadFromStorage(key, fallback) {
-        try {
-          const item = localStorage.getItem(key);
-          if (!item) {
-            localStorage.setItem(key, JSON.stringify(fallback));
-            return structuredClone(fallback);
-          }
-          return JSON.parse(item);
-        } catch (error) {
-          console.error("Chyba při načítání dat", key, error);
-          return structuredClone(fallback);
-        }
-      }
-
-      function saveToStorage(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-      }
-
-      function formatDate(dateStr) {
-        try {
-          const date = new Date(dateStr + "T00:00:00");
-          return date.toLocaleDateString("cs-CZ", { day: "2-digit", month: "2-digit", year: "numeric" });
-        } catch (error) {
-          return dateStr;
-        }
-      }
-
-      function renderEvents() {
-        els.eventsList.innerHTML = "";
-        if (!state.events.length) {
-          els.eventsList.innerHTML = '<div class="empty-state">Žádné akce zatím nejsou naplánovány.</div>';
-          return;
-        }
-        const sorted = [...state.events].sort((a, b) => new Date(a.date) - new Date(b.date));
-        sorted.forEach((event) => {
-          const reservedSeats = state.reservations
-            .filter((reservation) => reservation.eventId === event.id)
-            .reduce((total, reservation) => total + Number(reservation.people || 0), 0);
-          const available = Math.max(event.capacity - reservedSeats, 0);
-
-          const card = document.createElement("article");
-          card.className = "event-card";
-          card.innerHTML = `
-            <h3>${event.title}</h3>
-            <div class="event-meta">
-              <span>📅 ${formatDate(event.date)}</span>
-              <span class="event-availability">💡 Volná místa: ${available} / ${event.capacity}</span>
-            </div>
-            <p>${event.description}</p>
-            <div class="chips">${(event.tags || [])
-              .map((tag) => `<span>${tag}</span>`)
-              .join("")}</div>
-            <div class="event-actions">
-              <button class="primary-btn" data-reserve="${event.id}">Rezervovat</button>
-              ${event.photos?.length ? `<button class="secondary-btn" data-gallery="${event.id}">Zobrazit fotky</button>` : ""}
-            </div>
-          `;
-          els.eventsList.appendChild(card);
-        });
-
-        const nextEvent = sorted[0];
-        if (nextEvent) {
-          els.eventHighlight.innerHTML = `
-            <span>${nextEvent.title}</span>
-            <span>${formatDate(nextEvent.date)}</span>
-            <span>${nextEvent.tags?.slice(0, 2).join(" • ") || ""}</span>
-          `;
-        }
-      }
-
-      function populateReservationEvents() {
-        els.reservationEvent.innerHTML = state.events
-          .map((event) => `<option value="${event.id}">${event.title} (${formatDate(event.date)})</option>`)
-          .join("");
-      }
-
-      function renderGallery() {
-        const fragment = document.createDocumentFragment();
-        const previewImages = state.gallery.slice(0, 6);
-        previewImages.forEach((src, index) => {
-          const item = document.createElement("button");
-          item.type = "button";
-          item.className = "gallery-item";
-          item.setAttribute("aria-label", "Otevřít fotografii");
-          item.innerHTML = `<img src="${src}" alt="Foto z akce ${index + 1}" loading="lazy" />`;
-          item.addEventListener("click", () => openLightbox(src));
-          fragment.appendChild(item);
-        });
-        els.galleryGrid.innerHTML = "";
-        els.galleryGrid.appendChild(fragment);
-
-        renderMarquee();
-        renderAdminGallery();
-      }
-
-      function renderMarquee() {
-        els.marqueeTrack.innerHTML = "";
-        const trackImages = [...state.gallery, ...state.gallery];
-        trackImages.forEach((src) => {
-          const img = document.createElement("img");
-          img.src = src;
-          img.alt = "Komunitní moment";
-          els.marqueeTrack.appendChild(img);
-        });
-      }
-
-      function renderPoll() {
-        els.pollOptions.innerHTML = "";
-        const totalVotes = state.poll.options.reduce((sum, option) => sum + Number(option.votes || 0), 0);
-        state.poll.options.forEach((option) => {
-          const percentage = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
-          const optionEl = document.createElement("div");
-          optionEl.className = "poll-option";
-          optionEl.innerHTML = `
-            <label>
-              <input type="radio" name="poll" value="${option.id}" required />
-              <div>
-                <strong>${option.title}</strong>
-                <p>${option.description}</p>
-              </div>
-            </label>
-            <div class="poll-progress"><span style="transform: scaleX(${percentage / 100});"></span></div>
-            <small>${percentage}% (${option.votes} hlasů)</small>
-          `;
-          els.pollOptions.appendChild(optionEl);
-        });
-        renderAdminPoll();
-      }
-
-      function renderReviews() {
-        els.reviewsList.innerHTML = "";
-        const approved = state.reviews.filter((review) => review.approved);
-        if (!approved.length) {
-          els.reviewsList.innerHTML = '<div class="empty-state">Zatím žádné schválené recenze.</div>';
-          return;
-        }
-        const sorted = approved.sort((a, b) => b.createdAt - a.createdAt);
-        sorted.forEach((review) => {
-          const card = document.createElement("article");
-          card.className = "review-card";
-          card.innerHTML = `
-            <div class="review-stars">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</div>
-            <p>${review.text}</p>
-            <div class="review-meta">
-              <span>${review.name}</span>
-              <span>${new Date(review.createdAt).toLocaleDateString("cs-CZ")}</span>
-            </div>
-          `;
-          els.reviewsList.appendChild(card);
-        });
-        renderAdminReviews();
-      }
-
-      function renderAdminReviews() {
-        if (!state.isAdmin) return;
-        els.adminReviews.innerHTML = "";
-        const pending = state.reviews.filter((review) => !review.approved);
-        if (!pending.length) {
-          els.adminReviews.innerHTML = '<div class="empty-state">Žádné recenze ke schválení.</div>';
-          return;
-        }
-        pending.forEach((review) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "review-card";
-          wrapper.innerHTML = `
-            <strong>${review.name}</strong>
-            <div class="review-stars">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</div>
-            <p>${review.text}</p>
-            <div class="event-actions">
-              <button class="primary-btn" data-approve="${review.id}">Schválit</button>
-              <button class="secondary-btn" data-delete-review="${review.id}">Smazat</button>
-            </div>
-          `;
-          els.adminReviews.appendChild(wrapper);
-        });
-      }
-
-      function renderAdminGallery() {
-        if (!state.isAdmin) return;
-        els.adminGallery.innerHTML = "";
-        if (!state.gallery.length) {
-          els.adminGallery.innerHTML = '<div class="empty-state">Galerie je prázdná.</div>';
-          return;
-        }
-        state.gallery.forEach((src, index) => {
-          const item = document.createElement("div");
-          item.className = "gallery-item";
-          item.innerHTML = `<img src="${src}" alt="Galerie ${index + 1}" loading="lazy" /><button class="secondary-btn" data-remove-gallery="${index}" type="button" style="position:absolute;bottom:0.5rem;right:0.5rem;">✕</button>`;
-          item.querySelector("img").addEventListener("click", () => openLightbox(src));
-          els.adminGallery.appendChild(item);
-        });
-      }
-
-      function renderReservationsTable() {
-        if (!state.isAdmin) return;
-        els.reservationsTable.innerHTML = "";
-        if (!state.reservations.length) {
-          els.reservationsTable.innerHTML = '<tr><td colspan="5">Žádné rezervace zatím nepřišly.</td></tr>';
-          return;
-        }
-        state.reservations
-          .slice()
-          .reverse()
-          .forEach((reservation) => {
-            const row = document.createElement("tr");
-            const eventTitle = state.events.find((event) => event.id === reservation.eventId)?.title || "";
-            row.innerHTML = `
-              <td>${eventTitle}</td>
-              <td>${reservation.name}</td>
-              <td>${reservation.email}</td>
-              <td>${formatDate(reservation.date)}</td>
-              <td>${reservation.people}</td>
-            `;
-            els.reservationsTable.appendChild(row);
-          });
-      }
-
-      function renderAdminPoll() {
-        if (!state.isAdmin) return;
-        const totalVotes = state.poll.options.reduce((sum, option) => sum + Number(option.votes || 0), 0);
-        els.adminPoll.innerHTML = state.poll.options
-          .map((option) => {
-            const percent = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
-            return `<p><strong>${option.title}</strong>: ${option.votes} hlasů (${percent}%)</p>`;
-          })
-          .join("");
-      }
-
-      function openModal(title, content) {
-        els.modalTitle.textContent = title;
-        if (typeof content === "string") {
-          els.modalContent.innerHTML = content;
-        } else {
-          els.modalContent.innerHTML = "";
-          els.modalContent.appendChild(content);
-        }
-        els.modal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeModal() {
-        els.modal.classList.remove("active");
-        els.modalContent.innerHTML = "";
-        document.body.style.overflow = "";
-      }
-
-      function openLightbox(src) {
-        els.lightboxImg.src = src;
-        els.lightbox.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeLightbox() {
-        els.lightbox.classList.remove("active");
-        els.lightboxImg.src = "";
-        document.body.style.overflow = "";
-      }
-
-      function showStatus(element, message, type = "success") {
-        element.textContent = message;
-        element.classList.remove("success", "error");
-        if (type === "success") {
-          element.classList.add("success");
-        } else {
-          element.classList.add("error");
-        }
-      }
-
-      function hideStatus(element) {
-        element.classList.remove("success", "error");
-        element.textContent = "";
-      }
-
-      function setAdminMode(enabled) {
-        state.isAdmin = enabled;
-        if (enabled) {
-          els.adminPanel.classList.add("active");
-          els.adminLogin.setAttribute("aria-expanded", "true");
-          localStorage.setItem(STORAGE_KEYS.ADMIN, "1");
-          renderAdminReviews();
-          renderAdminGallery();
-          renderReservationsTable();
-          renderAdminPoll();
-        } else {
-          els.adminPanel.classList.remove("active");
-          els.adminLogin.setAttribute("aria-expanded", "false");
-          localStorage.removeItem(STORAGE_KEYS.ADMIN);
-        }
-      }
-
-      function readFilesAsDataUrls(fileList, limit = Infinity) {
-        const files = Array.from(fileList || []).slice(0, limit);
-        if (!files.length) return Promise.resolve([]);
-        return Promise.all(
-          files.map(
-            (file) =>
-              new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-              })
-          )
-        );
-      }
-
-      function downloadCSV(filename, rows) {
-        const csvContent = rows
-          .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";"))
-          .join("\n");
-        const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }
-
-      function handleReservationSubmit(event) {
-        event.preventDefault();
-        hideStatus(els.reservationStatus);
-        const formData = new FormData(els.reservationForm);
-        const payload = Object.fromEntries(formData.entries());
-        const reservation = {
-          id: crypto.randomUUID(),
-          ...payload,
-          people: Number(payload.people),
-          createdAt: Date.now()
-        };
-
-        fetch("https://formspree.io/f/xovyawqv", {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: formData
-        })
-          .then((response) => {
-            if (!response.ok) throw new Error("Rezervaci se nepodařilo odeslat. Zkus to prosím znovu.");
-            state.reservations.push(reservation);
-            saveToStorage(STORAGE_KEYS.RESERVATIONS, state.reservations);
-            renderEvents();
-            if (state.isAdmin) renderReservationsTable();
-            els.reservationForm.reset();
-            populateReservationEvents();
-            showStatus(els.reservationStatus, "Díky! Rezervace byla odeslána a potvrzení dorazí na e-mail.");
-          })
-          .catch((error) => {
-            console.error(error);
-            showStatus(els.reservationStatus, error.message || "Něco se pokazilo.", "error");
-          });
-      }
-
-      function handleReviewSubmit(event) {
-        event.preventDefault();
-        hideStatus(els.reviewStatus);
-        const formData = new FormData(els.reviewForm);
-        const payload = Object.fromEntries(formData.entries());
-        const review = {
-          id: crypto.randomUUID(),
-          name: payload.name.trim(),
-          rating: Number(payload.rating),
-          text: payload.text.trim(),
-          approved: false,
-          createdAt: Date.now()
-        };
-        state.reviews.push(review);
-        saveToStorage(STORAGE_KEYS.REVIEWS, state.reviews);
-        els.reviewForm.reset();
-        showStatus(els.reviewStatus, "Děkujeme! Recenze byla odeslána a čeká na schválení.");
-        if (state.isAdmin) renderAdminReviews();
-      }
-
-      function handlePollSubmit(event) {
-        event.preventDefault();
-        hideStatus(els.pollStatus);
-        if (localStorage.getItem(STORAGE_KEYS.POLL_VOTE)) {
-          showStatus(els.pollStatus, "Hlas už byl zaznamenán. Děkujeme!", "error");
-          return;
-        }
-        const formData = new FormData(els.pollForm);
-        const choice = formData.get("poll");
-        const option = state.poll.options.find((item) => item.id === choice);
-        if (!option) return;
-        option.votes += 1;
-        saveToStorage(STORAGE_KEYS.POLL, state.poll);
-        localStorage.setItem(STORAGE_KEYS.POLL_VOTE, choice);
-        showStatus(els.pollStatus, "Děkujeme za hlas! Výsledky průběžně aktualizujeme.");
-        els.pollForm.reset();
-        renderPoll();
-      }
-
-      function handleAdminEventSubmit(event) {
-        event.preventDefault();
-        hideStatus(els.adminEventStatus);
-        const formData = new FormData(els.adminEventForm);
-        const payload = Object.fromEntries(formData.entries());
-        readFilesAsDataUrls(formData.getAll("photos"), 5)
-          .then((photos) => {
-            const newEvent = {
-              id: `event-${crypto.randomUUID()}`,
-              title: payload.title.trim(),
-              date: payload.date,
-              capacity: Number(payload.capacity),
-              description: payload.description.trim(),
-              tags: ["custom", "komunita"],
-              photos
-            };
-            state.events.push(newEvent);
-            saveToStorage(STORAGE_KEYS.EVENTS, state.events);
-            renderEvents();
-            populateReservationEvents();
-            els.adminEventForm.reset();
-            showStatus(els.adminEventStatus, "Nová akce byla přidána.");
-          })
-          .catch(() => {
-            showStatus(els.adminEventStatus, "Nepodařilo se načíst fotky.", "error");
-          });
-      }
-
-      function handleAdminGallerySubmit(event) {
-        event.preventDefault();
-        hideStatus(els.adminGalleryStatus);
-        const files = new FormData(els.adminGalleryForm).getAll("gallery");
-        if (!files.length || (files.length === 1 && files[0].size === 0)) {
-          showStatus(els.adminGalleryStatus, "Vyber prosím alespoň jednu fotku.", "error");
-          return;
-        }
-        readFilesAsDataUrls(files)
-          .then((images) => {
-            if (!images.length) return;
-            state.gallery = [...images, ...state.gallery];
-            saveToStorage(STORAGE_KEYS.GALLERY, state.gallery);
-            els.adminGalleryForm.reset();
-            renderGallery();
-            showStatus(els.adminGalleryStatus, "Fotky byly přidány do galerie.");
-          })
-          .catch((error) => {
-            console.error(error);
-            showStatus(els.adminGalleryStatus, "Nahrávání fotek selhalo.", "error");
-          });
-      }
-
-      function handleAdminReviewActions(event) {
-        const approveId = event.target.dataset.approve;
-        const deleteId = event.target.dataset.deleteReview;
-        if (approveId) {
-          const review = state.reviews.find((item) => item.id === approveId);
-          if (review) {
-            review.approved = true;
-            saveToStorage(STORAGE_KEYS.REVIEWS, state.reviews);
-            renderReviews();
-          }
-        }
-        if (deleteId) {
-          state.reviews = state.reviews.filter((item) => item.id !== deleteId);
-          saveToStorage(STORAGE_KEYS.REVIEWS, state.reviews);
-          renderReviews();
-        }
-      }
-
-      function handleAdminGalleryClick(event) {
-        const removeIndex = event.target.dataset.removeGallery;
-        if (removeIndex !== undefined) {
-          state.gallery.splice(Number(removeIndex), 1);
-          saveToStorage(STORAGE_KEYS.GALLERY, state.gallery);
-          renderGallery();
-        }
-      }
-
-      function handleEventListClick(event) {
-        const reserveId = event.target.dataset.reserve;
-        const galleryId = event.target.dataset.gallery;
-        if (reserveId) {
-          els.reservationEvent.value = reserveId;
-          document.querySelector('[data-scroll="#rezervace"]').click();
-        }
-        if (galleryId) {
-          const eventData = state.events.find((item) => item.id === galleryId);
-          if (!eventData) return;
-          if (!eventData.photos?.length) {
-            showStatus(els.reservationStatus, "Tato akce zatím nemá fotky.", "error");
-            return;
-          }
-          const container = document.createElement("div");
-          container.className = "gallery-grid";
-          eventData.photos.forEach((src, index) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "gallery-item";
-            btn.innerHTML = `<img src="${src}" alt="Foto ${eventData.title} ${index + 1}" />`;
-            btn.addEventListener("click", () => openLightbox(src));
-            container.appendChild(btn);
-          });
-          openModal(eventData.title, container);
-        }
-      }
-
-      function handleGalleryOpen() {
-        const container = document.createElement("div");
-        container.className = "gallery-grid";
-        state.gallery.forEach((src, index) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "gallery-item";
-          btn.innerHTML = `<img src="${src}" alt="Komunitní foto ${index + 1}" />`;
-          btn.addEventListener("click", () => openLightbox(src));
-          container.appendChild(btn);
-        });
-        openModal("Komunitní galerie", container);
-      }
-
-      function handleExportReservations() {
-        if (!state.reservations.length) return;
-        const rows = [["Akce", "Jméno", "Email", "Datum", "Místa"]];
-        state.reservations.forEach((reservation) => {
-          const eventTitle = state.events.find((event) => event.id === reservation.eventId)?.title || "";
-          rows.push([
-            eventTitle,
-            reservation.name,
-            reservation.email,
-            formatDate(reservation.date),
-            reservation.people
-          ]);
-        });
-        downloadCSV(`rezervace-${new Date().toISOString().split("T")[0]}.csv`, rows);
-      }
-
-      function handleResetPoll() {
-        if (!confirm("Opravdu chceš resetovat anketu?")) return;
-        state.poll = structuredClone(defaultPoll);
-        saveToStorage(STORAGE_KEYS.POLL, state.poll);
-        localStorage.removeItem(STORAGE_KEYS.POLL_VOTE);
-        renderPoll();
-        showStatus(els.pollStatus, "Anketa byla restartována. Hlasuj znovu!", "success");
-      }
-
-      function setupScrolling() {
-        document.querySelectorAll('[data-scroll]').forEach((button) => {
-          button.addEventListener("click", () => {
-            const target = document.querySelector(button.dataset.scroll);
-            if (target) target.scrollIntoView({ behavior: "smooth" });
-          });
-        });
-      }
-
-      function bindEvents() {
-        els.reservationForm.addEventListener("submit", handleReservationSubmit);
-        els.reviewForm.addEventListener("submit", handleReviewSubmit);
-        els.pollForm.addEventListener("submit", handlePollSubmit);
-        els.eventsList.addEventListener("click", handleEventListClick);
-        els.openGallery.addEventListener("click", handleGalleryOpen);
-        els.lightbox.addEventListener("click", (event) => {
-          if (event.target.dataset.lightboxClose !== undefined || event.target === els.lightbox) {
-            closeLightbox();
-          }
-        });
-        els.modal.addEventListener("click", (event) => {
-          if (event.target.dataset.close !== undefined || event.target === els.modal) {
-            closeModal();
-          }
-        });
-        els.adminLogin.addEventListener("click", () => {
-          const password = prompt("Zadej heslo pro admin sekci:");
-          if (password === "akce1234") {
-            setAdminMode(true);
-          } else if (password) {
-            alert("Nesprávné heslo.");
-          }
-        });
-        els.adminLogout.addEventListener("click", () => setAdminMode(false));
-        els.adminEventForm.addEventListener("submit", handleAdminEventSubmit);
-        els.adminGalleryForm.addEventListener("submit", handleAdminGallerySubmit);
-        els.adminReviews.addEventListener("click", handleAdminReviewActions);
-        els.adminGallery.addEventListener("click", handleAdminGalleryClick);
-        els.exportReservations.addEventListener("click", handleExportReservations);
-        els.resetPoll.addEventListener("click", handleResetPoll);
-      }
-
-      function init() {
-        loadState();
-        renderEvents();
-        populateReservationEvents();
-        renderGallery();
-        renderPoll();
-        renderReviews();
-        if (state.isAdmin) setAdminMode(true);
-        setupScrolling();
-        bindEvents();
-      }
-
-      document.addEventListener("DOMContentLoaded", init);
-    </script>
+    <script src="app.js" type="module"></script>
   </body>
 </html>
