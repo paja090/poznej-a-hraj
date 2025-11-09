@@ -2,6 +2,9 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage, isFirebaseConfigured } from '../firebaseConfig.js';
 
+const defaultFormspree = 'https://formspree.io/f/xovyawqvv';
+const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT || defaultFormspree;
+
 export async function sendFeedback(data, file) {
   if (!isFirebaseConfigured || !db || !storage) {
     throw new Error('Firebase není nakonfigurované. Vyplň prosím údaje ve souboru .env.');
@@ -28,6 +31,22 @@ export async function sendFeedback(data, file) {
 
   const feedbackCollection = collection(db, 'feedback');
   const documentRef = await addDoc(feedbackCollection, payload);
+
+  try {
+    await fetch(formspreeEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        _subject: 'Nová zpětná vazba – Poznej & Hraj',
+        ...payload,
+      }),
+    });
+  } catch (err) {
+    console.warn('Formspree notification failed', err);
+  }
 
   return { id: documentRef.id, ...payload };
 }

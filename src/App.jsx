@@ -842,247 +842,440 @@ function AdminPanel({
     URL.revokeObjectURL(url);
   };
 
+
   return (
-    <div className="modal-back" style={{ display: 'flex', zIndex: 320 }}>
-      <div className="modal">
-        <button
-          onClick={onClose}
-          style={{ position: 'sticky', top: 0, float: 'right', background: 'transparent', border: 'none', color: '#9aa6b2', cursor: 'pointer', zIndex: 2 }}
-        >
-          ✕
-        </button>
-        <h2>Admin panel</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur px-4 py-10">
+      <div className="max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-white/10 bg-[#0b1220]/95 p-8 text-white shadow-2xl">
+        <header className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">Admin panel</h2>
+            <p className="text-sm text-white/60">Spravuj obsah Poznej &amp; Hraj v reálném čase.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isOnline ? 'bg-a2/20 text-a2' : 'bg-yellow-400/20 text-yellow-200'}`}>
+              {isOnline ? 'Online' : 'Demo režim'}
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-a2/40 hover:text-a2"
+            >
+              Zavřít
+            </button>
+          </div>
+        </header>
+
         {!isOnline && (
-          <div className="pill" style={{ border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.05)', color: '#ffd166', marginBottom: '10px' }}>
-            Připoj Firebase pro plnohodnotnou správu obsahu.
+          <div className="mt-6 rounded-2xl border border-yellow-400/30 bg-yellow-400/10 px-4 py-3 text-sm text-yellow-100">
+            Připoj Firebase pro plnohodnotnou správu obsahu (uploady, editace, ankety…).
           </div>
         )}
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Přidat akci</strong>
-          <form id="createForm" onSubmit={handleCreateEvent}>
-            <label>Název<input value={eventForm.title} onChange={(e) => setEventForm((prev) => ({ ...prev, title: e.target.value }))} required /></label>
-            <label>Datum (YYYY-MM-DD HH:MM)<input value={eventForm.when} onChange={(e) => setEventForm((prev) => ({ ...prev, when: e.target.value }))} placeholder="2025-11-20 19:00" required /></label>
-            <label>Místo<input value={eventForm.place} onChange={(e) => setEventForm((prev) => ({ ...prev, place: e.target.value }))} /></label>
-            <label>Popis<input value={eventForm.description} onChange={(e) => setEventForm((prev) => ({ ...prev, description: e.target.value }))} /></label>
-            <label>Kapacita<input type="number" value={eventForm.capacity} onChange={(e) => setEventForm((prev) => ({ ...prev, capacity: e.target.value }))} /></label>
-            <label>Cena (Kč – volit.)<input type="number" value={eventForm.price} onChange={(e) => setEventForm((prev) => ({ ...prev, price: e.target.value }))} /></label>
-            <label>Tagy (čárkou oddělené)<input value={eventForm.tags} onChange={(e) => setEventForm((prev) => ({ ...prev, tags: e.target.value }))} /></label>
-            <label>Fotky akce (až 5)<input type="file" accept="image/*" multiple onChange={(e) => setEventForm((prev) => ({ ...prev, files: Array.from(e.target.files || []).slice(0, 5) }))} /></label>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-              <button className="btn-join" type="submit" style={{ borderColor: '#38bdf8', color: '#38bdf8' }} disabled={uploadingEvent}>
-                {uploadingEvent ? 'Ukládám…' : 'Uložit akci'}
+
+        <section className="mt-8 space-y-6">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Nová akce</h3>
+            <p className="text-sm text-white/60">Vyplň detaily a nahraj náhledové fotky (max. 5).</p>
+            <form id="createForm" onSubmit={handleCreateEvent} className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="flex flex-col text-sm text-white/70">
+                Název
+                <input
+                  value={eventForm.title}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, title: e.target.value }))}
+                  required
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-a2 focus:outline-none focus:ring-2 focus:ring-a2/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Datum (YYYY-MM-DD HH:MM)
+                <input
+                  value={eventForm.when}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, when: e.target.value }))}
+                  placeholder="2025-11-20 19:00"
+                  required
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Místo
+                <input
+                  value={eventForm.place}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, place: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Kapacita
+                <input
+                  type="number"
+                  value={eventForm.capacity}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, capacity: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70 md:col-span-2">
+                Popis
+                <input
+                  value={eventForm.description}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Cena (Kč – volit.)
+                <input
+                  type="number"
+                  value={eventForm.price}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, price: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Tagy (čárkou oddělené)
+                <input
+                  value={eventForm.tags}
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, tags: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70 md:col-span-2">
+                Fotky akce (až 5)
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => setEventForm((prev) => ({ ...prev, files: Array.from(e.target.files || []).slice(0, 5) }))}
+                  className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-sm text-white/70 file:mr-4 file:rounded-full file:border-0 file:bg-gradient-to-r file:from-a1 file:to-a2 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-[#071022]"
+                />
+              </label>
+              <div className="md:col-span-2 flex justify-end">
+                <button
+                  className="rounded-full bg-gradient-to-r from-a1 to-a2 px-6 py-2 text-sm font-semibold text-[#071022] shadow-[0_12px_24px_rgba(139,92,246,0.25)] disabled:cursor-not-allowed disabled:opacity-60"
+                  type="submit"
+                  disabled={uploadingEvent}
+                >
+                  {uploadingEvent ? 'Ukládám…' : 'Uložit akci'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Seznam akcí</h3>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {events.map((event) => {
+                const { day, month } = formatDateLabel(event.startDate);
+                return (
+                  <div key={event.id} className="rounded-2xl border border-white/10 bg-[#101b2f] p-4 shadow-lg shadow-black/20">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{event.title}</p>
+                        <p className="text-xs text-white/60">{formatDateTime(event.startDate)}</p>
+                        <p className="mt-2 text-xs text-white/60">
+                          {event.place ? `📍 ${event.place} • ` : ''}
+                          Kapacita: {event.capacity ?? '—'} | Cena: {event.price ?? '—'}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">
+                        {day} · {month}
+                      </span>
+                    </div>
+                    <button
+                      className="mt-3 w-full rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 hover:border-red-300 hover:text-red-300"
+                      type="button"
+                      onClick={() => handleDeleteEvent(event.id)}
+                    >
+                      Smazat
+                    </button>
+                  </div>
+                );
+              })}
+              {!events.length && <p className="text-sm text-white/60">Žádné akce.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Galerie</h3>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <label className="flex cursor-pointer items-center gap-2 rounded-full border border-dashed border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-a1/40 hover:text-a1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleGalleryUpload(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+                + Nahrát fotku
+              </label>
+              <span className="text-xs text-white/50">Max. velikost 5 MB</span>
+              {uploadingGallery && <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/70">Nahrávám…</span>}
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {gallery.map((item) => (
+                <div key={item.id} className="group relative overflow-hidden rounded-2xl border border-white/10">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="h-32 w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <button
+                    className="absolute right-3 top-3 rounded-full border border-white/20 bg-black/50 px-2 py-1 text-xs font-semibold text-white/80 opacity-0 transition group-hover:opacity-100"
+                    type="button"
+                    onClick={() => handleDeleteGallery(item)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {!gallery.length && <p className="text-sm text-white/60">Žádné fotky.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Anketa</h3>
+            <form onSubmit={handleAddPollOption} className="mt-4 grid gap-3 md:grid-cols-2">
+              <label className="flex flex-col text-sm text-white/70">
+                Název
+                <input
+                  name="title"
+                  required
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Popis
+                <input
+                  name="description"
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <div className="md:col-span-2 flex flex-wrap justify-end gap-3">
+                <button
+                  className="rounded-full bg-gradient-to-r from-a1 to-a2 px-5 py-2 text-xs font-semibold text-[#071022] shadow-[0_12px_24px_rgba(0,229,168,0.25)] disabled:cursor-not-allowed disabled:opacity-60"
+                  type="submit"
+                  disabled={pollLoading}
+                >
+                  {pollLoading ? 'Přidávám…' : 'Přidat možnost'}
+                </button>
+                <button
+                  className="rounded-full border border-white/20 px-5 py-2 text-xs font-semibold text-white/80 hover:border-a1/40 hover:text-a1"
+                  type="button"
+                  onClick={handleResetVotes}
+                >
+                  Vynulovat hlasy
+                </button>
+              </div>
+            </form>
+            <div className="mt-4 grid gap-3">
+              <label className="flex flex-col text-sm text-white/70">
+                Otázka ankety
+                <input
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <button
+                className="self-end rounded-full border border-white/20 px-5 py-2 text-xs font-semibold text-white/80 hover:border-a2/40 hover:text-a2"
+                type="button"
+                onClick={handleSaveQuestion}
+                disabled={savingQuestion}
+              >
+                {savingQuestion ? 'Ukládám…' : 'Uložit otázku'}
+              </button>
+              {pollOptions.map((option) => (
+                <div key={option.id} className="rounded-2xl border border-white/10 bg-[#101b2f] p-4">
+                  <p className="text-sm font-semibold text-white">{option.title}</p>
+                  <p className="text-xs text-white/60">{option.description}</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-white/40">{option.votes} hlasů</p>
+                  <button
+                    className="mt-3 w-full rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 hover:border-red-300 hover:text-red-300"
+                    type="button"
+                    onClick={() => handleDeletePollOption(option.id)}
+                  >
+                    Smazat možnost
+                  </button>
+                </div>
+              ))}
+              {!pollOptions.length && <p className="text-sm text-white/60">Žádné možnosti.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Hero tagy</h3>
+            <form onSubmit={handleAddHeroTag} className="mt-4 flex flex-wrap gap-3">
+              <input
+                name="tag"
+                placeholder="např. 🎮 Herní turnaje"
+                className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+              />
+              <button className="rounded-full bg-gradient-to-r from-a1 to-a2 px-5 py-2 text-xs font-semibold text-[#071022] shadow-[0_12px_24px_rgba(0,229,168,0.25)]" type="submit">
+                Přidat tag
+              </button>
+            </form>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {heroTags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#101b2f] px-3 py-1 text-xs text-white/70"
+                >
+                  {tag.label}
+                  <button
+                    className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-white/60 transition group-hover:border-red-300 group-hover:text-red-300"
+                    type="button"
+                    onClick={() => handleDeleteHeroTag(tag.id)}
+                  >
+                    Smazat
+                  </button>
+                </span>
+              ))}
+              {!heroTags.length && <p className="text-sm text-white/60">Žádné tagy.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Správa týmu</h3>
+            <form onSubmit={handleAddCrew} className="mt-4 grid gap-3 md:grid-cols-2">
+              <label className="flex flex-col text-sm text-white/70">
+                Jméno
+                <input
+                  value={crewDraft.name}
+                  onChange={(e) => setCrewDraft((prev) => ({ ...prev, name: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70">
+                Role
+                <input
+                  value={crewDraft.role}
+                  onChange={(e) => setCrewDraft((prev) => ({ ...prev, role: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70 md:col-span-2">
+                Popis
+                <input
+                  value={crewDraft.description}
+                  onChange={(e) => setCrewDraft((prev) => ({ ...prev, description: e.target.value }))}
+                  className="mt-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+                />
+              </label>
+              <label className="flex flex-col text-sm text-white/70 md:col-span-2">
+                Fotka
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCrewDraft((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }))}
+                  className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-sm text-white/70 file:mr-4 file:rounded-full file:border-0 file:bg-gradient-to-r file:from-a1 file:to-a2 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-[#071022]"
+                />
+              </label>
+              <div className="md:col-span-2 flex justify-end">
+                <button className="rounded-full bg-gradient-to-r from-a1 to-a2 px-5 py-2 text-xs font-semibold text-[#071022] shadow-[0_12px_24px_rgba(139,92,246,0.25)] disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={crewSaving}>
+                  {crewSaving ? 'Přidávám…' : 'Přidat člena'}
+                </button>
+              </div>
+            </form>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {crew.map((member) => (
+                <div key={member.id} className="rounded-2xl border border-white/10 bg-[#101b2f] p-4">
+                  <div className="flex items-center gap-3">
+                    {member.photoUrl ? (
+                      <img src={member.photoUrl} alt={member.name} className="h-16 w-16 rounded-full border border-white/20 object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-white/20 text-sm text-white/60">{member.name?.slice(0, 2).toUpperCase()}</div>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">{member.name}</p>
+                      <p className="text-xs text-a2">{member.role}</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-white/60">{member.description}</p>
+                  <button className="mt-3 w-full rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 hover:border-red-300 hover:text-red-300" type="button" onClick={() => handleDeleteCrew(member)}>
+                    Smazat člena
+                  </button>
+                </div>
+              ))}
+              {!crew.length && <p className="text-sm text-white/60">Tým zatím představíme.</p>}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Rezervace</h3>
+            <div className="mt-3 overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10 text-left text-xs text-white/70">
+                <thead className="text-[11px] uppercase tracking-[0.3em] text-white/40">
+                  <tr>
+                    <th className="px-3 py-2">Čas</th>
+                    <th className="px-3 py-2">Akce</th>
+                    <th className="px-3 py-2">Jméno</th>
+                    <th className="px-3 py-2">E-mail</th>
+                    <th className="px-3 py-2">Počet</th>
+                    <th className="px-3 py-2">Cena</th>
+                    <th className="px-3 py-2">Poznámka</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {reservations.map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-3 py-2 text-white/60">{item.createdAt ? new Date(item.createdAt).toLocaleString('cs-CZ') : ''}</td>
+                      <td className="px-3 py-2 text-white/80">{item.eventTitle}</td>
+                      <td className="px-3 py-2 text-white/80">{item.name}</td>
+                      <td className="px-3 py-2 text-white/60">{item.email}</td>
+                      <td className="px-3 py-2 text-white/60">{item.count}</td>
+                      <td className="px-3 py-2 text-white/60">{item.price ?? ''}</td>
+                      <td className="px-3 py-2 text-white/60">{item.note}</td>
+                    </tr>
+                  ))}
+                  {!reservations.length && (
+                    <tr>
+                      <td colSpan={7} className="px-3 py-4 text-center text-white/60">
+                        Zatím žádné rezervace.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-3 flex flex-wrap justify-end gap-3">
+              <button className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 hover:border-a1/40 hover:text-a1" type="button" onClick={handleExportReservations}>
+                Export CSV
+              </button>
+              <button className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white/80 hover:border-a2/40 hover:text-a2" type="button" onClick={onClose}>
+                Zavřít panel
               </button>
             </div>
-          </form>
-        </section>
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Seznam akcí</strong>
-          <div className="reviews" style={{ marginTop: '8px' }}>
-            {events.map((event) => {
-              const { day, month } = formatDateLabel(event.startDate);
-              return (
-                <div key={event.id} className="review">
-                  <div className="head">
-                    <div className="name">{event.title}</div>
-                    <span className="pill">{formatDateTime(event.startDate)}</span>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-lg font-semibold text-white">Recenze</h3>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {reviews.map((review) => (
+                <div key={review.id} className="rounded-2xl border border-white/10 bg-[#101b2f] p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-white">{review.name}</p>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${review.approved ? 'bg-a2/20 text-a2' : 'bg-yellow-400/20 text-yellow-200'}`}>
+                      {review.approved ? 'Schváleno' : 'Čeká'}
+                    </span>
                   </div>
-                  <div className="text">
-                    {event.place ? `📍 ${event.place} • ` : ''}
-                    Kapacita: {event.capacity ?? '—'} | Cena: {event.price ?? '—'}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
-                    <div className="pill">{day} · {month}</div>
-                    <button className="btn-join" type="button" onClick={() => handleDeleteEvent(event.id)}>
+                  <p className="mt-2 text-xs text-white/60">{review.message}</p>
+                  <div className="mt-3 flex gap-2">
+                    <button className="flex-1 rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 hover:border-a1/40 hover:text-a1" type="button" onClick={() => handleToggleReview(review)}>
+                      {review.approved ? 'Skrýt' : 'Schválit'}
+                    </button>
+                    <button className="flex-1 rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-white/80 hover:border-red-300 hover:text-red-300" type="button" onClick={() => handleDeleteReview(review)}>
                       Smazat
                     </button>
                   </div>
                 </div>
-              );
-            })}
-            {events.length === 0 && <div className="review">Žádné akce zatím nejsou.</div>}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Galerie</strong>
-          <input type="file" accept="image/*" onChange={(e) => handleGalleryUpload(e.target.files?.[0] ?? null)} disabled={uploadingGallery} />
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px' }}>
-            {gallery.map((item) => (
-              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <img src={item.imageUrl} alt={item.name} style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,.12)' }} />
-                <button className="btn-join" type="button" onClick={() => handleDeleteGallery(item)}>
-                  Smazat
-                </button>
-              </div>
-            ))}
-            {gallery.length === 0 && <div className="pill">Galerie je prázdná.</div>}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Anketa</strong>
-          <label>Otázka
-            <input value={question} onChange={(e) => setQuestion(e.target.value)} />
-          </label>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-            <button className="btn-join" type="button" onClick={handleSaveQuestion} disabled={savingQuestion}>
-              {savingQuestion ? 'Ukládám…' : 'Uložit otázku'}
-            </button>
-            <button className="btn-join" type="button" onClick={handleResetVotes}>
-              Vynulovat hlasy
-            </button>
-          </div>
-          <form onSubmit={handleAddPollOption} style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label>Název možnosti<input name="title" type="text" /></label>
-            <label>Popis<input name="description" type="text" /></label>
-            <button className="btn-join" type="submit" disabled={pollLoading}>
-              {pollLoading ? 'Přidávám…' : 'Přidat možnost'}
-            </button>
-          </form>
-          <div className="reviews" style={{ marginTop: '10px' }}>
-            {pollOptions.map((option) => (
-              <div key={option.id} className="review">
-                <div className="head">
-                  <div className="name">{option.title}</div>
-                  <div className="pill">{option.votes} hlasů</div>
-                </div>
-                <div className="text">{option.description}</div>
-                <button className="btn-join" type="button" style={{ marginTop: '8px' }} onClick={() => handleDeletePollOption(option.id)}>
-                  Smazat
-                </button>
-              </div>
-            ))}
-            {pollOptions.length === 0 && <div className="review">Zatím žádné možnosti.</div>}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Hero tagy</strong>
-          <form onSubmit={handleAddHeroTag} style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-            <input name="tag" type="text" placeholder="např. 🎮 Herní turnaje" style={{ flex: 1 }} />
-            <button className="btn-join" type="submit">Přidat</button>
-          </form>
-          <div className="reviews" style={{ marginTop: '8px' }}>
-            {heroTags.map((tag) => (
-              <div key={tag.id} className="review" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{tag.label}</span>
-                <button className="btn-join" type="button" onClick={() => handleDeleteHeroTag(tag.id)}>
-                  Smazat
-                </button>
-              </div>
-            ))}
-            {heroTags.length === 0 && <div className="review">Žádné tagy.</div>}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Správa týmu</strong>
-          <form onSubmit={handleAddCrew} style={{ display: 'grid', gap: '8px', marginTop: '8px' }}>
-            <label>Jméno<input value={crewDraft.name} onChange={(e) => setCrewDraft((prev) => ({ ...prev, name: e.target.value }))} /></label>
-            <label>Role<input value={crewDraft.role} onChange={(e) => setCrewDraft((prev) => ({ ...prev, role: e.target.value }))} /></label>
-            <label>Popis<input value={crewDraft.description} onChange={(e) => setCrewDraft((prev) => ({ ...prev, description: e.target.value }))} /></label>
-            <label>Fotka<input type="file" accept="image/*" onChange={(e) => setCrewDraft((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }))} /></label>
-            <button className="btn-join" type="submit" disabled={crewSaving}>
-              {crewSaving ? 'Ukládám…' : 'Přidat člena'}
-            </button>
-          </form>
-          <div className="reviews" style={{ marginTop: '10px' }}>
-            {crew.map((member) => (
-              <div key={member.id} className="review" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                {member.photoUrl ? (
-                  <img src={member.photoUrl} alt={member.name} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,.12)' }} />
-                ) : (
-                  <div style={{ width: '80px', height: '60px', borderRadius: '8px', border: '1px dashed rgba(255,255,255,.2)', display: 'grid', placeItems: 'center' }}>Bez fotky</div>
-                )}
-                <div style={{ flex: 1 }}>
-                  <div className="name">{member.name}</div>
-                  <div className="text">{member.role}</div>
-                  <div className="text">{member.description}</div>
-                </div>
-                <button className="btn-join" type="button" onClick={() => handleDeleteCrew(member)}>
-                  Smazat
-                </button>
-              </div>
-            ))}
-            {crew.length === 0 && <div className="review">Tým zatím představíme.</div>}
-          </div>
-        </section>
-
-        <section style={{ marginBottom: '18px' }}>
-          <strong>Rezervace</strong>
-          <div className="small-muted">Seznam přijatých rezervací</div>
-          <div style={{ overflowX: 'auto', marginTop: '8px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr>
-                  <th>Čas</th>
-                  <th>Akce</th>
-                  <th>Jméno</th>
-                  <th>E-mail</th>
-                  <th>Počet</th>
-                  <th>Cena</th>
-                  <th>Poznámka</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reservations.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.createdAt ? new Date(item.createdAt).toLocaleString('cs-CZ') : ''}</td>
-                    <td>{item.eventTitle}</td>
-                    <td>{item.name}</td>
-                    <td>{item.email}</td>
-                    <td>{item.count}</td>
-                    <td>{item.price ?? ''}</td>
-                    <td>{item.note}</td>
-                  </tr>
-                ))}
-                {reservations.length === 0 && (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '12px' }}>
-                      Zatím žádné rezervace.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-            <button className="btn-join" type="button" onClick={handleExportReservations}>
-              Export CSV
-            </button>
-            <button className="btn-join" type="button" onClick={onClose}>
-              Zavřít panel
-            </button>
-          </div>
-        </section>
-
-        <section>
-          <strong>Recenze (správa)</strong>
-          <div className="reviews" style={{ marginTop: '8px' }}>
-            {reviews.map((review) => (
-              <div key={review.id} className="review">
-                <div className="head">
-                  <div className="name">{review.name}</div>
-                  <div className="stars">{'★'.repeat(review.stars || review.rating || 5)}</div>
-                </div>
-                <div className="text">{review.message}</div>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                  <button className="btn-join" type="button" onClick={() => handleToggleReview(review)}>
-                    {review.approved ? 'Skrýt' : 'Schválit'}
-                  </button>
-                  <button className="btn-join" type="button" onClick={() => handleDeleteReview(review)}>
-                    Smazat
-                  </button>
-                </div>
-              </div>
-            ))}
-            {reviews.length === 0 && <div className="review">Žádné recenze.</div>}
+              ))}
+              {!reviews.length && <p className="text-sm text-white/60">Žádné recenze.</p>}
+            </div>
           </div>
         </section>
       </div>
     </div>
   );
 }
+
 export default function App() {
   const [events, setEvents] = useState([]);
   const [reservations, setReservations] = useState([]);

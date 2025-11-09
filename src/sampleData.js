@@ -108,3 +108,54 @@ export const sampleReviews = [
 ];
 
 export const sampleReservations = [];
+
+export const sampleQuizResults = [
+  {
+    id: 'quiz1',
+    name: 'Klára',
+    type: 'Strategický taktik',
+    score: 12,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'quiz2',
+    name: 'Ondra',
+    type: 'Společenský parťák',
+    score: 9,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export const sampleEventRatings = [
+  {
+    id: 'rate1',
+    eventId: 'e1',
+    name: 'Tereza',
+    rating: 5,
+    comment: 'Absolutní top! Kombinace her a moderace byla perfektní.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'rate2',
+    eventId: 'e0',
+    name: 'Jirka',
+    rating: 4,
+    comment: 'Super komunita, jen bych přidal víc stolních her.',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export const sampleBoardMessages = [
+  {
+    id: 'msg1',
+    name: 'Lucka',
+    message: 'Kdo jde příště na quiz night? Ráda bych dala dohromady tým. 🎲',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'msg2',
+    name: 'Martin',
+    message: 'Díky za včerejšek! Nejvíc mě bavila improvizační hra.',
+    createdAt: new Date().toISOString(),
+  },
+];
