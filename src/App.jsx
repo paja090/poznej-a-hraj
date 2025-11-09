@@ -15,9 +15,20 @@ import {
 } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import FeedbackForm from './components/FeedbackForm.jsx';
-import { db, storage } from './firebaseConfig.js';
+import ReviewForm from './components/ReviewForm.jsx';
+import { db, storage, isFirebaseConfigured } from './firebaseConfig.js';
+import {
+  sampleCrew,
+  sampleEvents,
+  sampleGallery,
+  sampleHeroTags,
+  samplePollOptions,
+  samplePollQuestion,
+  sampleReservations,
+  sampleReviews,
+} from './sampleData.js';
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '';
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'akce1234';
 
 function ensureDate(value) {
   if (!value) return null;
@@ -166,7 +177,15 @@ function Lightbox({ isOpen, photos, currentIndex, onClose, onNavigate }) {
   );
 }
 
-function ReservationModal({ isOpen, events, reservations, onClose, selectedEventId }) {
+function ReservationModal({
+  isOpen,
+  events,
+  reservations,
+  onClose,
+  selectedEventId,
+  onSubmitReservation,
+  isOnline,
+}) {
   const [form, setForm] = useState({
     eventId: '',
     name: '',
@@ -181,7 +200,7 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
     guests: [],
   });
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -199,7 +218,7 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
         note: '',
         guests: [],
       });
-      setSuccess(false);
+      setSuccessMessage('');
       setError('');
       return;
     }
@@ -252,6 +271,7 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
     event.preventDefault();
     setSubmitting(true);
     setError('');
+    setSuccessMessage('');
 
     try {
       if (!form.eventId) {
@@ -271,7 +291,7 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
         throw new Error('Počet míst překračuje aktuální volnou kapacitu.');
       }
 
-      await addDoc(collection(db, 'reservations'), {
+      await onSubmitReservation({
         eventId: selectedEvent.id,
         eventTitle: selectedEvent.title,
         name: form.name,
@@ -285,10 +305,13 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
         guests: form.guests.filter(Boolean),
         note: form.note,
         price: selectedEvent.price ?? null,
-        createdAt: serverTimestamp(),
       });
 
-      setSuccess(true);
+      setSuccessMessage(
+        isOnline
+          ? 'Díky — rezervace byla odeslána.'
+          : 'Díky! Rezervaci máme uloženou v náhledu. Jakmile připojíš Firebase, odešli ji prosím znovu.',
+      );
       setForm({
         eventId: selectedEvent.id,
         name: '',
@@ -323,6 +346,11 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
         </button>
         <h2 className="text-2xl font-semibold text-white">Rezervace</h2>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          {!isOnline && (
+            <p className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+              Tento náhled běží bez propojení na Firebase. Rezervace se ukládají pouze lokálně.
+            </p>
+          )}
           <label className="flex flex-col gap-2 text-sm text-white/70">
             Vyber akci
             <select
@@ -482,10 +510,8 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
             />
           </label>
           {error && <p className="text-sm text-rose-300">{error}</p>}
-          {success && (
-            <p className="rounded-2xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">
-              Rezervace byla úspěšně odeslaná. Brzy se ozveme s potvrzením!
-            </p>
+          {successMessage && (
+            <p className="rounded-2xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">{successMessage}</p>
           )}
           <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
             <span>
@@ -513,7 +539,18 @@ function ReservationModal({ isOpen, events, reservations, onClose, selectedEvent
     </div>
   );
 }
-function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQuestion, heroTags, crew, reviews }) {
+function AdminPanel({
+  onClose,
+  events,
+  reservations,
+  gallery,
+  pollOptions,
+  pollQuestion,
+  heroTags,
+  crew,
+  reviews,
+  isOnline,
+}) {
   const [eventForm, setEventForm] = useState({
     title: '',
     when: '',
@@ -546,6 +583,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
       const parsedDate = new Date(eventForm.when);
       if (Number.isNaN(parsedDate.getTime())) {
         throw new Error('Datum nemá správný formát.');
+      }
+
+      if (!isOnline || !db) {
+        throw new Error('Pro správu akcí nastav Firebase konfiguraci (.env soubor).');
       }
 
       const docRef = await addDoc(collection(db, 'events'), {
@@ -594,6 +635,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
 
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Opravdu smazat akci?')) return;
+    if (!isOnline || !db) {
+      alert('Smazání akce je dostupné až po propojení na Firebase.');
+      return;
+    }
     await deleteDoc(doc(db, 'events', eventId));
   };
 
@@ -601,6 +646,9 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     if (!file) return;
     setUploadingGallery(true);
     try {
+      if (!isOnline || !db || !storage) {
+        throw new Error('Nahrávání fotek vyžaduje nastavení Firebase Storage.');
+      }
       const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
       const storageRef = ref(storage, `gallery/${safeName}`);
       const uploaded = await uploadBytes(storageRef, file);
@@ -620,6 +668,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
 
   const handleDeleteGallery = async (item) => {
     if (!window.confirm('Smazat fotku?')) return;
+    if (!isOnline || !db) {
+      alert('Smazání fotky vyžaduje aktivní Firebase konfiguraci.');
+      return;
+    }
     await deleteDoc(doc(db, 'gallery', item.id));
     if (item.storagePath) {
       try {
@@ -638,6 +690,9 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     if (!title) return;
     setPollLoading(true);
     try {
+      if (!isOnline || !db) {
+        throw new Error('Správa ankety vyžaduje propojení na Firebase.');
+      }
       await addDoc(collection(db, 'pollOptions'), {
         title,
         description: description || '',
@@ -654,6 +709,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
 
   const handleDeletePollOption = async (id) => {
     if (!window.confirm('Smazat možnost ankety?')) return;
+    if (!isOnline || !db) {
+      alert('Smazání možnosti vyžaduje aktivní Firebase.');
+      return;
+    }
     await deleteDoc(doc(db, 'pollOptions', id));
   };
 
@@ -661,7 +720,12 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     if (!window.confirm('Vynulovat všechny hlasy?')) return;
     setPollLoading(true);
     try {
+      if (!isOnline || !db) {
+        throw new Error('Reset hlasů vyžaduje propojení na Firebase.');
+      }
       await Promise.all(pollOptions.map((option) => updateDoc(doc(db, 'pollOptions', option.id), { votes: 0 })));
+    } catch (err) {
+      alert(err.message || 'Nepodařilo se vynulovat hlasy.');
     } finally {
       setPollLoading(false);
     }
@@ -671,6 +735,9 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     event.preventDefault();
     setSavingQuestion(true);
     try {
+      if (!isOnline || !db) {
+        throw new Error('Uložení otázky vyžaduje aktivní Firebase.');
+      }
       await setDoc(doc(db, 'poll', 'settings'), { question }, { merge: true });
     } catch (err) {
       alert(err.message || 'Dotaz ankety se nepodařilo uložit.');
@@ -684,11 +751,19 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     const formData = new FormData(event.currentTarget);
     const label = formData.get('label')?.toString().trim();
     if (!label) return;
+    if (!isOnline || !db) {
+      alert('Přidání tagu je dostupné až po propojení Firebase.');
+      return;
+    }
     await addDoc(collection(db, 'heroTags'), { label, createdAt: serverTimestamp() });
     event.currentTarget.reset();
   };
 
   const handleDeleteHeroTag = async (id) => {
+    if (!isOnline || !db) {
+      alert('Smazání tagu je dostupné až po propojení Firebase.');
+      return;
+    }
     await deleteDoc(doc(db, 'heroTags', id));
   };
 
@@ -696,6 +771,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
     event.preventDefault();
     if (!crewDraft.name || !crewDraft.role) {
       alert('Vyplň jméno i roli.');
+      return;
+    }
+    if (!isOnline || !db) {
+      alert('Správa týmu je dostupná až po propojení Firebase.');
       return;
     }
     setCrewSaving(true);
@@ -727,6 +806,10 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
 
   const handleDeleteCrewMember = async (member) => {
     if (!window.confirm('Smazat člena týmu?')) return;
+    if (!isOnline || !db) {
+      alert('Smazání člena je dostupné až po propojení Firebase.');
+      return;
+    }
     await deleteDoc(doc(db, 'crew', member.id));
     if (member.storagePath) {
       try {
@@ -738,11 +821,19 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
   };
 
   const handleReviewApproval = async (review, approved) => {
+    if (!isOnline || !db) {
+      alert('Schvalování recenzí vyžaduje propojení na Firebase.');
+      return;
+    }
     await updateDoc(doc(db, 'reviews', review.id), { approved });
   };
 
   const handleDeleteReview = async (review) => {
     if (!window.confirm('Smazat recenzi?')) return;
+    if (!isOnline || !db) {
+      alert('Smazání recenze vyžaduje propojení na Firebase.');
+      return;
+    }
     await deleteDoc(doc(db, 'reviews', review.id));
   };
 
@@ -758,6 +849,11 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
         </button>
         <h2 className="text-3xl font-semibold text-white">Admin panel</h2>
         <p className="mt-2 text-sm text-white/60">Spravuj akce, galerii, anketu, tým i recenze v reálném čase.</p>
+        {!isOnline && (
+          <div className="mt-4 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+            Pro plné úpravy obsahu je potřeba doplnit Firebase konfiguraci (.env). Níže vidíš pouze ukázková data.
+          </div>
+        )}
 
         <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
           <h3 className="text-xl font-semibold text-white">Přidat akci</h3>
@@ -846,7 +942,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
             </label>
             <button
               type="submit"
-              disabled={uploadingEvent}
+              disabled={uploadingEvent || !isOnline}
               className="self-start bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               {uploadingEvent ? 'Ukládám…' : 'Uložit akci'}
@@ -870,6 +966,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                   <button
                     type="button"
                     onClick={() => handleDeleteEvent(eventItem.id)}
+                    disabled={!isOnline}
                     className="rounded-xl border border-rose-400/40 px-4 py-2 text-sm text-rose-300 hover:border-rose-300"
                   >
                     Smazat
@@ -888,6 +985,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
               <input
                 type="file"
                 accept="image/*"
+                disabled={!isOnline}
                 onChange={(e) => handleGalleryUpload(e.target.files?.[0] ?? null)}
                 className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-white/70"
               />
@@ -901,6 +999,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                 <button
                   type="button"
                   onClick={() => handleDeleteGallery(item)}
+                  disabled={!isOnline}
                   className="mt-3 w-full rounded-xl border border-white/20 px-3 py-2 text-xs text-white hover:border-rose-300 hover:text-rose-200"
                 >
                   Smazat
@@ -925,7 +1024,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
             </label>
             <button
               type="submit"
-              disabled={savingQuestion}
+              disabled={savingQuestion || !isOnline}
               className="rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 hover:border-a1/60 hover:text-white"
             >
               {savingQuestion ? 'Ukládám…' : 'Uložit otázku'}
@@ -942,7 +1041,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
             </label>
             <button
               type="submit"
-              disabled={pollLoading}
+              disabled={pollLoading || !isOnline}
               className="bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2"
             >
               {pollLoading ? 'Přidávám…' : 'Přidat možnost'}
@@ -962,6 +1061,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                 <button
                   type="button"
                   onClick={() => handleDeletePollOption(option.id)}
+                  disabled={!isOnline}
                   className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
                 >
                   Smazat
@@ -971,7 +1071,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
           </div>
           <button
             type="button"
-            disabled={pollLoading}
+            disabled={pollLoading || !isOnline}
             onClick={handleResetPollVotes}
             className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white/70 hover:border-a1/60 hover:text-white"
           >
@@ -991,6 +1091,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
             />
             <button
               type="submit"
+              disabled={!isOnline}
               className="rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 hover:border-a1/60 hover:text-white"
             >
               Přidat tag
@@ -1006,6 +1107,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                 <button
                   type="button"
                   onClick={() => handleDeleteHeroTag(tag.id)}
+                  disabled={!isOnline}
                   className="rounded-xl border border-white/20 px-3 py-1 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
                 >
                   Smazat
@@ -1053,13 +1155,14 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
               <input
                 type="file"
                 accept="image/*"
+                disabled={!isOnline}
                 onChange={(e) => setCrewDraft((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }))}
                 className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-white/70"
               />
             </label>
             <button
               type="submit"
-              disabled={crewSaving}
+              disabled={crewSaving || !isOnline}
               className="md:col-span-2 bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
               {crewSaving ? 'Ukládám…' : 'Přidat člena'}
@@ -1085,6 +1188,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                 <button
                   type="button"
                   onClick={() => handleDeleteCrewMember(member)}
+                  disabled={!isOnline}
                   className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
                 >
                   Smazat člena
@@ -1153,6 +1257,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                   <button
                     type="button"
                     onClick={() => handleReviewApproval(review, !review.approved)}
+                    disabled={!isOnline}
                     className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-a1/60 hover:text-white"
                   >
                     {review.approved ? 'Zrušit schválení' : 'Schválit'}
@@ -1160,6 +1265,7 @@ function AdminPanel({ onClose, events, reservations, gallery, pollOptions, pollQ
                   <button
                     type="button"
                     onClick={() => handleDeleteReview(review)}
+                    disabled={!isOnline}
                     className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
                   >
                     Smazat
@@ -1194,63 +1300,97 @@ export default function App() {
   const [adminError, setAdminError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const firebaseReady = isFirebaseConfigured && !!db;
+
   useEffect(() => {
+    if (!firebaseReady) {
+      setEvents(sampleEvents.map((item) => ({ ...item })));
+      return undefined;
+    }
     const eventsQuery = query(collection(db, 'events'), orderBy('startDate'));
     return onSnapshot(eventsQuery, (snapshot) => {
       setEvents(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setReservations(sampleReservations.map((item) => ({ ...item })));
+      return undefined;
+    }
     const reservationQuery = query(collection(db, 'reservations'), orderBy('createdAt', 'desc'));
     return onSnapshot(reservationQuery, (snapshot) => {
       setReservations(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setGallery(sampleGallery.map((item) => ({ ...item })));
+      return undefined;
+    }
     const galleryQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
     return onSnapshot(galleryQuery, (snapshot) => {
       setGallery(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setPollOptions(samplePollOptions.map((item) => ({ ...item })));
+      return undefined;
+    }
     const pollQuery = query(collection(db, 'pollOptions'), orderBy('createdAt'));
     return onSnapshot(pollQuery, (snapshot) => {
       setPollOptions(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setHeroTags(sampleHeroTags.map((item) => ({ ...item })));
+      return undefined;
+    }
     const heroQuery = query(collection(db, 'heroTags'), orderBy('createdAt'));
     return onSnapshot(heroQuery, (snapshot) => {
       setHeroTags(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setCrew(sampleCrew.map((item) => ({ ...item })));
+      return undefined;
+    }
     const crewQuery = query(collection(db, 'crew'), orderBy('createdAt'));
     return onSnapshot(crewQuery, (snapshot) => {
       setCrew(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setReviews(sampleReviews.map((item) => ({ ...item })));
+      return undefined;
+    }
     const reviewsQuery = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     return onSnapshot(reviewsQuery, (snapshot) => {
       setReviews(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
     });
-  }, []);
+  }, [firebaseReady]);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setPollQuestion(samplePollQuestion);
+      return undefined;
+    }
     const pollDoc = doc(db, 'poll', 'settings');
     return onSnapshot(pollDoc, (snapshot) => {
       if (snapshot.exists()) {
         setPollQuestion(snapshot.data().question || 'Jaké téma chcete příště?');
       }
     });
-  }, []);
+  }, [firebaseReady]);
 
   const reservationTotals = useMemo(() => {
     const map = new Map();
@@ -1303,8 +1443,63 @@ export default function App() {
     return images;
   }, [events, gallery]);
 
+  const handleCreateReservation = async (payload) => {
+    if (!firebaseReady) {
+      setReservations((prev) => [
+        ...prev,
+        { id: `local-${Date.now()}`, ...payload, createdAt: new Date() },
+      ]);
+      return;
+    }
+    await addDoc(collection(db, 'reservations'), {
+      ...payload,
+      createdAt: serverTimestamp(),
+    });
+  };
+
   const handleVote = async (optionId) => {
-    await updateDoc(doc(db, 'pollOptions', optionId), { votes: increment(1) });
+    if (!optionId) return;
+    if (!firebaseReady) {
+      setPollOptions((prev) =>
+        prev.map((option) =>
+          option.id === optionId
+            ? { ...option, votes: (option.votes || 0) + 1 }
+            : option,
+        ),
+      );
+      return;
+    }
+    try {
+      await updateDoc(doc(db, 'pollOptions', optionId), { votes: increment(1) });
+    } catch (err) {
+      alert(err.message || 'Hlasování se nepodařilo uložit.');
+    }
+  };
+
+  const handleSubmitReview = async ({ name, rating, message }) => {
+    if (!firebaseReady) {
+      setReviews((prev) => [
+        ...prev,
+        {
+          id: `local-${Date.now()}`,
+          name,
+          rating,
+          stars: rating,
+          message,
+          approved: true,
+          createdAt: new Date(),
+        },
+      ]);
+      return;
+    }
+    await addDoc(collection(db, 'reviews'), {
+      name,
+      rating,
+      stars: rating,
+      message,
+      approved: false,
+      createdAt: serverTimestamp(),
+    });
   };
 
   const handleOpenReservation = (eventId) => {
@@ -1361,6 +1556,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-poznej font-rubik text-white">
       <div className="mx-auto max-w-6xl px-4 pb-20">
+        {!firebaseReady && (
+          <div className="mb-6 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+            Tento náhled běží bez propojení na Firebase. Data se ukládají pouze v rámci aktuální relace.
+          </div>
+        )}
         <header className="flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-a1 to-a2 text-2xl font-extrabold text-[#071022] shadow-xl">
@@ -1614,6 +1814,12 @@ export default function App() {
                   </li>
                 )}
               </ul>
+              <ReviewForm onSubmit={handleSubmitReview} disabled={false} />
+              {!firebaseReady && (
+                <p className="text-xs text-white/50">
+                  Tento formulář v náhledu uchovává recenze pouze lokálně. Pro veřejné ukládání přidej Firebase konfiguraci.
+                </p>
+              )}
             </section>
             <section className="card" id="crew">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -1734,6 +1940,8 @@ export default function App() {
         reservations={reservations}
         onClose={handleCloseReservation}
         selectedEventId={selectedEventId}
+        onSubmitReservation={handleCreateReservation}
+        isOnline={firebaseReady}
       />
 
       <Lightbox
@@ -1755,6 +1963,7 @@ export default function App() {
           heroTags={heroTags}
           crew={crew}
           reviews={reviews}
+          isOnline={firebaseReady}
         />
       )}
 

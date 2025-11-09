@@ -34,10 +34,12 @@ VITE_FIREBASE_PROJECT_ID=...
 VITE_FIREBASE_STORAGE_BUCKET=...
 VITE_FIREBASE_MESSAGING_SENDER_ID=...
 VITE_FIREBASE_APP_ID=...
+VITE_ADMIN_PASSWORD=akce1234
 ```
 
 2. V [Firebase konzoli](https://console.firebase.google.com/) povol Firestore a Cloud Storage.
-3. Struktura ukládaných dokumentů v kolekci `feedback`:
+3. Pokud `.env` nevyplníš, aplikace běží v ukázkovém režimu: zobrazí se demo data a akce jako rezervace či anketa se ukládají jen lokálně.
+4. Struktura ukládaných dokumentů v kolekci `feedback`:
    - `name`, `email`, `message`, `photoURL`, `timestamp` (serverTimestamp).
 
 ## Struktura projektu
@@ -48,8 +50,10 @@ src/
   main.jsx           # vstupní bod
   index.css          # Tailwind a custom styly
   firebaseConfig.js  # inicializace Firebase
+  sampleData.js      # demo obsah pro offline náhled
   components/
     FeedbackForm.jsx
+    ReviewForm.jsx
   services/
     feedback.js      # funkce sendFeedback()
 ```

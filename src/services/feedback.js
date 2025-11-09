@@ -1,24 +1,11 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { db, storage } from '../firebaseConfig.js';
-
-function assertFirebaseConfig() {
-  const requiredKeys = [
-    'VITE_FIREBASE_API_KEY',
-    'VITE_FIREBASE_PROJECT_ID',
-    'VITE_FIREBASE_STORAGE_BUCKET',
-  ];
-
-  const missing = requiredKeys.filter((key) => !import.meta.env[key]);
-  if (missing.length) {
-    throw new Error(
-      `Chybí Firebase konfigurace: ${missing.join(', ')}. Zkontroluj prosím .env soubor.`,
-    );
-  }
-}
+import { db, storage, isFirebaseConfigured } from '../firebaseConfig.js';
 
 export async function sendFeedback(data, file) {
-  assertFirebaseConfig();
+  if (!isFirebaseConfigured || !db || !storage) {
+    throw new Error('Firebase není nakonfigurované. Vyplň prosím údaje ve souboru .env.');
+  }
 
   const payload = {
     name: data.name?.trim() || '',

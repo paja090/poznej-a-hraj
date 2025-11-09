@@ -11,8 +11,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
 
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+let app = null;
+let db = null;
+let storage = null;
+
+if (isFirebaseConfigured) {
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  storage = getStorage(app);
+} else {
+  console.warn('Firebase konfigurace nebyla nalezena. Funkce závislé na cloudu budou omezené.');
+}
+
+export { db, storage, isFirebaseConfigured };
 export default app;
