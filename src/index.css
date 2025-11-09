@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --a1: #8b5cf6;
+    --a2: #00e5a8;
+    --bg: #071022;
+  }
+
+  body {
+    @apply bg-poznej font-rubik text-white antialiased;
+  }
+}
+
+@layer components {
+  .bg-poznej {
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(139, 92, 246, 0.08), transparent),
+      linear-gradient(180deg, #071023 0%, #071022 100%);
+  }
+
+  .card {
+    @apply rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur;
+  }
+
+  .hero-card {
+    @apply card bg-gradient-to-br from-[#0b1220] via-[#0a1020] to-[#0b1528];
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4 py-1 font-medium text-white/75;
+  }
+
+  .shadow-glass {
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+  }
+
+  .marquee-track {
+    animation: marquee 45s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
