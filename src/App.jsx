@@ -34,11 +34,170 @@ function ensureDate(value) {
   if (!value) return null;
   if (value instanceof Date) return value;
   if (value instanceof Timestamp) return value.toDate();
-  if (typeof value === 'string' || typeof value === 'number') {
+  if (typeof value === 'object' && 'seconds' in value && 'nanoseconds' in value) {
+    return new Date(value.seconds * 1000 + value.nanoseconds / 1_000_000);
+  }
+  if (typeof value === 'number') {
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
+  if (typeof value === 'string') {
+    const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+    const parsed = new Date(normalized);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+    const fallback = new Date(value.replace(/\s+/g, ' '));
+    return Number.isNaN(fallback.getTime()) ? null : fallback;
+  }
   return null;
+}
+
+const toNumber = (value) => {
+  if (value == null || value === '') return null;
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+function normalizeEvent(raw) {
+  if (!raw) return null;
+  const startDate =
+    ensureDate(raw.startDate) ||
+    ensureDate(raw.start_time) ||
+    ensureDate(raw.start) ||
+    ensureDate(raw.date) ||
+    ensureDate(raw.when) ||
+    ensureDate(raw.datetime) ||
+    ensureDate(raw.timestamp);
+
+  const capacity =
+    toNumber(raw.capacity) ??
+    toNumber(raw.cap) ??
+    toNumber(raw.maxCapacity) ??
+    toNumber(raw.maxParticipants);
+
+  const price =
+    toNumber(raw.price) ??
+    toNumber(raw.cost) ??
+    toNumber(raw.fee) ??
+    toNumber(raw.ticketPrice);
+
+  const tags = Array.isArray(raw.tags)
+    ? raw.tags
+    : typeof raw.tags === 'string'
+      ? raw.tags
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
+  let photos = [];
+  if (Array.isArray(raw.photos)) {
+    photos = raw.photos;
+  } else if (Array.isArray(raw.photoUrls)) {
+    photos = raw.photoUrls;
+  } else if (raw.photos && typeof raw.photos === 'object') {
+    photos = Object.values(raw.photos).filter(Boolean);
+  } else if (raw.gallery && Array.isArray(raw.gallery)) {
+    photos = raw.gallery;
+  }
+
+  return {
+    ...raw,
+    title: raw.title || raw.name || raw.heading || 'Bez názvu',
+    description: raw.description || raw.desc || raw.summary || '',
+    place: raw.place || raw.location || raw.venue || '',
+    startDate,
+    capacity,
+    price,
+    tags,
+    photos,
+  };
+}
+
+function normalizeGalleryItem(raw) {
+  if (!raw) return null;
+  const imageUrl = raw.imageUrl || raw.url || raw.src || raw.downloadURL || raw.photoUrl;
+  if (!imageUrl) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || imageUrl,
+    name: raw.name || raw.label || 'photo',
+    imageUrl,
+  };
+}
+
+function normalizeHeroTag(raw) {
+  if (raw == null) return null;
+  if (typeof raw === 'string') {
+    const label = raw.trim();
+    if (!label) return null;
+    return { id: label, label };
+  }
+  const label = (raw.label || raw.text || raw.value || '').toString().trim();
+  if (!label) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || label || JSON.stringify(raw),
+    label,
+  };
+}
+
+function normalizeCrewMember(raw) {
+  if (!raw) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || raw.email || raw.name || JSON.stringify(raw),
+    name: raw.name || raw.fullName || 'Člen týmu',
+    role: raw.role || raw.position || '',
+    description: raw.description || raw.desc || raw.bio || '',
+    photoUrl: raw.photoUrl || raw.photo || raw.avatar || raw.imageUrl || raw.image || '',
+  };
+}
+
+function normalizePollOption(raw) {
+  if (!raw) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || raw.title || JSON.stringify(raw),
+    title: raw.title || raw.label || raw.option || 'Možnost',
+    description: raw.description || raw.desc || '',
+    votes: typeof raw.votes === 'number' ? raw.votes : Number(raw.votes) || 0,
+  };
+}
+
+function normalizeReview(raw) {
+  if (!raw) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || raw.name || JSON.stringify(raw),
+    name: raw.name || raw.author || 'Anonym',
+    message: raw.message || raw.text || raw.review || '',
+    stars: typeof raw.stars === 'number' ? raw.stars : typeof raw.rating === 'number' ? raw.rating : 5,
+    rating: typeof raw.rating === 'number' ? raw.rating : undefined,
+    approved: raw.approved ?? raw.visible ?? false,
+  };
+}
+
+function normalizeReservation(raw) {
+  if (!raw) return null;
+  return {
+    ...raw,
+    id: raw.id || raw.uid || JSON.stringify(raw),
+    count: toNumber(raw.count) ?? 1,
+    createdAt: ensureDate(raw.createdAt) || new Date(),
+    eventId: raw.eventId || raw.event || raw.eventRef || '',
+    eventTitle: raw.eventTitle || raw.eventName || raw.event || raw.title || '',
+    price: toNumber(raw.price) ?? toNumber(raw.totalPrice) ?? toNumber(raw.amount) ?? null,
+    guests: Array.isArray(raw.guests)
+      ? raw.guests
+      : typeof raw.guests === 'string'
+        ? raw.guests
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [],
+  };
 }
 
 function formatDateTime(value) {
@@ -117,10 +276,17 @@ function ReservationModal({
   const upcomingEvents = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    return events.filter((event) => {
-      const date = ensureDate(event.startDate);
-      return date && date >= now;
-    });
+    return events
+      .filter((event) => {
+        const date = ensureDate(event.startDate);
+        if (!date) return true;
+        return date >= now;
+      })
+      .sort((a, b) => {
+        const aDate = ensureDate(a.startDate) ?? new Date(8640000000000000);
+        const bDate = ensureDate(b.startDate) ?? new Date(8640000000000000);
+        return aDate - bDate;
+      });
   }, [events]);
 
   const reservationTotals = useMemo(() => {
@@ -938,78 +1104,130 @@ export default function App() {
 
   useEffect(() => {
     if (!firebaseReady) {
-      setEvents(sampleEvents.map((item) => ({ ...item })));
+      const items = sampleEvents
+        .map((item) => normalizeEvent(item))
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDate = ensureDate(a.startDate) ?? new Date(0);
+          const bDate = ensureDate(b.startDate) ?? new Date(0);
+          return aDate - bDate;
+        });
+      setEvents(items);
       return undefined;
     }
-    const eventsQuery = query(collection(db, 'events'), orderBy('startDate'));
-    return onSnapshot(eventsQuery, (snapshot) => {
-      setEvents(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const eventsRef = collection(db, 'events');
+    return onSnapshot(eventsRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeEvent({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDate = ensureDate(a.startDate) ?? new Date(0);
+          const bDate = ensureDate(b.startDate) ?? new Date(0);
+          return aDate - bDate;
+        });
+      setEvents(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setReservations(sampleReservations.map((item) => ({ ...item })));
+      setReservations(sampleReservations.map((item) => normalizeReservation(item)).filter(Boolean));
       return undefined;
     }
-    const reservationQuery = query(collection(db, 'reservations'), orderBy('createdAt', 'desc'));
-    return onSnapshot(reservationQuery, (snapshot) => {
-      setReservations(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const reservationRef = collection(db, 'reservations');
+    return onSnapshot(reservationRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeReservation({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDate = ensureDate(a.createdAt) ?? new Date(0);
+          const bDate = ensureDate(b.createdAt) ?? new Date(0);
+          return bDate - aDate;
+        });
+      setReservations(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setGallery(sampleGallery.map((item) => ({ ...item })));
+      setGallery(sampleGallery.map((item) => normalizeGalleryItem(item)).filter(Boolean));
       return undefined;
     }
-    const galleryQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
-    return onSnapshot(galleryQuery, (snapshot) => {
-      setGallery(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const galleryRef = collection(db, 'gallery');
+    return onSnapshot(galleryRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeGalleryItem({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDate = ensureDate(a.createdAt) ?? new Date(0);
+          const bDate = ensureDate(b.createdAt) ?? new Date(0);
+          return bDate - aDate;
+        });
+      setGallery(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setPollOptions(samplePollOptions.map((item) => ({ ...item })));
+      setPollOptions(samplePollOptions.map((item) => normalizePollOption(item)).filter(Boolean));
       return undefined;
     }
-    const pollQuery = query(collection(db, 'pollOptions'), orderBy('createdAt'));
-    return onSnapshot(pollQuery, (snapshot) => {
-      setPollOptions(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const pollRef = collection(db, 'pollOptions');
+    return onSnapshot(pollRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizePollOption({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      setPollOptions(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setHeroTags(sampleHeroTags.map((item) => ({ ...item })));
+      setHeroTags(sampleHeroTags.map((item) => normalizeHeroTag(item)).filter(Boolean));
       return undefined;
     }
-    const heroQuery = query(collection(db, 'heroTags'), orderBy('createdAt'));
-    return onSnapshot(heroQuery, (snapshot) => {
-      setHeroTags(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const heroRef = collection(db, 'heroTags');
+    return onSnapshot(heroRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeHeroTag({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+      setHeroTags(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setCrew(sampleCrew.map((item) => ({ ...item })));
+      setCrew(sampleCrew.map((item) => normalizeCrewMember(item)).filter(Boolean));
       return undefined;
     }
-    const crewQuery = query(collection(db, 'crew'), orderBy('createdAt'));
-    return onSnapshot(crewQuery, (snapshot) => {
-      setCrew(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+    const crewRef = collection(db, 'crew');
+    return onSnapshot(crewRef, (snapshot) => {
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeCrewMember({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      setCrew(mapped);
     });
   }, [firebaseReady]);
 
   useEffect(() => {
     if (!firebaseReady) {
-      setReviews(sampleReviews.map((item) => ({ ...item })));
+      setReviews(sampleReviews.map((item) => normalizeReview(item)).filter(Boolean));
       return undefined;
     }
     const reviewsQuery = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     return onSnapshot(reviewsQuery, (snapshot) => {
-      setReviews(snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
+      const mapped = snapshot.docs
+        .map((docSnap) => normalizeReview({ id: docSnap.id, ...docSnap.data() }))
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aDate = ensureDate(a.createdAt) ?? new Date(0);
+          const bDate = ensureDate(b.createdAt) ?? new Date(0);
+          return bDate - aDate;
+        });
+      setReviews(mapped);
     });
   }, [firebaseReady]);
 
@@ -1045,7 +1263,8 @@ export default function App() {
     () =>
       events.filter((event) => {
         const eventDate = ensureDate(event.startDate);
-        return eventDate && eventDate >= now;
+        if (!eventDate) return true;
+        return eventDate >= now;
       }),
     [events, now],
   );
@@ -1070,12 +1289,22 @@ export default function App() {
   };
 
   const marqueeImages = useMemo(() => {
-    const images = gallery.map((item) => item.imageUrl).filter(Boolean);
-    events.forEach((event) => {
-      (event.photos || []).forEach((photo) => images.push(photo));
+    const urls = new Set();
+    gallery.forEach((item) => {
+      if (item?.imageUrl) {
+        urls.add(item.imageUrl);
+      }
     });
-    if (images.length === 0) return [];
-    return images.concat(images);
+    events.forEach((event) => {
+      (event.photos || []).forEach((photo) => {
+        if (photo) {
+          urls.add(photo);
+        }
+      });
+    });
+    const list = Array.from(urls);
+    if (list.length === 0) return [];
+    return list.concat(list);
   }, [events, gallery]);
 
   const handleCreateReservation = async (payload) => {
@@ -1221,7 +1450,12 @@ export default function App() {
       </nav>
       <section className="hero-full" id="hero">
         <div className="hero-inner">
-          <button className="hero-cta" type="button" onClick={() => handleOpenReservation('')}>
+          <button
+            className="hero-cta"
+            type="button"
+            style={{ position: 'absolute', top: '16px', right: '16px' }}
+            onClick={() => handleOpenReservation('')}
+          >
             Rezervuj místo 🔔 Kapacita se rychle plní
           </button>
           <div className="hero">
@@ -1229,7 +1463,9 @@ export default function App() {
             <p>Žádné trapné ticho. Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.</p>
             <div className="tags">
               {heroTags.map((tag) => (
-                <span key={tag.id} className="tag">{tag.label}</span>
+                <span key={tag.id} className="tag">
+                  {tag.label || tag.value || tag.text || ''}
+                </span>
               ))}
               {heroTags.length === 0 && <span className="tag">🎮 Herní turnaje</span>}
             </div>
@@ -1285,6 +1521,7 @@ export default function App() {
               )}
               {upcomingEvents.map((event) => {
                 const { day, month } = formatDateLabel(event.startDate);
+                const dateLabel = formatDateTime(event.startDate);
                 const taken = reservationTotals.get(event.id) ?? 0;
                 const cap = typeof event.capacity === 'number' ? event.capacity : 0;
                 const left = cap ? Math.max(0, cap - taken) : null;
@@ -1295,7 +1532,10 @@ export default function App() {
                       <div className="ev-title">{event.title}</div>
                       <div className="ev-desc">{event.description}</div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                        <div className="pill">📅 {formatDateTime(event.startDate)}{event.place ? ` • 📍 ${event.place}` : ''}</div>
+                        <div className="pill">
+                          {dateLabel ? `📅 ${dateLabel}` : '📅 Termín bude upřesněn'}
+                          {event.place ? ` • 📍 ${event.place}` : ''}
+                        </div>
                         {typeof event.capacity === 'number' && <div className="pill">Kapacita: {event.capacity}</div>}
                         {left != null && (
                           <div className="pill" style={{ color: left > 0 ? '#6bf0c1' : '#ff7a7a' }}>
@@ -1323,6 +1563,7 @@ export default function App() {
               )}
               {pastEvents.map((event) => {
                 const { day, month } = formatDateLabel(event.startDate);
+                const dateLabel = formatDateTime(event.startDate);
                 return (
                   <div className="event" key={event.id}>
                     <div className="ev-left"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
@@ -1330,7 +1571,10 @@ export default function App() {
                       <div className="ev-title">{event.title}</div>
                       <div className="ev-desc">{event.description}</div>
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                        <div className="pill">📅 {formatDateTime(event.startDate)}{event.place ? ` • 📍 ${event.place}` : ''}</div>
+                        <div className="pill">
+                          {dateLabel ? `📅 ${dateLabel}` : '📅 Termín bude upřesněn'}
+                          {event.place ? ` • 📍 ${event.place}` : ''}
+                        </div>
                         {event.price != null && <div className="pill" style={{ color: '#b4ffd9' }}>💳 {event.price} Kč</div>}
                       </div>
                     </div>
@@ -1450,14 +1694,6 @@ export default function App() {
         </section>
       </main>
       <footer>© {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!</footer>
-      <button
-        type="button"
-        onClick={() => handleOpenReservation('')}
-        className="hero-cta"
-        style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: '80px' }}
-      >
-        Rezervovat místo
-      </button>
       <button
         type="button"
         onClick={() => (isAdmin ? setIsAdmin(false) : setShowAdminPrompt(true))}

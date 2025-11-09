@@ -94,9 +94,10 @@ input::placeholder,textarea::placeholder{color:#9aa6b2}input:focus,select:focus,
 
 .hero-cta{position:absolute;top:16px;right:16px;z-index:5;background:linear-gradient(90deg,#8b5cf6,#00e5a8);
   border:none;padding:10px 14px;border-radius:999px;color:#071022;font-weight:800;cursor:pointer;
-  box-shadow:0 0 18px rgba(139,92,246,.5),0 6px 18px rgba(0,0,0,.5)}
+  box-shadow:0 0 18px rgba(139,92,246,.5),0 6px 18px rgba(0,0,0,.5);display:inline-flex;align-items:center;gap:6px;
+  white-space:nowrap}
 .hero-cta:hover{transform:translateY(-1px);box-shadow:0 0 22px rgba(139,92,246,.7),0 8px 22px rgba(0,0,0,.6)}
-@media(max-width:1080px){.hero-cta{position:static;margin-top:10px;grid-column:1/-1;justify-self:end}}
+@media(max-width:1080px){.hero-cta{position:static!important;margin-top:10px;grid-column:1/-1;justify-self:end}}
 
 .contact-card{
   margin-top:28px;
