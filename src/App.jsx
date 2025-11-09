@@ -16,6 +16,8 @@ import {
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import FeedbackForm from './components/FeedbackForm.jsx';
 import ReviewForm from './components/ReviewForm.jsx';
+import HeroSection from './components/HeroSection.jsx';
+import Reveal from './components/Reveal.jsx';
 import { db, storage, isFirebaseConfigured } from './firebaseConfig.js';
 import {
   sampleCrew,
@@ -221,6 +223,86 @@ function formatDateLabel(value) {
     day: date.toLocaleDateString('cs-CZ', { day: '2-digit' }),
     month: date.toLocaleDateString('cs-CZ', { month: 'short' }),
   };
+}
+
+function NewsletterSignup({ className = '' }) {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle');
+  const [responseMessage, setResponseMessage] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!email) return;
+    setStatus('loading');
+    setResponseMessage('');
+    try {
+      const result = await fetch('https://formspree.io/f/xovyawqv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, _subject: 'Poznej & Hraj – newsletter' }),
+      });
+      if (!result.ok) {
+        throw new Error('Odeslání se nezdařilo. Zkus to prosím znovu.');
+      }
+      setEmail('');
+      setStatus('success');
+      setResponseMessage('✅ Děkujeme, brzy ti napíšeme!');
+    } catch (err) {
+      setStatus('error');
+      setResponseMessage(err.message || 'Odeslání se nezdařilo.');
+    }
+  };
+
+  return (
+    <Reveal
+      as="section"
+      id="newsletter"
+      className={`relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-10 shadow-2xl shadow-black/30 backdrop-blur ${className}`}
+      offset={40}
+      duration={0.6}
+      margin="-80px"
+    >
+      <div
+        className="animate-gradient absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.35),_transparent_45%),radial-gradient(circle_at_bottom_right,_rgba(0,229,168,0.28),_transparent_45%)]"
+        aria-hidden="true"
+      />
+      <div className="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <div className="space-y-3">
+          <p className="text-sm uppercase tracking-[0.4em] text-white/40">Buď v obraze!</p>
+          <h2 className="text-3xl font-semibold text-white drop-shadow-[0_0_18px_rgba(139,92,246,0.45)] md:text-4xl">
+            Získej pozvánky na nové akce, novinky a speciální herní večery Poznej &amp; Hraj.
+          </h2>
+          <p className="max-w-xl text-sm text-white/70">
+            Přihlášením získáš exkluzivní pozvánky, early bird místa a zákulisní novinky. Žádný spam – jen večery plné herních zážitků.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0d172e]/70 p-6 shadow-xl backdrop-blur">
+          <label htmlFor="newsletter-email" className="text-sm font-medium text-white">
+            Tvůj e-mail
+          </label>
+          <input
+            id="newsletter-email"
+            type="email"
+            name="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="např. tvoje@email.cz"
+            className="rounded-xl border border-white/10 bg-[#101828] px-4 py-3 text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
+          />
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-6 py-3 text-sm font-semibold text-[#071022] shadow-[0_12px_28px_rgba(0,229,168,0.35)] transition-transform hover:-translate-y-1"
+          >
+            {status === 'loading' ? 'Odesílám…' : 'Přihlásit se k odběru'}
+          </button>
+          {responseMessage && (
+            <p className={`text-sm ${status === 'success' ? 'text-a2' : 'text-rose-300'}`}>{responseMessage}</p>
+          )}
+        </form>
+      </div>
+    </Reveal>
+  );
 }
 
 function ReservationModal({
@@ -1291,6 +1373,10 @@ export default function App() {
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
+  const [navShrunk, setNavShrunk] = useState(false);
+  const [eventTab, setEventTab] = useState('upcoming');
+  const [eventLimit, setEventLimit] = useState(3);
+  const [communityTab, setCommunityTab] = useState('poll');
   const [isAdmin, setIsAdmin] = useState(false);
 
   const firebaseReady = isFirebaseConfigured && !!db;
@@ -1437,468 +1523,817 @@ export default function App() {
     });
   }, [firebaseReady]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setNavShrunk(window.scrollY > 40);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const navLinks = useMemo(
+    () => [
+      { id: 'about', label: 'O projektu' },
+      { id: 'events', label: 'Akce' },
+      { id: 'gallery', label: 'Galerie' },
+      { id: 'community', label: 'Komunita' },
+      { id: 'crew', label: 'Tým' },
+      { id: 'contact', label: 'Kontakt' },
+      { id: 'newsletter', label: 'Buď v obraze!' },
+    ],
+    [],
+  );
+
+  const upcomingList = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return events
+      .slice()
+      .filter((event) => {
+        const date = ensureDate(event.startDate);
+        if (!date) return true;
+        return date >= now;
+      })
+      .sort((a, b) => {
+        const aDate = ensureDate(a.startDate) ?? new Date(8640000000000000);
+        const bDate = ensureDate(b.startDate) ?? new Date(8640000000000000);
+        return aDate - bDate;
+      });
+  }, [events]);
+
+  const pastList = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return events
+      .slice()
+      .filter((event) => {
+        const date = ensureDate(event.startDate);
+        if (!date) return false;
+        return date < now;
+      })
+      .sort((a, b) => {
+        const aDate = ensureDate(a.startDate) ?? new Date(0);
+        const bDate = ensureDate(b.startDate) ?? new Date(0);
+        return bDate - aDate;
+      });
+  }, [events]);
+
   const reservationTotals = useMemo(() => {
     const map = new Map();
     reservations.forEach((item) => {
+      if (!item?.eventId) return;
       const current = map.get(item.eventId) ?? 0;
       map.set(item.eventId, current + (item.count ?? 0));
     });
     return map;
   }, [reservations]);
 
-  const now = useMemo(() => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    return date;
-  }, []);
-
-  const upcomingEvents = useMemo(
-    () =>
-      events.filter((event) => {
-        const eventDate = ensureDate(event.startDate);
-        if (!eventDate) return true;
-        return eventDate >= now;
-      }),
-    [events, now],
-  );
-
-  const pastEvents = useMemo(
-    () =>
-      events.filter((event) => {
-        const eventDate = ensureDate(event.startDate);
-        return eventDate && eventDate < now;
-      }),
-    [events, now],
-  );
-
   const approvedReviews = useMemo(() => reviews.filter((review) => review.approved), [reviews]);
-  const totalVotes = pollOptions.reduce((sum, option) => sum + (option.votes || 0), 0);
 
-  const stats = {
-    upcoming: upcomingEvents.length,
-    past: pastEvents.length,
-    attendees: reservations.reduce((sum, item) => sum + (item.count ?? 0), 0),
-    reviews: approvedReviews.length,
-  };
+  const stats = useMemo(() => {
+    const attendees = reservations.reduce((total, item) => total + (item.count ?? 0), 0);
+    return {
+      upcoming: upcomingList.length,
+      past: pastList.length,
+      attendees,
+      reviews: approvedReviews.length,
+    };
+  }, [approvedReviews, pastList, reservations, upcomingList]);
+
+  const statsItems = useMemo(
+    () => [
+      {
+        id: 'upcoming',
+        label: 'Nadcházející akce',
+        value: stats.upcoming,
+        icon: '📅',
+      },
+      {
+        id: 'past',
+        label: 'Proběhlé večery',
+        value: stats.past,
+        icon: '🕰️',
+      },
+      {
+        id: 'attendees',
+        label: 'Účastníků celkem',
+        value: stats.attendees,
+        icon: '🧑‍🤝‍🧑',
+      },
+      {
+        id: 'reviews',
+        label: 'Recenzí od hráčů',
+        value: stats.reviews,
+        icon: '⭐',
+      },
+    ],
+    [stats.attendees, stats.past, stats.reviews, stats.upcoming],
+  );
+
+  const displayedEvents = useMemo(() => {
+    const source = eventTab === 'upcoming' ? upcomingList : pastList;
+    return source.slice(0, Math.max(1, eventLimit));
+  }, [eventTab, eventLimit, upcomingList, pastList]);
+
+  const hasMoreEvents = useMemo(() => {
+    const source = eventTab === 'upcoming' ? upcomingList : pastList;
+    return source.length > displayedEvents.length;
+  }, [displayedEvents.length, eventTab, pastList, upcomingList]);
 
   const marqueeImages = useMemo(() => {
-    const urls = new Set();
-    gallery.forEach((item) => {
-      if (item?.imageUrl) {
-        urls.add(item.imageUrl);
-      }
-    });
+    const seen = new Set();
+    const images = [];
+    const push = (url) => {
+      if (!url || seen.has(url)) return;
+      seen.add(url);
+      images.push(url);
+    };
+    gallery.forEach((item) => push(item.imageUrl));
     events.forEach((event) => {
-      (event.photos || []).forEach((photo) => {
-        if (photo) {
-          urls.add(photo);
-        }
-      });
+      (event.photos || []).forEach((url) => push(url));
     });
-    const list = Array.from(urls);
-    if (list.length === 0) return [];
-    return list.concat(list);
+    return images;
   }, [events, gallery]);
 
-  const handleCreateReservation = async (payload) => {
-    if (!firebaseReady) {
-      setReservations((prev) => [
-        ...prev,
-        { id: `local-${Date.now()}`, ...payload, createdAt: new Date() },
-      ]);
-      return;
-    }
-    await addDoc(collection(db, 'reservations'), {
-      ...payload,
-      createdAt: serverTimestamp(),
-    });
+  const totalVotes = useMemo(
+    () => pollOptions.reduce((total, option) => total + (option.votes || 0), 0),
+    [pollOptions],
+  );
+
+  const handleSmoothScroll = (event, targetId) => {
+    event.preventDefault();
+    const element = document.getElementById(targetId);
+    if (!element) return;
+    const offset = 80;
+    const top = element.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
   };
 
-  const handleVote = async (optionId) => {
-    if (!optionId) return;
-    if (!firebaseReady) {
-      setPollOptions((prev) =>
-        prev.map((option) =>
-          option.id === optionId
-            ? { ...option, votes: (option.votes || 0) + 1 }
-            : option,
-        ),
-      );
-      return;
-    }
-    try {
-      await updateDoc(doc(db, 'pollOptions', optionId), { votes: increment(1) });
-    } catch (err) {
-      alert(err.message || 'Hlasování se nepodařilo uložit.');
-    }
-  };
-
-  const handleSubmitReview = async ({ name, rating, message }) => {
-    if (!firebaseReady) {
-      setReviews((prev) => [
-        ...prev,
-        {
-          id: `local-${Date.now()}`,
-          name,
-          rating,
-          stars: rating,
-          message,
-          approved: true,
-          createdAt: new Date(),
-        },
-      ]);
-      return;
-    }
-    await addDoc(collection(db, 'reviews'), {
-      name,
-      rating,
-      stars: rating,
-      message,
-      approved: false,
-      createdAt: serverTimestamp(),
-    });
-  };
-
-  const handleOpenReservation = (eventId) => {
-    setSelectedEventId(eventId || '');
+  const handleOpenReservation = (eventId = '') => {
+    setSelectedEventId(eventId);
     setShowReservation(true);
   };
 
   const handleCloseReservation = () => {
     setShowReservation(false);
-    setSelectedEventId('');
   };
 
   const handleShowPhotos = (eventId, startIndex = 0) => {
-    const event = events.find((item) => item.id === eventId);
-    const photos = (event?.photos || []).filter(Boolean);
+    const eventItem = events.find((item) => item.id === eventId);
+    if (!eventItem || !(eventItem.photos?.length)) return;
+    setLightboxState({ open: true, photos: eventItem.photos, index: Math.max(0, startIndex) });
+  };
+
+  const handleOpenGallery = (index) => {
+    const photos = gallery.map((item) => item.imageUrl).filter(Boolean);
     if (!photos.length) return;
-    setLightboxState({ open: true, photos, index: startIndex });
+    const clampedIndex = Math.min(Math.max(index, 0), photos.length - 1);
+    setLightboxState({ open: true, photos, index: clampedIndex });
+  };
+
+  const handleCloseLightbox = () => {
+    setLightboxState((prev) => ({ ...prev, open: false }));
   };
 
   const handleNavigateLightbox = (nextIndex) => {
     setLightboxState((prev) => {
+      if (!prev.photos.length) return prev;
       const total = prev.photos.length;
-      if (!total) return prev;
-      const normalized = (nextIndex + total) % total;
+      const normalized = ((nextIndex % total) + total) % total;
       return { ...prev, index: normalized };
     });
   };
 
-  const handleCloseLightbox = () => {
-    setLightboxState({ open: false, photos: [], index: 0 });
+  const handleVote = async (optionId) => {
+    const option = pollOptions.find((item) => item.id === optionId);
+    if (!option) return;
+    try {
+      if (firebaseReady) {
+        await updateDoc(doc(db, 'pollOptions', optionId), { votes: increment(1) });
+      } else {
+        setPollOptions((prev) =>
+          prev.map((item) => (item.id === optionId ? { ...item, votes: (item.votes || 0) + 1 } : item)),
+        );
+      }
+    } catch (err) {
+      console.error('Hlasování selhalo', err);
+    }
+  };
+
+  const handleSubmitReview = async ({ name, rating, message }) => {
+    const reviewData = {
+      name,
+      stars: rating,
+      rating,
+      message,
+      approved: false,
+    };
+    if (firebaseReady) {
+      await addDoc(collection(db, 'reviews'), {
+        ...reviewData,
+        createdAt: serverTimestamp(),
+      });
+    } else {
+      setReviews((prev) => [
+        ...prev,
+        normalizeReview({
+          ...reviewData,
+          id: `preview-review-${Date.now()}`,
+          createdAt: new Date(),
+        }),
+      ]);
+    }
+  };
+
+  const handleCreateReservation = async (reservation) => {
+    const formspreePayload = {
+      _subject: `Rezervace: ${reservation.eventTitle}`,
+      type: 'reservation',
+      event: reservation.eventTitle,
+      name: reservation.name,
+      email: reservation.email,
+      phone: reservation.phone,
+      count: reservation.count,
+      guests: reservation.guests.join('; '),
+      note: reservation.note,
+      price: reservation.price ?? '',
+      gender: reservation.gender ?? '',
+      age: reservation.age ?? '',
+      status: reservation.status ?? '',
+      expectation: reservation.expectation ?? '',
+    };
+
+    try {
+      if (firebaseReady) {
+        await addDoc(collection(db, 'reservations'), {
+          ...reservation,
+          guests: reservation.guests,
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        setReservations((prev) => [
+          ...prev,
+          normalizeReservation({
+            ...reservation,
+            id: `preview-reservation-${Date.now()}`,
+            createdAt: new Date(),
+          }),
+        ]);
+      }
+    } catch (err) {
+      console.error('Rezervaci se nepodařilo uložit', err);
+      throw err;
+    } finally {
+      try {
+        await fetch('https://formspree.io/f/xovyawqv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formspreePayload),
+        });
+      } catch (err) {
+        console.warn('Formspree submit failed', err);
+      }
+    }
   };
 
   const handleAdminLogin = (event) => {
     event.preventDefault();
-    if (!ADMIN_PASSWORD) {
-      setAdminError('Není nastavené heslo admina (VITE_ADMIN_PASSWORD).');
-      return;
-    }
-    if (adminPassword === ADMIN_PASSWORD) {
+    if (adminPassword.trim() === ADMIN_PASSWORD) {
       setIsAdmin(true);
+      setShowAdminPrompt(false);
       setAdminPassword('');
       setAdminError('');
-      setShowAdminPrompt(false);
     } else {
-      setAdminError('Nesprávné heslo.');
+      setAdminError('Špatné heslo, zkus to prosím znovu.');
     }
   };
 
-  const handleSmoothScroll = (event, anchor) => {
-    event.preventDefault();
-    const target = document.getElementById(anchor);
-    if (!target) return;
-    const y = target.getBoundingClientRect().top + window.scrollY - 70;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  };
   return (
-    <div style={{ minHeight: '100vh' }}>
-      {!firebaseReady && (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px' }}>
-          <div className="pill" style={{ border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.05)', color: '#ffd166' }}>
+    <div className="bg-poznej min-h-screen text-white">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-4 pb-24 pt-10 md:px-8">
+        {!firebaseReady && (
+          <div className="rounded-3xl border border-amber-300/30 bg-amber-200/10 px-6 py-4 text-sm text-amber-200 shadow-lg shadow-black/30">
             Tento náhled běží bez propojení na Firebase. Data se ukládají pouze v rámci aktuální relace.
           </div>
-        </div>
-      )}
-      <header>
-        <div className="brand">
-          <div className="logo" aria-hidden="true">PH</div>
-          <div>
-            <h1>Poznej &amp; Hraj</h1>
-            <p className="lead">Zábavné večery plné her, kvízů a nových známostí — přijď, zahraj si, poznej lidi.</p>
-          </div>
-        </div>
-      </header>
-      <nav className="topnav">
-        <div className="topnav-inner">
-          <a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')}>O projektu</a>
-          <a href="#stats" onClick={(e) => handleSmoothScroll(e, 'stats')}>Statistiky</a>
-          <a href="#events" onClick={(e) => handleSmoothScroll(e, 'events')}>Akce</a>
-          <a href="#gallery" onClick={(e) => handleSmoothScroll(e, 'gallery')}>Galerie</a>
-          <a href="#poll" onClick={(e) => handleSmoothScroll(e, 'poll')}>Anketa</a>
-          <a href="#reviews" onClick={(e) => handleSmoothScroll(e, 'reviews')}>Recenze</a>
-          <a href="#crew" onClick={(e) => handleSmoothScroll(e, 'crew')}>Crew</a>
-        </div>
-      </nav>
-      <section className="hero-full" id="hero">
-        <div className="hero-inner">
-          <button
-            className="hero-cta"
-            type="button"
-            style={{ position: 'absolute', top: '16px', right: '16px' }}
-            onClick={() => handleOpenReservation('')}
+        )}
+        <header className="sticky top-6 z-40 flex flex-col gap-4">
+          <div
+            className={`flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 px-6 transition-all duration-300 backdrop-blur ${
+              navShrunk ? 'py-4 shadow-2xl shadow-black/40' : 'py-6 shadow-[0_25px_60px_rgba(7,16,34,0.65)]'
+            }`}
           >
-            Rezervuj místo 🔔 Kapacita se rychle plní
-          </button>
-          <div className="hero">
-            <h2>Místo, kde se lidé potkávají přirozeně</h2>
-            <p>Žádné trapné ticho. Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.</p>
-            <div className="tags">
-              {heroTags.map((tag) => (
-                <span key={tag.id} className="tag">
-                  {tag.label || tag.value || tag.text || ''}
-                </span>
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#00e5a8] text-xl font-bold text-[#071022] shadow-[0_15px_30px_rgba(0,229,168,0.35)]">
+                  PH
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.35em] text-white/40">Poznej &amp; Hraj</p>
+                  <h1 className="text-2xl font-semibold text-white md:text-3xl">Komunitní večery plné her a nových přátel</h1>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenReservation('')}
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-6 py-3 text-sm font-semibold text-[#071022] shadow-[0_15px_32px_rgba(0,229,168,0.35)] transition-transform hover:-translate-y-1"
+              >
+                Rezervovat místo
+              </button>
+            </div>
+          </div>
+          <nav
+            className={`flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-white/5 px-4 transition-all duration-300 backdrop-blur ${
+              navShrunk ? 'py-2 shadow-lg shadow-black/30' : 'py-3 shadow-xl shadow-black/30'
+            }`}
+          >
+            <div className="flex flex-wrap gap-2">
+              {navLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={`#${link.id}`}
+                  onClick={(event) => handleSmoothScroll(event, link.id)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                >
+                  {link.label}
+                </a>
               ))}
-              {heroTags.length === 0 && <span className="tag">🎮 Herní turnaje</span>}
             </div>
-            <div className="socials">
-              <div className="ico" title="Instagram">
-                <svg viewBox="0 0 24 24"><path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm4.5-.75a1 1 0 100 2 1 1 0 000-2z" /></svg>
+            <button
+              type="button"
+              onClick={() => (isAdmin ? setIsAdmin(false) : setShowAdminPrompt(true))}
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white/80 transition-all hover:border-a1/50 hover:text-white"
+            >
+              {isAdmin ? 'Odhlásit admina' : 'Admin panel'}
+            </button>
+          </nav>
+        </header>
+        <main className="flex flex-col gap-16">
+          <HeroSection heroTags={heroTags} onReserve={() => handleOpenReservation('')} />
+          <Reveal
+            as="section"
+            id="about"
+            className="card grid gap-8 lg:grid-cols-[1.1fr_0.9fr]"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="space-y-4">
+              <span className="text-sm uppercase tracking-[0.4em] text-white/40">O projektu</span>
+              <h2 className="text-3xl font-semibold text-white md:text-4xl">Hry jako nejlepší způsob, jak se poznat</h2>
+              <p className="text-base text-white/70">
+                <strong>Poznej &amp; Hraj</strong> vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze společné zážitky. Každý večer má svůj příběh, atmosféru a moderátory, kteří se postarají, aby se všichni cítili vítaně.
+              </p>
+              <p className="text-base text-white/70">
+                Kombinujeme kvízy, mini-hry, týmové výzvy i chill zóny. Díky promyšlenému flow se do akce zapojí i introverti a seznamování je přirozené a bez tlaku.
+              </p>
+            </div>
+            <div className="space-y-4 rounded-3xl border border-white/10 bg-[#0c1424]/70 p-6 shadow-glass">
+              <h3 className="text-lg font-semibold text-white">Co tě čeká?</h3>
+              <ul className="space-y-3 text-sm text-white/70">
+                <li className="flex items-start gap-3"><span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-a1/30 text-a1">🎲</span>Tematické večery s průvodci a vymazleným programem.</li>
+                <li className="flex items-start gap-3"><span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-a2/30 text-a2">🤝</span>Ice-breaker hry a týmové výzvy pro navázání nových kontaktů.</li>
+                <li className="flex items-start gap-3"><span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-white">📸</span>Fotokoutky, afterparty a komunitní skupiny pro další akce.</li>
+              </ul>
+            </div>
+          </Reveal>
+          <Reveal
+            as="section"
+            id="events"
+            className="card flex flex-col gap-10"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="space-y-5">
+              <div>
+                <p className="text-sm uppercase tracking-[0.4em] text-white/40">Místa máme aktuálně…</p>
+                <h2 className="text-3xl font-semibold text-white md:text-4xl">Přehled akcí a kapacit</h2>
               </div>
-              <div className="ico" title="Facebook">
-                <svg viewBox="0 0 24 24"><path d="M13 22V12h3l1-4h-4V6a1 1 0 011-1h3V1h-3a5 5 0 00-5 5v2H6v4h3v10h4z" /></svg>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {statsItems.map((item, index) => (
+                  <Reveal
+                    as="article"
+                    key={item.id}
+                    className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-glass"
+                    offset={24}
+                    duration={0.4}
+                    delay={index * 0.05}
+                    margin="-80px"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-a1/15 via-transparent to-a2/25 opacity-80" aria-hidden="true" />
+                    <div className="relative flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-[#0e1830]/80 text-xl text-a2 shadow-[0_12px_24px_rgba(0,229,168,0.25)]">
+                        <span aria-hidden="true">{item.icon}</span>
+                      </div>
+                      <div>
+                        <p className="text-3xl font-bold text-white drop-shadow-[0_0_18px_rgba(0,229,168,0.25)]">{item.value}</p>
+                        <p className="text-sm text-white/70">{item.label}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
               </div>
-              <div style={{ color: '#cfe3ff', opacity: 0.9, fontSize: '14px' }}>📸 Sleduj a sdílej momentky — označ <strong>@poznejahraj</strong></div>
             </div>
-          </div>
-          <div className="hero-video">
-            <iframe
-              title="Promo video"
-              src="https://www.youtube.com/embed/5jK8L3j4Z_4"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      </section>
-      <main>
-        <section className="card" id="about">
-          <div><strong style={{ fontSize: '16px' }}>O projektu</strong><div className="small-muted">Proč to děláme a jak to funguje</div></div>
-          <div style={{ height: '10px' }} />
-          <div style={{ color: '#b8c4d1', lineHeight: 1.6 }}>
-            <p><strong>Poznej &amp; Hraj</strong> vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce. Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.</p>
-            <p>Program vede tým moderátorů. Dáváme dohromady mix aktivit: kvízy, mini-hry, výzvy v týmech i úkoly pro dvojice. Díky řízenému programu se i introverti snadno zapojí a seznámení působí přirozeně.</p>
-          </div>
-        </section>
-        <section className="card" id="stats">
-          <div><strong style={{ fontSize: '16px' }}>Naše akce v číslech</strong><div className="small-muted">Aktualizuje se automaticky</div></div>
-          <div style={{ height: '12px' }} />
-          <div className="stats" id="statsBox">
-            <div className="stat"><div className="n" id="st-upcoming">{stats.upcoming}</div><div className="l">naplánovaných akcí</div></div>
-            <div className="stat"><div className="n" id="st-past">{stats.past}</div><div className="l">předešlých akcí</div></div>
-            <div className="stat"><div className="n" id="st-attendees">{stats.attendees}</div><div className="l">účastníků celkem</div></div>
-            <div className="stat"><div className="n" id="st-reviews">{stats.reviews}</div><div className="l">recenzí</div></div>
-          </div>
-        </section>
-        <div className="grid" id="events">
-          <section className="card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div><strong style={{ fontSize: '16px' }}>Nadcházející akce</strong><div className="small-muted">Vyber termín a rezervuj místo</div></div>
-              <div className="small-muted" id="events-count">{upcomingEvents.length} akcí</div>
-            </div>
-            <div style={{ height: '12px' }} />
-            <div className="events-list">
-              {upcomingEvents.length === 0 && (
-                <div className="review"><div className="text">Žádné akce zatím nejsou naplánovány.</div></div>
-              )}
-              {upcomingEvents.map((event) => {
-                const { day, month } = formatDateLabel(event.startDate);
-                const dateLabel = formatDateTime(event.startDate);
-                const taken = reservationTotals.get(event.id) ?? 0;
-                const cap = typeof event.capacity === 'number' ? event.capacity : 0;
-                const left = cap ? Math.max(0, cap - taken) : null;
-                return (
-                  <div className="event" key={event.id}>
-                    <div className="ev-left"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
-                    <div style={{ flex: 1 }}>
-                      <div className="ev-title">{event.title}</div>
-                      <div className="ev-desc">{event.description}</div>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                        <div className="pill">
-                          {dateLabel ? `📅 ${dateLabel}` : '📅 Termín bude upřesněn'}
-                          {event.place ? ` • 📍 ${event.place}` : ''}
+            <div className="space-y-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="inline-flex rounded-full border border-white/10 bg-[#0e1830]/70 p-1 text-sm font-semibold">
+                  {[
+                    { id: 'upcoming', label: 'Nadcházející' },
+                    { id: 'past', label: 'Minulé' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setEventTab(tab.id)}
+                      className={`rounded-full px-4 py-2 transition-all ${
+                        eventTab === tab.id ? 'bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-[#071022]' : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm text-white/60">
+                  {eventTab === 'upcoming'
+                    ? 'Rezervace se rychle plní – zajisti si místo co nejdřív.'
+                    : 'Prohlédni si atmosféru z minulých večerů a nech se inspirovat.'}
+                </p>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {displayedEvents.map((event, index) => {
+                  const { day, month } = formatDateLabel(event.startDate);
+                  const cover = event.photos?.[0] || gallery[0]?.imageUrl || '';
+                  const taken = reservationTotals.get(event.id) ?? 0;
+                  const capacity = typeof event.capacity === 'number' ? event.capacity : null;
+                  const available = capacity != null ? Math.max(0, capacity - taken) : null;
+                  return (
+                    <Reveal
+                      as="article"
+                      key={event.id}
+                      className="relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-glass"
+                      offset={28}
+                      duration={0.45}
+                      delay={index * 0.05}
+                      margin="-80px"
+                    >
+                      {cover && (
+                        <div className="relative h-44 overflow-hidden">
+                          <img src={cover} alt={event.title} className="h-full w-full object-cover" loading="lazy" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0b1220] via-transparent to-transparent" aria-hidden="true" />
                         </div>
-                        {typeof event.capacity === 'number' && <div className="pill">Kapacita: {event.capacity}</div>}
-                        {left != null && (
-                          <div className="pill" style={{ color: left > 0 ? '#6bf0c1' : '#ff7a7a' }}>
-                            Volná místa: {left} / {event.capacity}
+                      )}
+                      <div className="relative flex flex-col gap-4 p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-1 items-center gap-4">
+                            <div className="flex h-14 w-14 flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#0e1830]/80 text-sm">
+                              <span className="text-lg font-bold text-a2">{day}</span>
+                              <span className="text-xs uppercase text-white/60">{month}</span>
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-semibold text-white">{event.title}</h3>
+                              <p className="text-sm text-white/60">{event.description}</p>
+                            </div>
+                          </div>
+                          {event.photos?.length ? (
+                            <button
+                              type="button"
+                              onClick={() => handleShowPhotos(event.id, 0)}
+                              className="rounded-full border border-white/15 px-3 py-1 text-xs font-semibold text-white/70 transition-all hover:border-a2/50 hover:text-white"
+                            >
+                              Fotky
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
+                          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">
+                            📅 {formatDateTime(event.startDate) || 'Brzy oznámíme'}
+                          </span>
+                          {event.place && (
+                            <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">📍 {event.place}</span>
+                          )}
+                          {capacity != null && (
+                            <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Kapacita {capacity}</span>
+                          )}
+                          {available != null && (
+                            <span
+                              className={`rounded-full border px-3 py-1 ${
+                                available > 0 ? 'border-a2/30 bg-a2/10 text-a2' : 'border-rose-300/30 bg-rose-400/10 text-rose-200'
+                              }`}
+                            >
+                              Volná místa {available}
+                            </span>
+                          )}
+                          {event.price != null && (
+                            <span className="rounded-full border border-a1/30 bg-a1/10 px-3 py-1 text-a1 font-semibold">{event.price} Kč</span>
+                          )}
+                        </div>
+                        {!!event.tags?.length && (
+                          <div className="flex flex-wrap gap-2 text-xs text-white/60">
+                            {event.tags.map((tag) => (
+                              <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1">#{tag}</span>
+                            ))}
                           </div>
                         )}
-                        {event.price != null && <div className="pill" style={{ color: '#b4ffd9' }}>💳 {event.price} Kč</div>}
-                      </div>
-                    </div>
-                    <div className="ev-actions">
-                      <button className="btn-join" type="button" onClick={() => handleOpenReservation(event.id)} disabled={left != null && left <= 0}>
-                        {left != null && left <= 0 ? 'Obsazeno' : 'Rezervovat'}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ height: '18px' }} />
-            <div><strong style={{ fontSize: '16px' }}>Předešlé akce</strong><div className="small-muted">Fotodokumentace ke každé akci</div></div>
-            <div style={{ height: '12px' }} />
-            <div className="events-list">
-              {pastEvents.length === 0 && (
-                <div className="review"><div className="text">Archiv je zatím prázdný.</div></div>
-              )}
-              {pastEvents.map((event) => {
-                const { day, month } = formatDateLabel(event.startDate);
-                const dateLabel = formatDateTime(event.startDate);
-                return (
-                  <div className="event" key={event.id}>
-                    <div className="ev-left"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
-                    <div style={{ flex: 1 }}>
-                      <div className="ev-title">{event.title}</div>
-                      <div className="ev-desc">{event.description}</div>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                        <div className="pill">
-                          {dateLabel ? `📅 ${dateLabel}` : '📅 Termín bude upřesněn'}
-                          {event.place ? ` • 📍 ${event.place}` : ''}
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenReservation(event.id)}
+                            disabled={available === 0 && eventTab === 'upcoming'}
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-5 py-2 text-sm font-semibold text-[#071022] shadow-[0_12px_26px_rgba(0,229,168,0.3)] transition-transform hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {eventTab === 'upcoming' ? (available === 0 ? 'Obsazeno' : 'Rezervovat') : 'Chci další edici'}
+                          </button>
+                          {event.website && (
+                            <a href={event.website} className="text-sm text-white/60 hover:text-white" target="_blank" rel="noreferrer">
+                              Detail akce ↗
+                            </a>
+                          )}
                         </div>
-                        {event.price != null && <div className="pill" style={{ color: '#b4ffd9' }}>💳 {event.price} Kč</div>}
                       </div>
-                    </div>
-                    <div className="ev-actions">
-                      {(event.photos || []).length > 0 ? (
-                        <button className="btn-join" type="button" onClick={() => handleShowPhotos(event.id, 0)}>
-                          📸 Fotky z akce
-                        </button>
-                      ) : (
-                        <span className="pill">Bez fotek</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ height: '12px' }} />
-            <div className="card" id="gallery" style={{ marginTop: '8px' }}>
-              <strong>Naše momentky &amp; vaše #IG</strong>
-              <div className="small-muted">📸 Již brzy připojíme náš Instagram feed — sleduj nás na <strong>@poznejahraj</strong>.</div>
-              <div className="gallery" id="galleryGrid">
-                {gallery.map((item) => (
-                  <img key={item.id} src={item.imageUrl} alt={item.name} loading="lazy" />
-                ))}
-                {gallery.length === 0 && <div className="pill">Galerie bude doplněna.</div>}
-              </div>
-            </div>
-          </section>
-          <aside>
-            <div className="card" id="poll">
-              <strong>Anketa: Téma příštího večera</strong>
-              <div className="reviews" id="pollBox">
-                <div className="review"><div className="text"><strong>{pollQuestion}</strong></div></div>
-                {pollOptions.map((option) => {
-                  const ratio = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
-                  return (
-                    <div key={option.id} className="review" style={{ minHeight: 'auto' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                        <div>
-                          <div><strong>{option.title}</strong></div>
-                          <div className="small-muted">{option.description}</div>
-                        </div>
-                        <button className="btn-join" type="button" onClick={() => handleVote(option.id)}>Hlasovat</button>
-                      </div>
-                      <div style={{ marginTop: '8px', background: 'rgba(255,255,255,.06)', borderRadius: '8px', overflow: 'hidden' }}>
-                        <div style={{ height: '8px', width: `${ratio}%`, background: 'linear-gradient(90deg,#8b5cf6,#00e5a8)' }} />
-                      </div>
-                      <small className="small-muted">{option.votes} hlasů ({ratio}%)</small>
-                    </div>
+                    </Reveal>
                   );
                 })}
               </div>
+              {!displayedEvents.length && (
+                <p className="rounded-3xl border border-white/10 bg-white/5 px-6 py-5 text-sm text-white/60">
+                  Zatím žádné akce v této kategorii. Sleduj náš Instagram @poznejahraj a dozvíš se o dalších termínech jako první.
+                </p>
+              )}
+              {hasMoreEvents && (
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setEventLimit((prev) => prev + 2)}
+                    className="rounded-full border border-white/15 px-5 py-2 text-sm font-semibold text-white/70 transition-all hover:border-a1/40 hover:text-white"
+                  >
+                    Zobrazit další
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="card" id="reviews">
-              <strong>Recenze</strong>
-              <div className="small-muted">Co říkají účastníci</div>
-              <div className="reviews" id="reviewsList">
-                {approvedReviews.map((review) => (
-                  <div key={review.id} className="review">
-                    <div className="head">
-                      <div className="name">{review.name}</div>
-                      <div className="stars">{'★'.repeat(review.stars || review.rating || 5)}</div>
-                    </div>
-                    <div className="text">{review.message}</div>
-                  </div>
-                ))}
-                {approvedReviews.length === 0 && <div className="review">Zatím bez recenzí.</div>}
+          </Reveal>
+          <Reveal
+            as="section"
+            id="gallery"
+            className="card space-y-6"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <span className="text-sm uppercase tracking-[0.4em] text-white/40">Galerie</span>
+                <h2 className="text-3xl font-semibold text-white">Momentky z našich večerů</h2>
               </div>
-              <div style={{ height: '8px' }} />
-              <ReviewForm onSubmit={handleSubmitReview} disabled={false} />
+              <p className="text-sm text-white/60">Klikni na fotku a otevři lightbox. Přidej své snímky po přihlášení do adminu.</p>
             </div>
-          </aside>
-        </div>
-        <div className="marquee-wrap">
-          <div className="marquee" id="marquee">
-            {marqueeImages.map((src, index) => (
-              <img key={`${src}-${index}`} src={src} alt="momentka" loading="lazy" />
-            ))}
-            {marqueeImages.length === 0 && <span className="pill">Galerie bude doplněna.</span>}
-          </div>
-        </div>
-        <section className="card" id="crew">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div><strong style={{ fontSize: '16px' }}>The Crew</strong><div className="small-muted">Lidé, kteří za tím stojí</div></div>
-            <div className="small-muted" id="crew-count">{crew.length} členů</div>
-          </div>
-          <div style={{ height: '12px' }} />
-          <div className="crew" id="crewList">
-            {crew.map((member) => (
-              <article key={member.id} className="crew-card">
-                {member.photoUrl ? (
-                  <img className="crew-avatar" src={member.photoUrl} alt={member.name} />
-                ) : (
-                  <div className="crew-avatar" style={{ display: 'grid', placeItems: 'center', border: '2px dashed rgba(255,255,255,.2)', color: '#9aa6b2' }}>
-                    {member.name?.slice(0, 2).toUpperCase()}
+            {marqueeImages.length > 0 && (
+              <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
+                <div className="marquee-track flex gap-4 p-4">
+                  {marqueeImages.map((src, index) => (
+                    <img key={`${src}-${index}`} src={src} alt="momentka" className="h-32 w-auto rounded-2xl border border-white/10 object-cover" loading="lazy" />
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {gallery.map((item, index) => (
+                <Reveal
+                  as="button"
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleOpenGallery(index)}
+                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-glass"
+                  fromScale={0.96}
+                  offset={0}
+                  duration={0.4}
+                  delay={index * 0.03}
+                  margin="-80px"
+                >
+                  <img src={item.imageUrl} alt={item.name} className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b1220] via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <span className="absolute bottom-4 left-4 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">
+                    {item.name || 'momentka'}
+                  </span>
+                </Reveal>
+              ))}
+              {!gallery.length && (
+                <p className="rounded-3xl border border-dashed border-white/20 bg-white/5 px-6 py-5 text-sm text-white/60">
+                  Galerie se plní. Přidej svou fotku po přihlášení do adminu.
+                </p>
+              )}
+            </div>
+          </Reveal>
+          <Reveal
+            as="section"
+            id="community"
+            className="card space-y-8"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.4em] text-white/40">Komunita</p>
+                <h2 className="text-3xl font-semibold text-white">Hlasování a recenze od návštěvníků</h2>
+              </div>
+              <div className="inline-flex rounded-full border border-white/10 bg-[#0e1830]/70 p-1 text-sm font-semibold">
+                {[
+                  { id: 'poll', label: 'Anketa' },
+                  { id: 'reviews', label: 'Recenze' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setCommunityTab(tab.id)}
+                    className={`rounded-full px-4 py-2 transition-all ${
+                      communityTab === tab.id
+                        ? 'bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-[#071022]'
+                        : 'text-white/70 hover:text-white'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {communityTab === 'poll' ? (
+              <div className="space-y-5">
+                <div className="rounded-3xl border border-white/10 bg-[#0c1424]/70 p-6 shadow-glass">
+                  <h3 className="text-xl font-semibold text-white">{pollQuestion}</h3>
+                  <p className="mt-2 text-sm text-white/60">Celkem {totalVotes} hlasů</p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {pollOptions.map((option) => {
+                    const votes = option.votes || 0;
+                    const ratio = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
+                    return (
+                      <Reveal
+                        as="article"
+                        key={option.id}
+                        className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-glass"
+                        offset={20}
+                        duration={0.35}
+                        margin="-80px"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-a1/15 via-transparent to-a2/20 opacity-80" aria-hidden="true" />
+                        <div className="relative flex flex-col gap-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <h4 className="text-lg font-semibold text-white">{option.title}</h4>
+                              {option.description && <p className="text-sm text-white/60">{option.description}</p>}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleVote(option.id)}
+                              className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition-all hover:border-a2/40 hover:text-white"
+                            >
+                              Hlasovat
+                            </button>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8]" style={{ width: `${ratio}%` }} />
+                          </div>
+                          <p className="text-xs text-white/60">{votes} hlasů · {ratio}%</p>
+                        </div>
+                      </Reveal>
+                    );
+                  })}
+                  {!pollOptions.length && (
+                    <p className="rounded-3xl border border-dashed border-white/20 bg-white/5 px-6 py-5 text-sm text-white/60">
+                      Anketa bude brzy zveřejněna.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="space-y-4">
+                  {approvedReviews.map((review) => {
+                    const rating = review.stars || review.rating || 5;
+                    return (
+                      <div key={review.id} className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-glass">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-white">{review.name}</p>
+                            <p className="text-xs uppercase tracking-[0.3em] text-white/40">{review.createdAt ? new Date(review.createdAt).toLocaleDateString('cs-CZ') : 'Nová recenze'}</p>
+                          </div>
+                          <div className="flex items-center gap-1 text-a2">
+                            {Array.from({ length: 5 }).map((_, star) => (
+                              <span key={star} className={star < rating ? '' : 'text-white/30'}>
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="mt-3 text-sm text-white/70">{review.message}</p>
+                      </div>
+                    );
+                  })}
+                  {!approvedReviews.length && (
+                    <p className="rounded-3xl border border-dashed border-white/20 bg-white/5 px-6 py-5 text-sm text-white/60">
+                      Buď první, kdo napíše recenzi na Poznej &amp; Hraj!
+                    </p>
+                  )}
+                </div>
+                <div className="rounded-3xl border border-white/10 bg-[#0c1424]/70 p-6 shadow-glass">
+                  <h3 className="text-lg font-semibold text-white">Napiš vlastní zkušenost</h3>
+                  <ReviewForm onSubmit={handleSubmitReview} disabled={false} />
+                </div>
+              </div>
+            )}
+          </Reveal>
+          <Reveal
+            as="section"
+            id="crew"
+            className="card space-y-6"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <span className="text-sm uppercase tracking-[0.4em] text-white/40">The Crew</span>
+                <h2 className="text-3xl font-semibold text-white">Tým, který stojí za atmosférou</h2>
+              </div>
+              <p className="text-sm text-white/60">{crew.length} členů komunity připravuje herní večery na míru.</p>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {crew.map((member, index) => (
+                <Reveal
+                  as="article"
+                  key={member.id}
+                  className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-glass"
+                  offset={24}
+                  duration={0.4}
+                  delay={index * 0.05}
+                  margin="-80px"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-a1/15 via-transparent to-a2/20 opacity-80" aria-hidden="true" />
+                  <div className="relative flex flex-col items-start gap-4">
+                    {member.photoUrl ? (
+                      <img src={member.photoUrl} alt={member.name} className="h-20 w-20 rounded-full border border-white/10 object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-white/20 text-lg text-white/60">
+                        {member.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-lg font-semibold text-white">{member.name}</p>
+                      <p className="text-sm text-a2">{member.role}</p>
+                    </div>
+                    {member.description && <p className="text-sm text-white/70">{member.description}</p>}
                   </div>
-                )}
-                <div className="crew-name">{member.name}</div>
-                <div className="crew-role">{member.role}</div>
-                <div className="crew-desc">{member.description}</div>
-              </article>
-            ))}
-            {crew.length === 0 && <div className="pill">Tým představíme brzy.</div>}
-          </div>
-        </section>
-        <section className="contact-card" id="feedback">
-          <div className="contact-header">
-            <div className="contact-icon">💬</div>
-            <div className="contact-title">
-              <h3>Chceš, abychom uspořádali večer i pro tebe?</h3>
-              <p className="small-muted">Máš nápad, přání nebo zpětnou vazbu? Napiš nám – připravíme program na míru a rádi si poslechneme tvůj názor.</p>
+                </Reveal>
+              ))}
+              {!crew.length && (
+                <p className="rounded-3xl border border-dashed border-white/20 bg-white/5 px-6 py-5 text-sm text-white/60">
+                  Tým představíme brzy.
+                </p>
+              )}
             </div>
-          </div>
-          <div className="contact-form">
+          </Reveal>
+          <Reveal
+            as="section"
+            id="contact"
+            className="card grid gap-8 lg:grid-cols-[1.1fr_0.9fr]"
+            offset={40}
+            duration={0.6}
+            margin="-80px"
+          >
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.4em] text-white/40">Chceš vlastní akci?</p>
+              <h2 className="bg-gradient-to-r from-[#8b5cf6] via-[#9f7aff] to-[#00e5a8] bg-clip-text text-3xl font-semibold text-transparent md:text-4xl">
+                Chceš, abychom uspořádali herní večer i pro tebe?
+              </h2>
+              <p className="text-base text-white/70">
+                Napiš nám své nápady, přání nebo zpětnou vazbu. Připravíme program na míru a ozveme se ti s detaily.
+              </p>
+              <p className="text-sm text-white/60">
+                Preferuješ e-mail? Piš na <a href="mailto:poznejahraj@seznam.cz" className="text-a2 underline">poznejahraj@seznam.cz</a>.
+              </p>
+            </div>
             <FeedbackForm />
+          </Reveal>
+          <NewsletterSignup className="shadow-[0_30px_80px_rgba(7,16,34,0.55)]" />
+        </main>
+        <footer className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-6 py-6 text-sm text-white/60 shadow-2xl shadow-black/30">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <span>© {new Date().getFullYear()} Poznej &amp; Hraj. Vidíme se na dalším herním večeru!</span>
+            <span className="text-white/40">Made with ❤️ pro komunitu hráčů.</span>
           </div>
-        </section>
-      </main>
-      <footer>© {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!</footer>
-      <button
-        type="button"
-        onClick={() => (isAdmin ? setIsAdmin(false) : setShowAdminPrompt(true))}
-        className="admin-btn"
-        style={{ right: '18px', bottom: '18px' }}
-      >
-        {isAdmin ? 'Odhlásit admina' : 'Admin panel'}
-      </button>
+        </footer>
+      </div>
 
       {showAdminPrompt && !isAdmin && (
-        <div className="modal-back" style={{ display: 'flex' }}>
-          <form className="modal" style={{ maxWidth: '420px' }} onSubmit={handleAdminLogin}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020817]/80 px-4 py-8 backdrop-blur">
+          <form
+            onSubmit={handleAdminLogin}
+            className="relative w-full max-w-sm space-y-5 rounded-3xl border border-white/10 bg-[#0c1424] p-8 text-white shadow-2xl shadow-black/60"
+          >
             <button
               type="button"
               onClick={() => {
@@ -1906,34 +2341,41 @@ export default function App() {
                 setAdminPassword('');
                 setAdminError('');
               }}
-              style={{ position: 'sticky', top: 0, float: 'right', background: 'transparent', border: 'none', color: '#9aa6b2', cursor: 'pointer', zIndex: 2 }}
+              className="absolute right-4 top-4 text-white/50 transition hover:text-white"
             >
               ✕
             </button>
-            <h2>Admin přihlášení</h2>
-            <p className="small-muted">Zadej heslo pro vstup do administračního panelu.</p>
-            <label>Heslo
+            <h2 className="text-xl font-semibold text-white">Admin přihlášení</h2>
+            <p className="text-sm text-white/60">Zadej heslo pro vstup do administračního panelu.</p>
+            <label className="flex flex-col gap-2 text-sm text-white/70">
+              Heslo
               <input
                 type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="••••••••"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
               />
             </label>
-            {adminError && <div className="pill" style={{ color: '#ff7a7a', marginTop: '8px' }}>{adminError}</div>}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            {adminError && (
+              <p className="rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{adminError}</p>
+            )}
+            <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
-                className="btn-join"
                 onClick={() => {
                   setShowAdminPrompt(false);
                   setAdminPassword('');
                   setAdminError('');
                 }}
+                className="rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white/70 transition-all hover:border-white/40 hover:text-white"
               >
                 Zrušit
               </button>
-              <button className="btn-join" type="submit" style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>
+              <button
+                type="submit"
+                className="rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-5 py-2 text-sm font-semibold text-[#071022] shadow-[0_12px_26px_rgba(139,92,246,0.35)]"
+              >
                 Přihlásit
               </button>
             </div>
