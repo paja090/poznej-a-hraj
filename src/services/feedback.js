@@ -1,14 +1,24 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { db, storage, isFirebaseConfigured } from '../firebaseConfig.js';
+import { db, storage } from '../firebaseConfig.js';
 
-const defaultFormspree = 'https://formspree.io/f/xovyawqvv';
-const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT || defaultFormspree;
+function assertFirebaseConfig() {
+  const requiredKeys = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+  ];
+
+  const missing = requiredKeys.filter((key) => !import.meta.env[key]);
+  if (missing.length) {
+    throw new Error(
+      `Chybí Firebase konfigurace: ${missing.join(', ')}. Zkontroluj prosím .env soubor.`,
+    );
+  }
+}
 
 export async function sendFeedback(data, file) {
-  if (!isFirebaseConfigured || !db || !storage) {
-    throw new Error('Firebase není nakonfigurované. Vyplň prosím údaje ve souboru .env.');
-  }
+  assertFirebaseConfig();
 
   const payload = {
     name: data.name?.trim() || '',
@@ -31,22 +41,6 @@ export async function sendFeedback(data, file) {
 
   const feedbackCollection = collection(db, 'feedback');
   const documentRef = await addDoc(feedbackCollection, payload);
-
-  try {
-    await fetch(formspreeEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        _subject: 'Nová zpětná vazba – Poznej & Hraj',
-        ...payload,
-      }),
-    });
-  } catch (err) {
-    console.warn('Formspree notification failed', err);
-  }
 
   return { id: documentRef.id, ...payload };
 }

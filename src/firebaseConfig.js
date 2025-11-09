@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -12,24 +11,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
+const app = initializeApp(firebaseConfig);
 
-let app = null;
-let db = null;
-let storage = null;
-let auth = null;
-let googleProvider = null;
-
-if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  storage = getStorage(app);
-  auth = getAuth(app);
-  googleProvider = new GoogleAuthProvider();
-  googleProvider.setCustomParameters({ prompt: 'select_account' });
-} else {
-  console.warn('Firebase konfigurace nebyla nalezena. Funkce závislé na cloudu budou omezené.');
-}
-
-export { db, storage, auth, googleProvider, isFirebaseConfigured };
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 export default app;

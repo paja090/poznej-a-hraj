@@ -7,7 +7,7 @@ const initialForm = {
   message: '',
 };
 
-export default function FeedbackForm({ onSuccess } = {}) {
+export default function FeedbackForm() {
   const [form, setForm] = useState(initialForm);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,6 @@ export default function FeedbackForm({ onSuccess } = {}) {
       setForm(initialForm);
       setFile(null);
       event.target.reset();
-      onSuccess?.();
     } catch (err) {
       setError(err.message || 'Odeslání se nezdařilo. Zkus to prosím znovu.');
     } finally {

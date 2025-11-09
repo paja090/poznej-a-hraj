@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap');
 
-@import './styles/legacy.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,54 +33,5 @@
 
   .pill {
     @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4 py-1 font-medium text-white/75;
-  }
-
-  .shadow-glass {
-    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
-  }
-
-  .marquee-track {
-    animation: marquee 45s linear infinite;
-  }
-}
-
-@layer utilities {
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradientShift 12s ease-in-out infinite alternate;
-  }
-
-  .cta-pulse {
-    animation: ctaPulse 2.6s ease-in-out infinite;
-  }
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes ctaPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
-  100% {
-    transform: scale(1);
   }
 }
