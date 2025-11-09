@@ -41,140 +41,27 @@ function ensureDate(value) {
   return null;
 }
 
-function formatDateTime(value, withTime = true) {
+function formatDateTime(value) {
   const date = ensureDate(value);
   if (!date) return '';
-  const options = withTime
-    ? { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }
-    : { day: '2-digit', month: '2-digit', year: 'numeric' };
-  return date.toLocaleString('cs-CZ', options).replaceAll('.', '.');
+  return date
+    .toLocaleString('cs-CZ', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .replaceAll('.', '.');
 }
 
-function EventCard({ event, available, onReserve, onShowPhotos }) {
-  const eventDate = ensureDate(event.startDate);
-  const isArchive = eventDate ? eventDate < new Date() : false;
-  const day = eventDate ? eventDate.toLocaleDateString('cs-CZ', { day: '2-digit' }) : '';
-  const month = eventDate ? eventDate.toLocaleDateString('cs-CZ', { month: 'short' }) : '';
-
-  return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 backdrop-blur">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-white">{event.title}</h3>
-          {event.description && <p className="mt-1 text-sm text-white/70">{event.description}</p>}
-        </div>
-        <span className="rounded-full border border-a1/40 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-a1">
-          {isArchive ? 'Archiv' : 'Nadcházející'}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2 text-xs text-white/70">
-        {eventDate && <span className="pill">📅 {formatDateTime(eventDate)}</span>}
-        {event.place && <span className="pill">📍 {event.place}</span>}
-        {typeof event.capacity === 'number' && <span className="pill">Kapacita: {event.capacity}</span>}
-        {typeof available === 'number' && !isArchive && (
-          <span className={`pill ${available > 0 ? 'text-a2' : 'text-rose-300'}`}>
-            Volná místa: {Math.max(0, available)}
-          </span>
-        )}
-        {event.price ? <span className="pill text-[#b4ffd9]">💳 {event.price} Kč</span> : null}
-        {(event.tags || []).map((tag) => (
-          <span key={tag} className="pill text-white/60">
-            #{tag}
-          </span>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-3">
-        {!isArchive && (
-          <button
-            type="button"
-            onClick={() => onReserve(event.id)}
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 transition hover:border-a1/80 hover:text-white"
-            disabled={available !== undefined && available <= 0}
-          >
-            {available !== undefined && available <= 0 ? 'Obsazeno' : 'Rezervovat'}
-          </button>
-        )}
-        {isArchive && (event.photos || []).length > 0 && (
-          <button
-            type="button"
-            onClick={() => onShowPhotos(event.id, 0)}
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white transition hover:border-a1/60"
-          >
-            📸 Fotky z akce
-          </button>
-        )}
-      </div>
-      {isArchive && (!event.photos || event.photos.length === 0) && (
-        <p className="text-xs text-white/50">Fotky budou doplněny brzy.</p>
-      )}
-      <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-4 text-center text-xs text-white/50">
-        <span className="font-semibold text-white/70">{day}</span> · {month}
-      </div>
-    </article>
-  );
-}
-
-function PollOption({ option, totalVotes, onVote }) {
-  const ratio = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
-
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-inner">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="font-semibold text-white">{option.title}</p>
-          {option.description && <p className="text-sm text-white/60">{option.description}</p>}
-        </div>
-        <span className="text-sm font-semibold text-a2">{option.votes} hlasů</span>
-      </div>
-      <div className="mt-4 h-2 w-full rounded-full bg-white/10">
-        <div className="h-full rounded-full bg-gradient-to-r from-a1 to-a2" style={{ width: `${ratio}%` }} />
-      </div>
-      <div className="mt-4 flex items-center justify-between gap-4 text-xs text-white/60">
-        <span>{ratio}% hlasů</span>
-        <button
-          type="button"
-          onClick={() => onVote(option.id)}
-          className="rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-a1 transition hover:border-a1/70 hover:text-white"
-        >
-          Hlasovat
-        </button>
-      </div>
-    </div>
-  );
-}
-function Lightbox({ isOpen, photos, currentIndex, onClose, onNavigate }) {
-  if (!isOpen || !photos.length) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6">
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-6 top-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white"
-      >
-        Zavřít
-      </button>
-      <button
-        type="button"
-        onClick={() => onNavigate(currentIndex - 1)}
-        className="absolute left-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-2xl text-white"
-      >
-        ◀
-      </button>
-      <img
-        src={photos[currentIndex]}
-        alt="Event"
-        className="max-h-[80vh] max-w-5xl rounded-3xl border border-white/20 object-contain shadow-2xl"
-      />
-      <button
-        type="button"
-        onClick={() => onNavigate(currentIndex + 1)}
-        className="absolute right-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-2xl text-white"
-      >
-        ▶
-      </button>
-    </div>
-  );
+function formatDateLabel(value) {
+  const date = ensureDate(value);
+  if (!date) return { day: '', month: '' };
+  return {
+    day: date.toLocaleDateString('cs-CZ', { day: '2-digit' }),
+    month: date.toLocaleDateString('cs-CZ', { month: 'short' }),
+  };
 }
 
 function ReservationModal({
@@ -335,46 +222,39 @@ function ReservationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
-      <div className="relative w-full max-w-3xl rounded-3xl border border-white/15 bg-gradient-to-b from-[#071022] to-[#0b1220] p-8 shadow-2xl">
+    <div className="modal-back" style={{ display: 'flex' }}>
+      <div className="modal">
         <button
-          type="button"
           onClick={onClose}
-          className="absolute right-6 top-6 rounded-full border border-white/20 px-3 py-1 text-sm text-white/70 hover:text-white"
+          style={{ position: 'sticky', top: 0, float: 'right', background: 'transparent', border: 'none', color: '#9aa6b2', cursor: 'pointer', zIndex: 2 }}
         >
-          ✕ Zavřít
+          ✕
         </button>
-        <h2 className="text-2xl font-semibold text-white">Rezervace</h2>
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          {!isOnline && (
-            <p className="rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-              Tento náhled běží bez propojení na Firebase. Rezervace se ukládají pouze lokálně.
-            </p>
-          )}
-          <label className="flex flex-col gap-2 text-sm text-white/70">
-            Vyber akci
-            <select
-              value={form.eventId}
-              onChange={(e) => handleChange('eventId', e.target.value)}
-              className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-            >
-              <option value="">— vyber akci —</option>
-              {upcomingEvents.map((eventItem) => {
-                const taken = reservationTotals.get(eventItem.id) ?? 0;
-                const hasCapacity = typeof eventItem.capacity === 'number';
-                const capacity = hasCapacity ? eventItem.capacity : null;
-                const left = hasCapacity ? capacity - taken : Infinity;
-                const capacityText = hasCapacity ? `${Math.max(0, left)}/${capacity}` : 'bez limitu';
-                return (
-                  <option key={eventItem.id} value={eventItem.id}>
-                    {eventItem.title} — {formatDateTime(eventItem.startDate)} ({capacityText})
-                  </option>
-                );
-              })}
-            </select>
-          </label>
+        <h2>Rezervace</h2>
+        {!isOnline && (
+          <div className="pill" style={{ border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.05)', color: '#ffd166', marginTop: '6px' }}>
+            Tento náhled běží bez propojení na Firebase. Rezervace se ukládají pouze v rámci relace.
+          </div>
+        )}
+        <form onSubmit={handleSubmit}>
+          <label>Vyber událost</label>
+          <select value={form.eventId} onChange={(e) => handleChange('eventId', e.target.value)}>
+            <option value="">— vyber akci —</option>
+            {upcomingEvents.map((eventItem) => {
+              const taken = reservationTotals.get(eventItem.id) ?? 0;
+              const hasCapacity = typeof eventItem.capacity === 'number';
+              const capacity = hasCapacity ? eventItem.capacity : null;
+              const left = hasCapacity ? capacity - taken : Infinity;
+              const capacityText = hasCapacity ? `${Math.max(0, left)}/${capacity}` : 'bez limitu';
+              return (
+                <option key={eventItem.id} value={eventItem.id}>
+                  {eventItem.title} — {formatDateTime(eventItem.startDate)} ({capacityText})
+                </option>
+              );
+            })}
+          </select>
           {selectedEvent && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
+            <div className="pill" style={{ marginTop: '8px', border: '1px solid rgba(255,255,255,.12)', background: 'rgba(255,255,255,.04)', color: '#cfe3ff' }}>
               📅 {formatDateTime(selectedEvent.startDate)}
               {selectedEvent.place ? ` • 📍 ${selectedEvent.place}` : ''}
               {selectedEvent.price ? ` • 💳 ${selectedEvent.price} Kč` : ''}
@@ -383,153 +263,80 @@ function ReservationModal({
                 : ' • Kapacita: bez omezení'}
             </div>
           )}
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Jméno a příjmení
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                required
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              E-mail
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                required
-              />
-            </label>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Telefon
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Pohlaví
-              <select
-                value={form.gender}
-                onChange={(e) => handleChange('gender', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              >
+          <label>Jméno a příjmení
+            <input type="text" value={form.name} onChange={(e) => handleChange('name', e.target.value)} required />
+          </label>
+          <label>E-mail
+            <input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} required />
+          </label>
+          <label>Telefon
+            <input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} />
+          </label>
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
+            <div>
+              <label>Pohlaví</label>
+              <select value={form.gender} onChange={(e) => handleChange('gender', e.target.value)}>
                 <option value="">— vyber —</option>
                 <option value="muž">Kluk / muž</option>
                 <option value="žena">Holka / žena</option>
                 <option value="jiné">Jiné / neuvádět</option>
               </select>
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Věk
-              <select
-                value={form.age}
-                onChange={(e) => handleChange('age', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              >
-                <option value="">— vyber —</option>
-                <option value="18–22">18–22</option>
-                <option value="23–27">23–27</option>
-                <option value="28–32">28–32</option>
-                <option value="33–37">33–37</option>
-                <option value="38–45">38–45</option>
-                <option value="46+">46+</option>
-              </select>
-            </label>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Stav
-              <select
-                value={form.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              >
-                <option value="">— vyber —</option>
-                <option value="nezadaný/á">nezadaný/á</option>
-                <option value="zadaný/á">zadaný/á</option>
-                <option value="je to složité">je to složité</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Počet osob
-              <select
-                value={form.count}
-                onChange={(e) => handleChange('count', Number(e.target.value))}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              >
-                {[1, 2, 3, 4, 5, 6].map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {guestInputs.length > 0 && (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-4">
-              <p className="text-sm font-semibold text-white">Jména hostů</p>
-              <div className="mt-4 grid gap-3">
-                {guestInputs.map((index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    value={form.guests[index] ?? ''}
-                    onChange={(e) => handleGuestChange(index, e.target.value)}
-                    placeholder={`Jméno hosta ${index + 1}`}
-                    className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                  />
-                ))}
-              </div>
             </div>
-          )}
-          <label className="flex flex-col gap-2 text-sm text-white/70">
-            Očekávání od akce
-            <textarea
-              rows={3}
-              value={form.expectation}
-              onChange={(e) => handleChange('expectation', e.target.value)}
-              className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-            />
+            <div>
+              <label>Věk</label>
+              <select value={form.age} onChange={(e) => handleChange('age', e.target.value)}>
+                <option value="">— vyber —</option>
+                <option>18–22</option>
+                <option>23–27</option>
+                <option>28–32</option>
+                <option>33–37</option>
+                <option>38–45</option>
+                <option>46+</option>
+              </select>
+            </div>
+            <div>
+              <label>Stav</label>
+              <select value={form.status} onChange={(e) => handleChange('status', e.target.value)}>
+                <option value="">— vyber —</option>
+                <option>nezadaný/á</option>
+                <option>zadaný/á</option>
+                <option>je to složité</option>
+              </select>
+            </div>
+          </div>
+          <label style={{ marginTop: '8px' }}>Očekávání od akce (co tě láká?)
+            <textarea rows={3} value={form.expectation} onChange={(e) => handleChange('expectation', e.target.value)} />
           </label>
-          <label className="flex flex-col gap-2 text-sm text-white/70">
-            Poznámka
-            <textarea
-              rows={3}
-              value={form.note}
-              onChange={(e) => handleChange('note', e.target.value)}
-              className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-            />
+          <label style={{ marginTop: '10px' }}>Počet osob
+            <select value={form.count} onChange={(e) => handleChange('count', Number(e.target.value))}>
+              {[1, 2, 3, 4].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </label>
-          {error && <p className="text-sm text-rose-300">{error}</p>}
-          {successMessage && (
-            <p className="rounded-2xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">{successMessage}</p>
-          )}
-          <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
-            <span>
-              Dotazy? Piš na <a className="text-a2 underline" href="mailto:poznejahraj@seznam.cz">poznejahraj@seznam.cz</a>
-            </span>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white/70 hover:border-white/40 hover:text-white"
-              >
-                Zavřít
+          <div className="guests-list">
+            {guestInputs.map((index) => (
+              <div key={index} className="ghost">
+                <label>Jméno hosta {index + 1}
+                  <input type="text" value={form.guests[index] || ''} onChange={(e) => handleGuestChange(index, e.target.value)} />
+                </label>
+              </div>
+            ))}
+          </div>
+          <label>Poznámka
+            <textarea rows={3} value={form.note} onChange={(e) => handleChange('note', e.target.value)} />
+          </label>
+          {error && <div className="pill" style={{ color: '#ffb4d0', marginTop: '10px' }}>{error}</div>}
+          {successMessage && <div className="pill" style={{ color: '#6bf0c1', marginTop: '10px' }}>{successMessage}</div>}
+          <div className="confirm">
+            <div className="small-muted">Dotazy? Piš na <a href="mailto:poznejahraj@seznam.cz">poznejahraj@seznam.cz</a></div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn-join" type="button" onClick={onClose} disabled={submitting}>
+                Zrušit
               </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-              >
+              <button className="btn-join" type="submit" disabled={submitting} style={{ borderColor: '#38bdf8', color: '#38bdf8' }}>
                 {submitting ? 'Odesílám…' : 'Odeslat rezervaci'}
               </button>
             </div>
@@ -539,7 +346,29 @@ function ReservationModal({
     </div>
   );
 }
+
+function Lightbox({ isOpen, photos, currentIndex, onClose, onNavigate }) {
+  if (!isOpen || !photos.length) return null;
+
+  return (
+    <div className="lightbox" style={{ display: 'flex' }}>
+      <button className="icon-btn" onClick={() => onNavigate(currentIndex - 1)} style={{ position: 'absolute', left: '24px' }}>
+        ◀
+      </button>
+      <img src={photos[currentIndex]} alt="event" />
+      <button className="icon-btn" onClick={() => onNavigate(currentIndex + 1)} style={{ position: 'absolute', right: '24px' }}>
+        ▶
+      </button>
+      <div className="controls">
+        <button className="icon-btn" onClick={onClose}>
+          Zavřít
+        </button>
+      </div>
+    </div>
+  );
+}
 function AdminPanel({
+  isOpen,
   onClose,
   events,
   reservations,
@@ -573,8 +402,19 @@ function AdminPanel({
     setQuestion(pollQuestion || 'Jaké téma chcete příště?');
   }, [pollQuestion]);
 
+  if (!isOpen) return null;
+
+  const requireOnline = () => {
+    if (!isOnline || !db) {
+      alert('Tato akce vyžaduje nastavení Firebase (.env konfiguraci).');
+      return true;
+    }
+    return false;
+  };
+
   const handleCreateEvent = async (event) => {
     event.preventDefault();
+    if (requireOnline()) return;
     setUploadingEvent(true);
     try {
       if (!eventForm.title || !eventForm.when) {
@@ -583,10 +423,6 @@ function AdminPanel({
       const parsedDate = new Date(eventForm.when);
       if (Number.isNaN(parsedDate.getTime())) {
         throw new Error('Datum nemá správný formát.');
-      }
-
-      if (!isOnline || !db) {
-        throw new Error('Pro správu akcí nastav Firebase konfiguraci (.env soubor).');
       }
 
       const docRef = await addDoc(collection(db, 'events'), {
@@ -635,20 +471,15 @@ function AdminPanel({
 
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Opravdu smazat akci?')) return;
-    if (!isOnline || !db) {
-      alert('Smazání akce je dostupné až po propojení na Firebase.');
-      return;
-    }
+    if (requireOnline()) return;
     await deleteDoc(doc(db, 'events', eventId));
   };
 
   const handleGalleryUpload = async (file) => {
     if (!file) return;
+    if (requireOnline()) return;
     setUploadingGallery(true);
     try {
-      if (!isOnline || !db || !storage) {
-        throw new Error('Nahrávání fotek vyžaduje nastavení Firebase Storage.');
-      }
       const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
       const storageRef = ref(storage, `gallery/${safeName}`);
       const uploaded = await uploadBytes(storageRef, file);
@@ -668,10 +499,7 @@ function AdminPanel({
 
   const handleDeleteGallery = async (item) => {
     if (!window.confirm('Smazat fotku?')) return;
-    if (!isOnline || !db) {
-      alert('Smazání fotky vyžaduje aktivní Firebase konfiguraci.');
-      return;
-    }
+    if (requireOnline()) return;
     await deleteDoc(doc(db, 'gallery', item.id));
     if (item.storagePath) {
       try {
@@ -688,11 +516,9 @@ function AdminPanel({
     const title = formData.get('title')?.toString().trim();
     const description = formData.get('description')?.toString().trim();
     if (!title) return;
+    if (requireOnline()) return;
     setPollLoading(true);
     try {
-      if (!isOnline || !db) {
-        throw new Error('Správa ankety vyžaduje propojení na Firebase.');
-      }
       await addDoc(collection(db, 'pollOptions'), {
         title,
         description: description || '',
@@ -701,46 +527,34 @@ function AdminPanel({
       });
       event.currentTarget.reset();
     } catch (err) {
-      alert(err.message || 'Nepodařilo se přidat možnost.');
+      alert(err.message || 'Nepodařilo se uložit možnost.');
     } finally {
       setPollLoading(false);
     }
   };
 
-  const handleDeletePollOption = async (id) => {
+  const handleDeletePollOption = async (optionId) => {
     if (!window.confirm('Smazat možnost ankety?')) return;
-    if (!isOnline || !db) {
-      alert('Smazání možnosti vyžaduje aktivní Firebase.');
-      return;
-    }
-    await deleteDoc(doc(db, 'pollOptions', id));
+    if (requireOnline()) return;
+    await deleteDoc(doc(db, 'pollOptions', optionId));
   };
 
-  const handleResetPollVotes = async () => {
-    if (!window.confirm('Vynulovat všechny hlasy?')) return;
-    setPollLoading(true);
-    try {
-      if (!isOnline || !db) {
-        throw new Error('Reset hlasů vyžaduje propojení na Firebase.');
-      }
-      await Promise.all(pollOptions.map((option) => updateDoc(doc(db, 'pollOptions', option.id), { votes: 0 })));
-    } catch (err) {
-      alert(err.message || 'Nepodařilo se vynulovat hlasy.');
-    } finally {
-      setPollLoading(false);
-    }
+  const handleResetVotes = async () => {
+    if (!window.confirm('Vynulovat hlasy?')) return;
+    if (requireOnline()) return;
+    const batchRef = collection(db, 'pollOptions');
+    await Promise.all(
+      pollOptions.map((option) => updateDoc(doc(batchRef, option.id), { votes: 0 })),
+    );
   };
 
-  const handleSaveQuestion = async (event) => {
-    event.preventDefault();
+  const handleSaveQuestion = async () => {
+    if (requireOnline()) return;
     setSavingQuestion(true);
     try {
-      if (!isOnline || !db) {
-        throw new Error('Uložení otázky vyžaduje aktivní Firebase.');
-      }
       await setDoc(doc(db, 'poll', 'settings'), { question }, { merge: true });
     } catch (err) {
-      alert(err.message || 'Dotaz ankety se nepodařilo uložit.');
+      alert(err.message || 'Otázku se nepodařilo uložit.');
     } finally {
       setSavingQuestion(false);
     }
@@ -748,39 +562,37 @@ function AdminPanel({
 
   const handleAddHeroTag = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const label = formData.get('label')?.toString().trim();
-    if (!label) return;
-    if (!isOnline || !db) {
-      alert('Přidání tagu je dostupné až po propojení Firebase.');
-      return;
+    const value = new FormData(event.currentTarget).get('tag')?.toString().trim();
+    if (!value) return;
+    if (requireOnline()) return;
+    try {
+      await addDoc(collection(db, 'heroTags'), {
+        label: value,
+        createdAt: serverTimestamp(),
+      });
+      event.currentTarget.reset();
+    } catch (err) {
+      alert(err.message || 'Tag se nepodařilo uložit.');
     }
-    await addDoc(collection(db, 'heroTags'), { label, createdAt: serverTimestamp() });
-    event.currentTarget.reset();
   };
 
-  const handleDeleteHeroTag = async (id) => {
-    if (!isOnline || !db) {
-      alert('Smazání tagu je dostupné až po propojení Firebase.');
-      return;
-    }
-    await deleteDoc(doc(db, 'heroTags', id));
+  const handleDeleteHeroTag = async (tagId) => {
+    if (!window.confirm('Smazat tag?')) return;
+    if (requireOnline()) return;
+    await deleteDoc(doc(db, 'heroTags', tagId));
   };
 
-  const handleAddCrewMember = async (event) => {
+  const handleAddCrew = async (event) => {
     event.preventDefault();
     if (!crewDraft.name || !crewDraft.role) {
       alert('Vyplň jméno i roli.');
       return;
     }
-    if (!isOnline || !db) {
-      alert('Správa týmu je dostupná až po propojení Firebase.');
-      return;
-    }
+    if (requireOnline()) return;
     setCrewSaving(true);
     try {
       let photoUrl = '';
-      let storagePath;
+      let storagePath = '';
       if (crewDraft.file) {
         const safeName = `${Date.now()}_${crewDraft.file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
         const storageRef = ref(storage, `crew/${safeName}`);
@@ -793,490 +605,312 @@ function AdminPanel({
         role: crewDraft.role,
         description: crewDraft.description,
         photoUrl,
-        storagePath: storagePath || '',
+        storagePath,
         createdAt: serverTimestamp(),
       });
       setCrewDraft({ name: '', role: '', description: '', file: null });
     } catch (err) {
-      alert(err.message || 'Nepodařilo se uložit člena týmu.');
+      alert(err.message || 'Člena se nepodařilo uložit.');
     } finally {
       setCrewSaving(false);
     }
   };
 
-  const handleDeleteCrewMember = async (member) => {
-    if (!window.confirm('Smazat člena týmu?')) return;
-    if (!isOnline || !db) {
-      alert('Smazání člena je dostupné až po propojení Firebase.');
-      return;
-    }
+  const handleDeleteCrew = async (member) => {
+    if (!window.confirm('Smazat člena?')) return;
+    if (requireOnline()) return;
     await deleteDoc(doc(db, 'crew', member.id));
     if (member.storagePath) {
       try {
         await deleteObject(ref(storage, member.storagePath));
       } catch (err) {
-        console.warn('Nelze smazat fotku z úložiště', err);
+        console.warn('Nelze smazat obrázek člena', err);
       }
     }
   };
 
-  const handleReviewApproval = async (review, approved) => {
-    if (!isOnline || !db) {
-      alert('Schvalování recenzí vyžaduje propojení na Firebase.');
-      return;
-    }
-    await updateDoc(doc(db, 'reviews', review.id), { approved });
+  const handleToggleReview = async (review) => {
+    if (requireOnline()) return;
+    await updateDoc(doc(db, 'reviews', review.id), { approved: !review.approved });
   };
 
   const handleDeleteReview = async (review) => {
     if (!window.confirm('Smazat recenzi?')) return;
-    if (!isOnline || !db) {
-      alert('Smazání recenze vyžaduje propojení na Firebase.');
-      return;
-    }
+    if (requireOnline()) return;
     await deleteDoc(doc(db, 'reviews', review.id));
   };
 
+  const handleExportReservations = () => {
+    if (!reservations.length) {
+      alert('Žádné rezervace k exportu.');
+      return;
+    }
+    const header = ['createdAt', 'eventTitle', 'name', 'email', 'phone', 'gender', 'age', 'status', 'expectation', 'count', 'price', 'guests', 'note'];
+    const csv = [header.join(',')]
+      .concat(
+        reservations.map((item) =>
+          [
+            JSON.stringify(item.createdAt),
+            JSON.stringify(item.eventTitle || ''),
+            JSON.stringify(item.name || ''),
+            JSON.stringify(item.email || ''),
+            JSON.stringify(item.phone || ''),
+            JSON.stringify(item.gender || ''),
+            JSON.stringify(item.age || ''),
+            JSON.stringify(item.status || ''),
+            JSON.stringify(item.expectation || ''),
+            JSON.stringify(item.count ?? 0),
+            JSON.stringify(item.price ?? ''),
+            JSON.stringify((item.guests || []).join('; ')),
+            JSON.stringify(item.note || ''),
+          ].join(','),
+        ),
+      )
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'poznej_a_hraj_reservations.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-6">
-      <div className="relative mx-auto max-w-5xl rounded-3xl border border-white/15 bg-[#071022] p-8 shadow-2xl">
+    <div className="modal-back" style={{ display: 'flex', zIndex: 320 }}>
+      <div className="modal">
         <button
-          type="button"
           onClick={onClose}
-          className="absolute right-6 top-6 rounded-full border border-white/20 px-3 py-1 text-sm text-white/70 hover:text-white"
+          style={{ position: 'sticky', top: 0, float: 'right', background: 'transparent', border: 'none', color: '#9aa6b2', cursor: 'pointer', zIndex: 2 }}
         >
-          ✕ Zavřít panel
+          ✕
         </button>
-        <h2 className="text-3xl font-semibold text-white">Admin panel</h2>
-        <p className="mt-2 text-sm text-white/60">Spravuj akce, galerii, anketu, tým i recenze v reálném čase.</p>
+        <h2>Admin panel</h2>
         {!isOnline && (
-          <div className="mt-4 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-100">
-            Pro plné úpravy obsahu je potřeba doplnit Firebase konfiguraci (.env). Níže vidíš pouze ukázková data.
+          <div className="pill" style={{ border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.05)', color: '#ffd166', marginBottom: '10px' }}>
+            Připoj Firebase pro plnohodnotnou správu obsahu.
           </div>
         )}
-
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Přidat akci</h3>
-          <form className="grid gap-4" onSubmit={handleCreateEvent}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Název
-                <input
-                  type="text"
-                  value={eventForm.title}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, title: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                  required
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Datum a čas
-                <input
-                  type="datetime-local"
-                  value={eventForm.when}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, when: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                  required
-                />
-              </label>
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Přidat akci</strong>
+          <form id="createForm" onSubmit={handleCreateEvent}>
+            <label>Název<input value={eventForm.title} onChange={(e) => setEventForm((prev) => ({ ...prev, title: e.target.value }))} required /></label>
+            <label>Datum (YYYY-MM-DD HH:MM)<input value={eventForm.when} onChange={(e) => setEventForm((prev) => ({ ...prev, when: e.target.value }))} placeholder="2025-11-20 19:00" required /></label>
+            <label>Místo<input value={eventForm.place} onChange={(e) => setEventForm((prev) => ({ ...prev, place: e.target.value }))} /></label>
+            <label>Popis<input value={eventForm.description} onChange={(e) => setEventForm((prev) => ({ ...prev, description: e.target.value }))} /></label>
+            <label>Kapacita<input type="number" value={eventForm.capacity} onChange={(e) => setEventForm((prev) => ({ ...prev, capacity: e.target.value }))} /></label>
+            <label>Cena (Kč – volit.)<input type="number" value={eventForm.price} onChange={(e) => setEventForm((prev) => ({ ...prev, price: e.target.value }))} /></label>
+            <label>Tagy (čárkou oddělené)<input value={eventForm.tags} onChange={(e) => setEventForm((prev) => ({ ...prev, tags: e.target.value }))} /></label>
+            <label>Fotky akce (až 5)<input type="file" accept="image/*" multiple onChange={(e) => setEventForm((prev) => ({ ...prev, files: Array.from(e.target.files || []).slice(0, 5) }))} /></label>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+              <button className="btn-join" type="submit" style={{ borderColor: '#38bdf8', color: '#38bdf8' }} disabled={uploadingEvent}>
+                {uploadingEvent ? 'Ukládám…' : 'Uložit akci'}
+              </button>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Místo
-                <input
-                  type="text"
-                  value={eventForm.place}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, place: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Kapacita
-                <input
-                  type="number"
-                  value={eventForm.capacity}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, capacity: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                />
-              </label>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Cena (Kč)
-                <input
-                  type="number"
-                  value={eventForm.price}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, price: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-sm text-white/70">
-                Tagy (čárkou)
-                <input
-                  type="text"
-                  value={eventForm.tags}
-                  onChange={(e) => setEventForm((prev) => ({ ...prev, tags: e.target.value }))}
-                  className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                  placeholder="turnaj, kvíz, hookah"
-                />
-              </label>
-            </div>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Popis
-              <textarea
-                rows={3}
-                value={eventForm.description}
-                onChange={(e) => setEventForm((prev) => ({ ...prev, description: e.target.value }))}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Fotky akce (max. 5)
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => setEventForm((prev) => ({ ...prev, files: Array.from(e.target.files ?? []).slice(0, 5) }))}
-                className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-white/70"
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={uploadingEvent || !isOnline}
-              className="self-start bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {uploadingEvent ? 'Ukládám…' : 'Uložit akci'}
-            </button>
           </form>
-          <div className="space-y-3">
-            <h4 className="text-lg font-semibold text-white">Aktivní akce</h4>
-            <div className="grid gap-4">
-              {events.length === 0 && <p className="text-sm text-white/60">Zatím žádné akce.</p>}
-              {events.map((eventItem) => (
-                <div
-                  key={eventItem.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70"
-                >
-                  <div>
-                    <p className="font-semibold text-white">{eventItem.title}</p>
-                    <p>
-                      {formatDateTime(eventItem.startDate)} • {eventItem.place}
-                    </p>
+        </section>
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Seznam akcí</strong>
+          <div className="reviews" style={{ marginTop: '8px' }}>
+            {events.map((event) => {
+              const { day, month } = formatDateLabel(event.startDate);
+              return (
+                <div key={event.id} className="review">
+                  <div className="head">
+                    <div className="name">{event.title}</div>
+                    <span className="pill">{formatDateTime(event.startDate)}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteEvent(eventItem.id)}
-                    disabled={!isOnline}
-                    className="rounded-xl border border-rose-400/40 px-4 py-2 text-sm text-rose-300 hover:border-rose-300"
-                  >
-                    Smazat
-                  </button>
+                  <div className="text">
+                    {event.place ? `📍 ${event.place} • ` : ''}
+                    Kapacita: {event.capacity ?? '—'} | Cena: {event.price ?? '—'}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
+                    <div className="pill">{day} · {month}</div>
+                    <button className="btn-join" type="button" onClick={() => handleDeleteEvent(event.id)}>
+                      Smazat
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+            {events.length === 0 && <div className="review">Žádné akce zatím nejsou.</div>}
           </div>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Galerie</h3>
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Nahrát fotku
-              <input
-                type="file"
-                accept="image/*"
-                disabled={!isOnline}
-                onChange={(e) => handleGalleryUpload(e.target.files?.[0] ?? null)}
-                className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-white/70"
-              />
-            </label>
-            {uploadingGallery && <span className="text-sm text-white/60">Nahrávám…</span>}
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Galerie</strong>
+          <input type="file" accept="image/*" onChange={(e) => handleGalleryUpload(e.target.files?.[0] ?? null)} disabled={uploadingGallery} />
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px' }}>
             {gallery.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-sm text-white/70">
-                <img src={item.imageUrl} alt={item.name || 'Fotka'} className="h-32 w-full rounded-xl object-cover" />
-                <button
-                  type="button"
-                  onClick={() => handleDeleteGallery(item)}
-                  disabled={!isOnline}
-                  className="mt-3 w-full rounded-xl border border-white/20 px-3 py-2 text-xs text-white hover:border-rose-300 hover:text-rose-200"
-                >
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                <img src={item.imageUrl} alt={item.name} style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,.12)' }} />
+                <button className="btn-join" type="button" onClick={() => handleDeleteGallery(item)}>
                   Smazat
                 </button>
               </div>
             ))}
-            {gallery.length === 0 && <p className="text-sm text-white/60">Galerie je prázdná.</p>}
+            {gallery.length === 0 && <div className="pill">Galerie je prázdná.</div>}
           </div>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Anketa</h3>
-          <form className="flex flex-col gap-3 md:flex-row md:items-end" onSubmit={handleSaveQuestion}>
-            <label className="flex flex-1 flex-col gap-2 text-sm text-white/70">
-              Otázka ankety
-              <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={savingQuestion || !isOnline}
-              className="rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 hover:border-a1/60 hover:text-white"
-            >
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Anketa</strong>
+          <label>Otázka
+            <input value={question} onChange={(e) => setQuestion(e.target.value)} />
+          </label>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <button className="btn-join" type="button" onClick={handleSaveQuestion} disabled={savingQuestion}>
               {savingQuestion ? 'Ukládám…' : 'Uložit otázku'}
             </button>
-          </form>
-          <form className="grid gap-3 md:grid-cols-2" onSubmit={handleAddPollOption}>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Název možnosti
-              <input name="title" type="text" className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white" required />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Popis (volitelný)
-              <input name="description" type="text" className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white" />
-            </label>
-            <button
-              type="submit"
-              disabled={pollLoading || !isOnline}
-              className="bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60 md:col-span-2"
-            >
+            <button className="btn-join" type="button" onClick={handleResetVotes}>
+              Vynulovat hlasy
+            </button>
+          </div>
+          <form onSubmit={handleAddPollOption} style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label>Název možnosti<input name="title" type="text" /></label>
+            <label>Popis<input name="description" type="text" /></label>
+            <button className="btn-join" type="submit" disabled={pollLoading}>
               {pollLoading ? 'Přidávám…' : 'Přidat možnost'}
             </button>
           </form>
-          <div className="space-y-3">
+          <div className="reviews" style={{ marginTop: '10px' }}>
             {pollOptions.map((option) => (
-              <div
-                key={option.id}
-                className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70"
-              >
-                <div>
-                  <p className="font-semibold text-white">{option.title}</p>
-                  {option.description && <p>{option.description}</p>}
-                  <p className="text-xs text-white/50">{option.votes} hlasů</p>
+              <div key={option.id} className="review">
+                <div className="head">
+                  <div className="name">{option.title}</div>
+                  <div className="pill">{option.votes} hlasů</div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleDeletePollOption(option.id)}
-                  disabled={!isOnline}
-                  className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
-                >
+                <div className="text">{option.description}</div>
+                <button className="btn-join" type="button" style={{ marginTop: '8px' }} onClick={() => handleDeletePollOption(option.id)}>
                   Smazat
                 </button>
               </div>
             ))}
+            {pollOptions.length === 0 && <div className="review">Zatím žádné možnosti.</div>}
           </div>
-          <button
-            type="button"
-            disabled={pollLoading || !isOnline}
-            onClick={handleResetPollVotes}
-            className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white/70 hover:border-a1/60 hover:text-white"
-          >
-            Vynulovat hlasy
-          </button>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Hero tagy</h3>
-          <form className="flex flex-col gap-3 md:flex-row" onSubmit={handleAddHeroTag}>
-            <input
-              name="label"
-              type="text"
-              placeholder="např. 🎮 Herní turnaje"
-              className="flex-1 rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              required
-            />
-            <button
-              type="submit"
-              disabled={!isOnline}
-              className="rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 hover:border-a1/60 hover:text-white"
-            >
-              Přidat tag
-            </button>
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Hero tagy</strong>
+          <form onSubmit={handleAddHeroTag} style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            <input name="tag" type="text" placeholder="např. 🎮 Herní turnaje" style={{ flex: 1 }} />
+            <button className="btn-join" type="submit">Přidat</button>
           </form>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="reviews" style={{ marginTop: '8px' }}>
             {heroTags.map((tag) => (
-              <div
-                key={tag.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70"
-              >
+              <div key={tag.id} className="review" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{tag.label}</span>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteHeroTag(tag.id)}
-                  disabled={!isOnline}
-                  className="rounded-xl border border-white/20 px-3 py-1 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
-                >
+                <button className="btn-join" type="button" onClick={() => handleDeleteHeroTag(tag.id)}>
                   Smazat
                 </button>
               </div>
             ))}
-            {heroTags.length === 0 && <p className="text-sm text-white/60">Žádné tagy.</p>}
+            {heroTags.length === 0 && <div className="review">Žádné tagy.</div>}
           </div>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Tým</h3>
-          <form className="grid gap-4 md:grid-cols-2" onSubmit={handleAddCrewMember}>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Jméno
-              <input
-                type="text"
-                value={crewDraft.name}
-                onChange={(e) => setCrewDraft((prev) => ({ ...prev, name: e.target.value }))}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                required
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-white/70">
-              Role
-              <input
-                type="text"
-                value={crewDraft.role}
-                onChange={(e) => setCrewDraft((prev) => ({ ...prev, role: e.target.value }))}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-                required
-              />
-            </label>
-            <label className="md:col-span-2 flex flex-col gap-2 text-sm text-white/70">
-              Popis
-              <textarea
-                rows={3}
-                value={crewDraft.description}
-                onChange={(e) => setCrewDraft((prev) => ({ ...prev, description: e.target.value }))}
-                className="rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              />
-            </label>
-            <label className="md:col-span-2 flex flex-col gap-2 text-sm text-white/70">
-              Fotka
-              <input
-                type="file"
-                accept="image/*"
-                disabled={!isOnline}
-                onChange={(e) => setCrewDraft((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }))}
-                className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-white/70"
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={crewSaving || !isOnline}
-              className="md:col-span-2 bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg hover:-translate-y-1 transition-all px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-            >
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Správa týmu</strong>
+          <form onSubmit={handleAddCrew} style={{ display: 'grid', gap: '8px', marginTop: '8px' }}>
+            <label>Jméno<input value={crewDraft.name} onChange={(e) => setCrewDraft((prev) => ({ ...prev, name: e.target.value }))} /></label>
+            <label>Role<input value={crewDraft.role} onChange={(e) => setCrewDraft((prev) => ({ ...prev, role: e.target.value }))} /></label>
+            <label>Popis<input value={crewDraft.description} onChange={(e) => setCrewDraft((prev) => ({ ...prev, description: e.target.value }))} /></label>
+            <label>Fotka<input type="file" accept="image/*" onChange={(e) => setCrewDraft((prev) => ({ ...prev, file: e.target.files?.[0] ?? null }))} /></label>
+            <button className="btn-join" type="submit" disabled={crewSaving}>
               {crewSaving ? 'Ukládám…' : 'Přidat člena'}
             </button>
           </form>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="reviews" style={{ marginTop: '10px' }}>
             {crew.map((member) => (
-              <div key={member.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-                <div className="flex items-center gap-3">
-                  {member.photoUrl ? (
-                    <img src={member.photoUrl} alt={member.name} className="h-16 w-16 rounded-full object-cover" />
-                  ) : (
-                    <div className="grid h-16 w-16 place-items-center rounded-full border border-white/10 bg-white/10 text-lg font-semibold text-white">
-                      {member.name?.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <p className="font-semibold text-white">{member.name}</p>
-                    <p className="text-a2">{member.role}</p>
-                  </div>
+              <div key={member.id} className="review" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {member.photoUrl ? (
+                  <img src={member.photoUrl} alt={member.name} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(255,255,255,.12)' }} />
+                ) : (
+                  <div style={{ width: '80px', height: '60px', borderRadius: '8px', border: '1px dashed rgba(255,255,255,.2)', display: 'grid', placeItems: 'center' }}>Bez fotky</div>
+                )}
+                <div style={{ flex: 1 }}>
+                  <div className="name">{member.name}</div>
+                  <div className="text">{member.role}</div>
+                  <div className="text">{member.description}</div>
                 </div>
-                {member.description && <p className="mt-3 text-xs text-white/60">{member.description}</p>}
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCrewMember(member)}
-                  disabled={!isOnline}
-                  className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
-                >
-                  Smazat člena
+                <button className="btn-join" type="button" onClick={() => handleDeleteCrew(member)}>
+                  Smazat
                 </button>
               </div>
             ))}
-            {crew.length === 0 && <p className="text-sm text-white/60">Tým zatím nemá žádné členy.</p>}
+            {crew.length === 0 && <div className="review">Tým zatím představíme.</div>}
           </div>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Rezervace</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm text-white/70">
-              <thead className="text-xs uppercase text-white/50">
+        <section style={{ marginBottom: '18px' }}>
+          <strong>Rezervace</strong>
+          <div className="small-muted">Seznam přijatých rezervací</div>
+          <div style={{ overflowX: 'auto', marginTop: '8px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
                 <tr>
-                  <th className="px-3 py-2">Čas</th>
-                  <th className="px-3 py-2">Akce</th>
-                  <th className="px-3 py-2">Jméno</th>
-                  <th className="px-3 py-2">E-mail</th>
-                  <th className="px-3 py-2">Počet</th>
-                  <th className="px-3 py-2">Cena</th>
-                  <th className="px-3 py-2">Poznámka</th>
+                  <th>Čas</th>
+                  <th>Akce</th>
+                  <th>Jméno</th>
+                  <th>E-mail</th>
+                  <th>Počet</th>
+                  <th>Cena</th>
+                  <th>Poznámka</th>
                 </tr>
               </thead>
               <tbody>
                 {reservations.map((item) => (
-                  <tr key={item.id} className="border-t border-white/10">
-                    <td className="px-3 py-2">{formatDateTime(item.createdAt)}</td>
-                    <td className="px-3 py-2">{item.eventTitle}</td>
-                    <td className="px-3 py-2">{item.name}</td>
-                    <td className="px-3 py-2">{item.email}</td>
-                    <td className="px-3 py-2">{item.count}</td>
-                    <td className="px-3 py-2">{item.price ? `${item.price} Kč` : '-'}</td>
-                    <td className="px-3 py-2">{item.note || '-'}</td>
+                  <tr key={item.id}>
+                    <td>{item.createdAt ? new Date(item.createdAt).toLocaleString('cs-CZ') : ''}</td>
+                    <td>{item.eventTitle}</td>
+                    <td>{item.name}</td>
+                    <td>{item.email}</td>
+                    <td>{item.count}</td>
+                    <td>{item.price ?? ''}</td>
+                    <td>{item.note}</td>
                   </tr>
                 ))}
                 {reservations.length === 0 && (
                   <tr>
-                    <td className="px-3 py-4 text-center text-sm text-white/50" colSpan={7}>
-                      Žádné rezervace.
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '12px' }}>
+                      Zatím žádné rezervace.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+            <button className="btn-join" type="button" onClick={handleExportReservations}>
+              Export CSV
+            </button>
+            <button className="btn-join" type="button" onClick={onClose}>
+              Zavřít panel
+            </button>
+          </div>
         </section>
 
-        <section className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-xl font-semibold text-white">Recenze</h3>
-          <div className="space-y-4">
+        <section>
+          <strong>Recenze (správa)</strong>
+          <div className="reviews" style={{ marginTop: '8px' }}>
             {reviews.map((review) => (
-              <div key={review.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-white">{review.name}</p>
-                    <p className="text-xs text-white/50">{formatDateTime(review.createdAt)}</p>
-                  </div>
-                  <div className="text-yellow-300">{'★'.repeat(review.stars || 0)}</div>
+              <div key={review.id} className="review">
+                <div className="head">
+                  <div className="name">{review.name}</div>
+                  <div className="stars">{'★'.repeat(review.stars || review.rating || 5)}</div>
                 </div>
-                {(review.message ?? review.text) && (
-                  <p className="mt-3 text-sm text-white/70">{review.message ?? review.text}</p>
-                )}
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleReviewApproval(review, !review.approved)}
-                    disabled={!isOnline}
-                    className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-a1/60 hover:text-white"
-                  >
-                    {review.approved ? 'Zrušit schválení' : 'Schválit'}
+                <div className="text">{review.message}</div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button className="btn-join" type="button" onClick={() => handleToggleReview(review)}>
+                    {review.approved ? 'Skrýt' : 'Schválit'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteReview(review)}
-                    disabled={!isOnline}
-                    className="rounded-xl border border-white/20 px-4 py-2 text-xs text-white/70 hover:border-rose-300 hover:text-rose-200"
-                  >
+                  <button className="btn-join" type="button" onClick={() => handleDeleteReview(review)}>
                     Smazat
                   </button>
-                  <span className={`pill ${review.approved ? 'text-a2' : 'text-amber-200/80'}`}>
-                    {review.approved ? 'Schváleno' : 'Čeká na schválení'}
-                  </span>
                 </div>
               </div>
             ))}
-            {reviews.length === 0 && <p className="text-sm text-white/60">Žádné recenze.</p>}
+            {reviews.length === 0 && <div className="review">Žádné recenze.</div>}
           </div>
         </section>
       </div>
@@ -1407,19 +1041,23 @@ export default function App() {
     return date;
   }, []);
 
-  const upcomingEvents = useMemo(() => {
-    return events.filter((event) => {
-      const eventDate = ensureDate(event.startDate);
-      return eventDate && eventDate >= now;
-    });
-  }, [events, now]);
+  const upcomingEvents = useMemo(
+    () =>
+      events.filter((event) => {
+        const eventDate = ensureDate(event.startDate);
+        return eventDate && eventDate >= now;
+      }),
+    [events, now],
+  );
 
-  const pastEvents = useMemo(() => {
-    return events.filter((event) => {
-      const eventDate = ensureDate(event.startDate);
-      return eventDate && eventDate < now;
-    });
-  }, [events, now]);
+  const pastEvents = useMemo(
+    () =>
+      events.filter((event) => {
+        const eventDate = ensureDate(event.startDate);
+        return eventDate && eventDate < now;
+      }),
+    [events, now],
+  );
 
   const approvedReviews = useMemo(() => reviews.filter((review) => review.approved), [reviews]);
   const totalVotes = pollOptions.reduce((sum, option) => sum + (option.votes || 0), 0);
@@ -1434,13 +1072,10 @@ export default function App() {
   const marqueeImages = useMemo(() => {
     const images = gallery.map((item) => item.imageUrl).filter(Boolean);
     events.forEach((event) => {
-      (event.photos || []).forEach((photo) => {
-        if (typeof photo === 'string') {
-          images.push(photo);
-        }
-      });
+      (event.photos || []).forEach((photo) => images.push(photo));
     });
-    return images;
+    if (images.length === 0) return [];
+    return images.concat(images);
   }, [events, gallery]);
 
   const handleCreateReservation = async (payload) => {
@@ -1548,385 +1183,328 @@ export default function App() {
     }
   };
 
-  const handleAdminLogout = () => {
-    setIsAdmin(false);
-    setShowAdminPrompt(false);
+  const handleSmoothScroll = (event, anchor) => {
+    event.preventDefault();
+    const target = document.getElementById(anchor);
+    if (!target) return;
+    const y = target.getBoundingClientRect().top + window.scrollY - 70;
+    window.scrollTo({ top: y, behavior: 'smooth' });
   };
-
   return (
-    <div className="min-h-screen bg-poznej font-rubik text-white">
-      <div className="mx-auto max-w-6xl px-4 pb-20">
-        {!firebaseReady && (
-          <div className="mb-6 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+    <div style={{ minHeight: '100vh' }}>
+      {!firebaseReady && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px' }}>
+          <div className="pill" style={{ border: '1px solid rgba(255,255,255,.2)', background: 'rgba(255,255,255,.05)', color: '#ffd166' }}>
             Tento náhled běží bez propojení na Firebase. Data se ukládají pouze v rámci aktuální relace.
           </div>
-        )}
-        <header className="flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-a1 to-a2 text-2xl font-extrabold text-[#071022] shadow-xl">
-              PH
+        </div>
+      )}
+      <header>
+        <div className="brand">
+          <div className="logo" aria-hidden="true">PH</div>
+          <div>
+            <h1>Poznej &amp; Hraj</h1>
+            <p className="lead">Zábavné večery plné her, kvízů a nových známostí — přijď, zahraj si, poznej lidi.</p>
+          </div>
+        </div>
+      </header>
+      <nav className="topnav">
+        <div className="topnav-inner">
+          <a href="#about" onClick={(e) => handleSmoothScroll(e, 'about')}>O projektu</a>
+          <a href="#stats" onClick={(e) => handleSmoothScroll(e, 'stats')}>Statistiky</a>
+          <a href="#events" onClick={(e) => handleSmoothScroll(e, 'events')}>Akce</a>
+          <a href="#gallery" onClick={(e) => handleSmoothScroll(e, 'gallery')}>Galerie</a>
+          <a href="#poll" onClick={(e) => handleSmoothScroll(e, 'poll')}>Anketa</a>
+          <a href="#reviews" onClick={(e) => handleSmoothScroll(e, 'reviews')}>Recenze</a>
+          <a href="#crew" onClick={(e) => handleSmoothScroll(e, 'crew')}>Crew</a>
+        </div>
+      </nav>
+      <section className="hero-full" id="hero">
+        <div className="hero-inner">
+          <button className="hero-cta" type="button" onClick={() => handleOpenReservation('')}>
+            Rezervuj místo 🔔 Kapacita se rychle plní
+          </button>
+          <div className="hero">
+            <h2>Místo, kde se lidé potkávají přirozeně</h2>
+            <p>Žádné trapné ticho. Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.</p>
+            <div className="tags">
+              {heroTags.map((tag) => (
+                <span key={tag.id} className="tag">{tag.label}</span>
+              ))}
+              {heroTags.length === 0 && <span className="tag">🎮 Herní turnaje</span>}
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Poznej &amp; Hraj</h1>
-              <p className="text-sm text-white/70">
-                Zábavné večery plné her, kvízů a nových známostí — přijď, zahraj si, poznej lidi.
-              </p>
+            <div className="socials">
+              <div className="ico" title="Instagram">
+                <svg viewBox="0 0 24 24"><path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm4.5-.75a1 1 0 100 2 1 1 0 000-2z" /></svg>
+              </div>
+              <div className="ico" title="Facebook">
+                <svg viewBox="0 0 24 24"><path d="M13 22V12h3l1-4h-4V6a1 1 0 011-1h3V1h-3a5 5 0 00-5 5v2H6v4h3v10h4z" /></svg>
+              </div>
+              <div style={{ color: '#cfe3ff', opacity: 0.9, fontSize: '14px' }}>📸 Sleduj a sdílej momentky — označ <strong>@poznejahraj</strong></div>
             </div>
           </div>
-          <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm shadow-lg backdrop-blur">
-            <ul className="flex flex-wrap items-center gap-3 text-white/70">
-              <li>
-                <a className="hover:text-white" href="#about">
-                  O projektu
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#stats">
-                  Statistiky
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#events">
-                  Akce
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#gallery">
-                  Galerie
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#poll">
-                  Anketa
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#reviews">
-                  Recenze
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-white" href="#crew">
-                  Crew
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </header>
-
-        <section className="hero-card" id="hero">
-          <div className="flex flex-col gap-8 py-12 lg:flex-row lg:items-center">
-            <div className="flex-1">
-              <button
-                type="button"
-                onClick={() => handleOpenReservation('')}
-                className="mb-6 self-start rounded-full bg-gradient-to-r from-a1 to-a2 px-5 py-2 text-sm font-semibold text-[#071022] shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
-              >
-                Rezervuj místo 🔔 Kapacita se rychle plní
-              </button>
-              <h2 className="text-4xl font-extrabold tracking-tight text-white drop-shadow-lg">
-                Místo, kde se lidé potkávají přirozeně
-              </h2>
-              <p className="mt-4 text-lg text-white/80">
-                Žádné trapné ticho. Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {heroTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur transition hover:border-a1/50 hover:text-white"
-                  >
-                    {tag.label}
-                  </span>
-                ))}
-                {heroTags.length === 0 && (
-                  <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/60">
-                    🎮 Herní turnaje
-                  </span>
-                )}
-              </div>
-              <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-white/70">
-                <a
-                  className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg"
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Instagram"
-                >
-                  📸
-                </a>
-                <a
-                  className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg"
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Facebook"
-                >
-                  📘
-                </a>
-                <p className="text-sm text-white/60">
-                  Sleduj momentky a označ <strong>@poznejahraj</strong>
-                </p>
-              </div>
-            </div>
-            <div className="flex-1">
-              <div className="aspect-video overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40">
-                <iframe
-                  title="Promo video"
-                  className="h-full w-full"
-                  src="https://www.youtube.com/embed/5jK8L3j4Z_4"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            </div>
+          <div className="hero-video">
+            <iframe
+              title="Promo video"
+              src="https://www.youtube.com/embed/5jK8L3j4Z_4"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
+      <main>
+        <section className="card" id="about">
+          <div><strong style={{ fontSize: '16px' }}>O projektu</strong><div className="small-muted">Proč to děláme a jak to funguje</div></div>
+          <div style={{ height: '10px' }} />
+          <div style={{ color: '#b8c4d1', lineHeight: 1.6 }}>
+            <p><strong>Poznej &amp; Hraj</strong> vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce. Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.</p>
+            <p>Program vede tým moderátorů. Dáváme dohromady mix aktivit: kvízy, mini-hry, výzvy v týmech i úkoly pro dvojice. Díky řízenému programu se i introverti snadno zapojí a seznámení působí přirozeně.</p>
           </div>
         </section>
-
-        <main className="mt-12 space-y-12">
-          <section className="card" id="about">
-            <h3 className="text-xl font-semibold text-white">O projektu</h3>
-            <p className="mt-4 text-white/70">
-              <strong className="text-white">Poznej &amp; Hraj</strong> vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky,
-              hry a skutečné emoce. Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.
-            </p>
-            <p className="mt-4 text-white/70">
-              Program vede tým moderátorů. Dáváme dohromady mix aktivit: kvízy, mini-hry, výzvy v týmech i úkoly pro dvojice. Díky řízenému
-              programu se i introverti snadno zapojí a seznámení působí přirozeně.
-            </p>
-          </section>
-
-          <section className="card" id="stats">
-            <h3 className="text-xl font-semibold text-white">Naše akce v číslech</h3>
-            <p className="mt-1 text-sm text-white/60">Aktualizované statistiky z posledních akcí</p>
-            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-glass">
-                <div className="text-3xl font-extrabold text-a2">{stats.upcoming}</div>
-                <div className="mt-2 text-sm text-white/70">naplánovaných akcí</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-glass">
-                <div className="text-3xl font-extrabold text-a2">{stats.past}</div>
-                <div className="mt-2 text-sm text-white/70">předešlých akcí</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-glass">
-                <div className="text-3xl font-extrabold text-a2">{stats.attendees}</div>
-                <div className="mt-2 text-sm text-white/70">účastníků celkem</div>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-glass">
-                <div className="text-3xl font-extrabold text-a2">{stats.reviews}</div>
-                <div className="mt-2 text-sm text-white/70">recenzí</div>
-              </div>
+        <section className="card" id="stats">
+          <div><strong style={{ fontSize: '16px' }}>Naše akce v číslech</strong><div className="small-muted">Aktualizuje se automaticky</div></div>
+          <div style={{ height: '12px' }} />
+          <div className="stats" id="statsBox">
+            <div className="stat"><div className="n" id="st-upcoming">{stats.upcoming}</div><div className="l">naplánovaných akcí</div></div>
+            <div className="stat"><div className="n" id="st-past">{stats.past}</div><div className="l">předešlých akcí</div></div>
+            <div className="stat"><div className="n" id="st-attendees">{stats.attendees}</div><div className="l">účastníků celkem</div></div>
+            <div className="stat"><div className="n" id="st-reviews">{stats.reviews}</div><div className="l">recenzí</div></div>
+          </div>
+        </section>
+        <div className="grid" id="events">
+          <section className="card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div><strong style={{ fontSize: '16px' }}>Nadcházející akce</strong><div className="small-muted">Vyber termín a rezervuj místo</div></div>
+              <div className="small-muted" id="events-count">{upcomingEvents.length} akcí</div>
             </div>
-          </section>
-
-          <section className="card space-y-8" id="events">
-            <div>
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-white">Nadcházející akce</h3>
-                  <p className="text-sm text-white/60">Vyber termín a rezervuj místo</p>
-                </div>
-                <span className="text-sm text-white/60">{upcomingEvents.length} akcí</span>
-              </div>
-              <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                {upcomingEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    available={typeof event.capacity === 'number' ? (event.capacity ?? 0) - (reservationTotals.get(event.id) ?? 0) : undefined}
-                    onReserve={handleOpenReservation}
-                    onShowPhotos={handleShowPhotos}
-                  />
-                ))}
-                {upcomingEvents.length === 0 && <p className="text-sm text-white/60">Žádné akce nejsou vypsané. Sleduj nás!</p>}
-              </div>
-            </div>
-            <div className="space-y-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-white">Předešlé akce</h3>
-                  <p className="text-sm text-white/60">Fotodokumentace ke každé akci</p>
-                </div>
-              </div>
-              <div className="grid gap-6 lg:grid-cols-2">
-                {pastEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    available={undefined}
-                    onReserve={handleOpenReservation}
-                    onShowPhotos={handleShowPhotos}
-                  />
-                ))}
-                {pastEvents.length === 0 && <p className="text-sm text-white/60">Archiv se připravuje.</p>}
-              </div>
-            </div>
-            <div className="space-y-4" id="gallery">
-              <h3 className="text-xl font-semibold text-white">Naše momentky &amp; vaše #IG</h3>
-              <p className="text-sm text-white/60">
-                📸 Již brzy připojíme náš Instagram feed — sleduj nás na <strong>@poznejahraj</strong>.
-              </p>
-              <div className="grid gap-4 md:grid-cols-3">
-                {gallery.slice(0, 6).map((item) => (
-                  <img
-                    key={item.id}
-                    src={item.imageUrl}
-                    alt={item.name || 'Momentka z Poznej & Hraj'}
-                    className="h-40 w-full rounded-2xl border border-white/10 object-cover shadow-lg"
-                  />
-                ))}
-                {gallery.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-4 text-sm text-white/60">
-                    Galerie se teprve plní.
+            <div style={{ height: '12px' }} />
+            <div className="events-list">
+              {upcomingEvents.length === 0 && (
+                <div className="review"><div className="text">Žádné akce zatím nejsou naplánovány.</div></div>
+              )}
+              {upcomingEvents.map((event) => {
+                const { day, month } = formatDateLabel(event.startDate);
+                const taken = reservationTotals.get(event.id) ?? 0;
+                const cap = typeof event.capacity === 'number' ? event.capacity : 0;
+                const left = cap ? Math.max(0, cap - taken) : null;
+                return (
+                  <div className="event" key={event.id}>
+                    <div className="ev-left"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
+                    <div style={{ flex: 1 }}>
+                      <div className="ev-title">{event.title}</div>
+                      <div className="ev-desc">{event.description}</div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                        <div className="pill">📅 {formatDateTime(event.startDate)}{event.place ? ` • 📍 ${event.place}` : ''}</div>
+                        {typeof event.capacity === 'number' && <div className="pill">Kapacita: {event.capacity}</div>}
+                        {left != null && (
+                          <div className="pill" style={{ color: left > 0 ? '#6bf0c1' : '#ff7a7a' }}>
+                            Volná místa: {left} / {event.capacity}
+                          </div>
+                        )}
+                        {event.price != null && <div className="pill" style={{ color: '#b4ffd9' }}>💳 {event.price} Kč</div>}
+                      </div>
+                    </div>
+                    <div className="ev-actions">
+                      <button className="btn-join" type="button" onClick={() => handleOpenReservation(event.id)} disabled={left != null && left <= 0}>
+                        {left != null && left <= 0 ? 'Obsazeno' : 'Rezervovat'}
+                      </button>
+                    </div>
                   </div>
-                )}
+                );
+              })}
+            </div>
+            <div style={{ height: '18px' }} />
+            <div><strong style={{ fontSize: '16px' }}>Předešlé akce</strong><div className="small-muted">Fotodokumentace ke každé akci</div></div>
+            <div style={{ height: '12px' }} />
+            <div className="events-list">
+              {pastEvents.length === 0 && (
+                <div className="review"><div className="text">Archiv je zatím prázdný.</div></div>
+              )}
+              {pastEvents.map((event) => {
+                const { day, month } = formatDateLabel(event.startDate);
+                return (
+                  <div className="event" key={event.id}>
+                    <div className="ev-left"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
+                    <div style={{ flex: 1 }}>
+                      <div className="ev-title">{event.title}</div>
+                      <div className="ev-desc">{event.description}</div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                        <div className="pill">📅 {formatDateTime(event.startDate)}{event.place ? ` • 📍 ${event.place}` : ''}</div>
+                        {event.price != null && <div className="pill" style={{ color: '#b4ffd9' }}>💳 {event.price} Kč</div>}
+                      </div>
+                    </div>
+                    <div className="ev-actions">
+                      {(event.photos || []).length > 0 ? (
+                        <button className="btn-join" type="button" onClick={() => handleShowPhotos(event.id, 0)}>
+                          📸 Fotky z akce
+                        </button>
+                      ) : (
+                        <span className="pill">Bez fotek</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ height: '12px' }} />
+            <div className="card" id="gallery" style={{ marginTop: '8px' }}>
+              <strong>Naše momentky &amp; vaše #IG</strong>
+              <div className="small-muted">📸 Již brzy připojíme náš Instagram feed — sleduj nás na <strong>@poznejahraj</strong>.</div>
+              <div className="gallery" id="galleryGrid">
+                {gallery.map((item) => (
+                  <img key={item.id} src={item.imageUrl} alt={item.name} loading="lazy" />
+                ))}
+                {gallery.length === 0 && <div className="pill">Galerie bude doplněna.</div>}
               </div>
             </div>
           </section>
-
-          <section className="card" id="poll">
-            <h3 className="text-xl font-semibold text-white">Anketa: Téma příštího večera</h3>
-            <p className="mt-1 text-sm text-white/60">Hlasuj, na co máš chuť příště.</p>
-            <div className="mt-6 grid gap-4">
-              {pollOptions.map((option) => (
-                <PollOption key={option.id} option={option} totalVotes={totalVotes} onVote={handleVote} />
-              ))}
-              {pollOptions.length === 0 && <p className="text-sm text-white/60">Anketa zatím nemá žádné možnosti.</p>}
-            </div>
-          </section>
-
-          <section className="grid gap-8 lg:grid-cols-[2fr_1fr]" id="reviews">
-            <section className="card">
-              <h3 className="text-xl font-semibold text-white">Recenze</h3>
-              <p className="mt-1 text-sm text-white/60">Co říkají účastníci</p>
-              <ul className="mt-6 space-y-4 text-sm text-white/75">
-                {approvedReviews.map((review) => {
-                  const message = review.message ?? review.text ?? '';
+          <aside>
+            <div className="card" id="poll">
+              <strong>Anketa: Téma příštího večera</strong>
+              <div className="reviews" id="pollBox">
+                <div className="review"><div className="text"><strong>{pollQuestion}</strong></div></div>
+                {pollOptions.map((option) => {
+                  const ratio = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
                   return (
-                    <li key={review.id} className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner">
-                      „{message}“ — <span className="font-semibold">{review.name}</span>
-                    </li>
+                    <div key={option.id} className="review" style={{ minHeight: 'auto' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                        <div>
+                          <div><strong>{option.title}</strong></div>
+                          <div className="small-muted">{option.description}</div>
+                        </div>
+                        <button className="btn-join" type="button" onClick={() => handleVote(option.id)}>Hlasovat</button>
+                      </div>
+                      <div style={{ marginTop: '8px', background: 'rgba(255,255,255,.06)', borderRadius: '8px', overflow: 'hidden' }}>
+                        <div style={{ height: '8px', width: `${ratio}%`, background: 'linear-gradient(90deg,#8b5cf6,#00e5a8)' }} />
+                      </div>
+                      <small className="small-muted">{option.votes} hlasů ({ratio}%)</small>
+                    </div>
                   );
                 })}
-                {approvedReviews.length === 0 && (
-                  <li className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/60">
-                    Recenze zatím čekají na schválení.
-                  </li>
-                )}
-              </ul>
-              <ReviewForm onSubmit={handleSubmitReview} disabled={false} />
-              {!firebaseReady && (
-                <p className="text-xs text-white/50">
-                  Tento formulář v náhledu uchovává recenze pouze lokálně. Pro veřejné ukládání přidej Firebase konfiguraci.
-                </p>
-              )}
-            </section>
-            <section className="card" id="crew">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-white">The Crew</h3>
-                  <p className="text-sm text-white/60">Lidé, kteří za tím stojí</p>
-                </div>
-                <span className="text-sm text-white/60">{crew.length} členů</span>
               </div>
-              <div className="mt-6 grid gap-6 md:grid-cols-1">
-                {crew.map((member) => (
-                  <article
-                    key={member.id}
-                    className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-center shadow-lg"
-                  >
-                    {member.photoUrl ? (
-                      <img
-                        src={member.photoUrl}
-                        alt={member.name}
-                        className="h-24 w-24 rounded-full border border-white/20 object-cover shadow-lg"
-                      />
-                    ) : (
-                      <div className="grid h-24 w-24 place-items-center rounded-full border border-white/20 bg-white/10 text-lg font-semibold text-white">
-                        {member.name?.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold text-white">{member.name}</p>
-                      <p className="text-sm text-a2">{member.role}</p>
+            </div>
+            <div className="card" id="reviews">
+              <strong>Recenze</strong>
+              <div className="small-muted">Co říkají účastníci</div>
+              <div className="reviews" id="reviewsList">
+                {approvedReviews.map((review) => (
+                  <div key={review.id} className="review">
+                    <div className="head">
+                      <div className="name">{review.name}</div>
+                      <div className="stars">{'★'.repeat(review.stars || review.rating || 5)}</div>
                     </div>
-                    <p className="text-sm text-white/70">{member.description}</p>
-                  </article>
+                    <div className="text">{review.message}</div>
+                  </div>
                 ))}
-                {crew.length === 0 && <p className="text-sm text-white/60">Tým zatím představíme brzy.</p>}
+                {approvedReviews.length === 0 && <div className="review">Zatím bez recenzí.</div>}
               </div>
-            </section>
-          </section>
-
-          <section className="card" id="feedback">
-            <div className="flex items-start gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl border border-a1/60 bg-a1/30 text-2xl">💬</div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">Chceš, abychom uspořádali večer i pro tebe?</h3>
-                <p className="text-sm text-white/70">
-                  Máš nápad, přání nebo zpětnou vazbu? Napiš nám – připravíme program na míru a rádi si poslechneme tvůj názor.
-                </p>
-              </div>
+              <div style={{ height: '8px' }} />
+              <ReviewForm onSubmit={handleSubmitReview} disabled={false} />
             </div>
-            <div className="mt-8">
-              <FeedbackForm />
+          </aside>
+        </div>
+        <div className="marquee-wrap">
+          <div className="marquee" id="marquee">
+            {marqueeImages.map((src, index) => (
+              <img key={`${src}-${index}`} src={src} alt="momentka" loading="lazy" />
+            ))}
+            {marqueeImages.length === 0 && <span className="pill">Galerie bude doplněna.</span>}
+          </div>
+        </div>
+        <section className="card" id="crew">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div><strong style={{ fontSize: '16px' }}>The Crew</strong><div className="small-muted">Lidé, kteří za tím stojí</div></div>
+            <div className="small-muted" id="crew-count">{crew.length} členů</div>
+          </div>
+          <div style={{ height: '12px' }} />
+          <div className="crew" id="crewList">
+            {crew.map((member) => (
+              <article key={member.id} className="crew-card">
+                {member.photoUrl ? (
+                  <img className="crew-avatar" src={member.photoUrl} alt={member.name} />
+                ) : (
+                  <div className="crew-avatar" style={{ display: 'grid', placeItems: 'center', border: '2px dashed rgba(255,255,255,.2)', color: '#9aa6b2' }}>
+                    {member.name?.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="crew-name">{member.name}</div>
+                <div className="crew-role">{member.role}</div>
+                <div className="crew-desc">{member.description}</div>
+              </article>
+            ))}
+            {crew.length === 0 && <div className="pill">Tým představíme brzy.</div>}
+          </div>
+        </section>
+        <section className="contact-card" id="feedback">
+          <div className="contact-header">
+            <div className="contact-icon">💬</div>
+            <div className="contact-title">
+              <h3>Chceš, abychom uspořádali večer i pro tebe?</h3>
+              <p className="small-muted">Máš nápad, přání nebo zpětnou vazbu? Napiš nám – připravíme program na míru a rádi si poslechneme tvůj názor.</p>
             </div>
-          </section>
-        </main>
-
-        <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
-          © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
-        </footer>
-      </div>
-
+          </div>
+          <div className="contact-form">
+            <FeedbackForm />
+          </div>
+        </section>
+      </main>
+      <footer>© {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!</footer>
       <button
         type="button"
         onClick={() => handleOpenReservation('')}
-        className="fixed bottom-6 left-1/2 z-20 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-6 py-3 text-sm font-semibold text-[#071022] shadow-xl transition hover:-translate-y-1"
+        className="hero-cta"
+        style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: '80px' }}
       >
         Rezervovat místo
       </button>
-
       <button
         type="button"
-        onClick={() => (isAdmin ? handleAdminLogout() : setShowAdminPrompt(true))}
-        className="fixed bottom-6 right-6 z-30 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] px-5 py-3 text-sm font-semibold text-[#071022] shadow-xl transition hover:-translate-y-1"
+        onClick={() => (isAdmin ? setIsAdmin(false) : setShowAdminPrompt(true))}
+        className="admin-btn"
+        style={{ right: '18px', bottom: '18px' }}
       >
         {isAdmin ? 'Odhlásit admina' : 'Admin panel'}
       </button>
 
       {showAdminPrompt && !isAdmin && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
-          <form
-            className="w-full max-w-md space-y-4 rounded-3xl border border-white/15 bg-[#071022] p-6 shadow-2xl"
-            onSubmit={handleAdminLogin}
-          >
-            <h2 className="text-xl font-semibold text-white">Admin přihlášení</h2>
-            <p className="text-sm text-white/60">Zadej heslo pro vstup do administračního panelu.</p>
-            <input
-              type="password"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              className="w-full rounded-2xl border border-white/15 bg-[#111827] px-4 py-3 text-white"
-              placeholder="••••••••"
-            />
-            {adminError && <p className="text-sm text-rose-300">{adminError}</p>}
-            <div className="flex justify-end gap-3">
+        <div className="modal-back" style={{ display: 'flex' }}>
+          <form className="modal" style={{ maxWidth: '420px' }} onSubmit={handleAdminLogin}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAdminPrompt(false);
+                setAdminPassword('');
+                setAdminError('');
+              }}
+              style={{ position: 'sticky', top: 0, float: 'right', background: 'transparent', border: 'none', color: '#9aa6b2', cursor: 'pointer', zIndex: 2 }}
+            >
+              ✕
+            </button>
+            <h2>Admin přihlášení</h2>
+            <p className="small-muted">Zadej heslo pro vstup do administračního panelu.</p>
+            <label>Heslo
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </label>
+            {adminError && <div className="pill" style={{ color: '#ff7a7a', marginTop: '8px' }}>{adminError}</div>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
               <button
                 type="button"
+                className="btn-join"
                 onClick={() => {
                   setShowAdminPrompt(false);
                   setAdminPassword('');
                   setAdminError('');
                 }}
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white/70 hover:border-white/40 hover:text-white"
               >
                 Zrušit
               </button>
-              <button
-                type="submit"
-                className="bg-gradient-to-r from-[#8b5cf6] to-[#00e5a8] text-white rounded-xl shadow-lg px-5 py-2 text-sm font-semibold"
-              >
+              <button className="btn-join" type="submit" style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}>
                 Přihlásit
               </button>
             </div>
@@ -1952,35 +1530,19 @@ export default function App() {
         onNavigate={handleNavigateLightbox}
       />
 
-      {isAdmin && (
-        <AdminPanel
-          onClose={() => setIsAdmin(false)}
-          events={events}
-          reservations={reservations}
-          gallery={gallery}
-          pollOptions={pollOptions}
-          pollQuestion={pollQuestion}
-          heroTags={heroTags}
-          crew={crew}
-          reviews={reviews}
-          isOnline={firebaseReady}
-        />
-      )}
-
-      {marqueeImages.length > 0 && (
-        <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-0 overflow-hidden border-t border-white/10 bg-white/5 py-4">
-          <div className="marquee-track flex gap-6 opacity-80">
-            {[...marqueeImages, ...marqueeImages].map((src, index) => (
-              <img
-                key={`${src}-${index}`}
-                src={src}
-                alt="Poznej & Hraj moment"
-                className="h-24 w-auto rounded-2xl border border-white/10 object-cover shadow-lg"
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <AdminPanel
+        isOpen={isAdmin}
+        onClose={() => setIsAdmin(false)}
+        events={events}
+        reservations={reservations}
+        gallery={gallery}
+        pollOptions={pollOptions}
+        pollQuestion={pollQuestion}
+        heroTags={heroTags}
+        crew={crew}
+        reviews={reviews}
+        isOnline={firebaseReady}
+      />
     </div>
   );
 }
