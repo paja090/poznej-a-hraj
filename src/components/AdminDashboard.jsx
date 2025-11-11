@@ -11,6 +11,7 @@ import {
 
 export default function AdminDashboard({ user, onLogout }) {
   const [events, setEvents] = useState([]);
+  const [reservations, setReservations] = useState([]); // 🧩 nové
   const [newEvent, setNewEvent] = useState({
     title: "",
     date: "",
@@ -24,6 +25,14 @@ export default function AdminDashboard({ user, onLogout }) {
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
       setEvents(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  // 🔹 Načtení všech rezervací v reálném čase
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "reservations"), (snapshot) => {
+      setReservations(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
     return () => unsub();
   }, []);
@@ -55,9 +64,16 @@ export default function AdminDashboard({ user, onLogout }) {
   };
 
   // 🔹 Smazání akce
-  const handleDelete = async (id) => {
+  const handleDeleteEvent = async (id) => {
     if (window.confirm("Opravdu chceš smazat tuto akci?")) {
       await deleteDoc(doc(db, "events", id));
+    }
+  };
+
+  // 🔹 Smazání rezervace
+  const handleDeleteReservation = async (id) => {
+    if (window.confirm("Opravdu chceš smazat tuto rezervaci?")) {
+      await deleteDoc(doc(db, "reservations", id));
     }
   };
 
@@ -160,8 +176,44 @@ export default function AdminDashboard({ user, onLogout }) {
                   <p className="text-sm text-gray-400 mt-1">{ev.description}</p>
                 </div>
                 <button
-                  onClick={() => handleDelete(ev.id)}
+                  onClick={() => handleDeleteEvent(ev.id)}
                   className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md mt-3 md:mt-0"
+                >
+                  🗑️ Smazat
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 🧾 Rezervace */}
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold mb-4">Rezervace</h2>
+        {reservations.length === 0 ? (
+          <p className="text-gray-400">Zatím nejsou žádné rezervace.</p>
+        ) : (
+          <ul className="space-y-3">
+            {reservations.map((r) => (
+              <li
+                key={r.id}
+                className="bg-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between"
+              >
+                <div>
+                  <p className="font-semibold">{r.name}</p>
+                  <p className="text-sm text-gray-400">
+                    📅 {r.eventTitle} | {r.ageRange} | {r.gender} | {r.relationship}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    👥 {r.peopleCount} os. · 📧 {r.email}
+                  </p>
+                  {r.message && (
+                    <p className="text-xs text-gray-500 mt-1">💬 {r.message}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => handleDeleteReservation(r.id)}
+                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md mt-3 md:mt-0"
                 >
                   🗑️ Smazat
                 </button>
@@ -173,3 +225,4 @@ export default function AdminDashboard({ user, onLogout }) {
     </div>
   );
 }
+
