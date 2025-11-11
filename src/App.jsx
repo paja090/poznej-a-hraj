@@ -383,3 +383,18 @@ export default function App() {
     </div>
   );
 }
+import { useState } from "react";
+import AdminLogin from "./components/AdminLogin";
+import AdminDashboard from "./components/AdminDashboard";
+
+function App() {
+  const [user, setUser] = useState(null);
+
+  return user ? (
+    <AdminDashboard user={user} onLogout={() => setUser(null)} />
+  ) : (
+    <AdminLogin onLogin={(u) => setUser(u)} />
+  );
+}
+
+export default App;
