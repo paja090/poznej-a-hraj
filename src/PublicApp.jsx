@@ -5,7 +5,6 @@ import { db } from "./firebaseConfig";
 import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm";
 
-// === DÍLČÍ KOMPONENTY ===
 function StatCard({ label, value }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-glass backdrop-blur">
@@ -51,7 +50,6 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-// === HLAVNÍ KOMPONENTA ===
 export default function PublicApp() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -63,13 +61,14 @@ export default function PublicApp() {
     reviews: 0,
   });
 
-  // 🔹 Načti akce z Firestore
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
       const now = new Date();
+      const getEventDate = (e) =>
+        e.date?.toDate ? e.date.toDate() : new Date(e.date || e.startDate || e.when || 0);
       const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      const upcoming = events.filter((e) => new Date(e.date) >= now);
-      const past = events.filter((e) => new Date(e.date) < now);
+      const upcoming = events.filter((e) => getEventDate(e) >= now);
+      const past = events.filter((e) => getEventDate(e) < now);
       setUpcomingEvents(upcoming);
       setPastEvents(past);
       setStats((s) => ({ ...s, events: events.length, past: past.length }));
@@ -77,7 +76,6 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
-  // 🔹 Počet rezervací (účastníků)
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "reservations"), (snap) => {
       setStats((s) => ({ ...s, attendees: snap.size }));
@@ -85,7 +83,6 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
-  // 🔹 Počet recenzí / zpětných vazeb
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "feedback"), (snap) => {
       setStats((s) => ({ ...s, reviews: snap.size }));
@@ -96,7 +93,6 @@ export default function PublicApp() {
   return (
     <div className="min-h-screen bg-poznej font-rubik text-white">
       <div className="mx-auto max-w-6xl px-4 pb-20">
-        {/* === HLAVIČKA === */}
         <header className="flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-a1 to-a2 text-2xl font-extrabold text-[#071022] shadow-xl">
@@ -111,7 +107,6 @@ export default function PublicApp() {
           </div>
         </header>
 
-        {/* === STATISTIKY === */}
         <section className="card" id="stats">
           <h3 className="text-xl font-semibold text-white">Naše akce v číslech</h3>
           <p className="mt-1 text-sm text-white/60">Aktualizované statistiky z posledních akcí</p>
@@ -123,45 +118,36 @@ export default function PublicApp() {
           </div>
         </section>
 
-        {/* === NADCHÁZEJÍCÍ AKCE === */}
         <section className="card space-y-8" id="events">
-          <div>
-            <h3 className="text-xl font-semibold text-white mb-2">Nadcházející akce</h3>
-            {upcomingEvents.length === 0 ? (
-              <p className="text-white/60">Žádné plánované akce.</p>
-            ) : (
-              <div className="grid gap-6 lg:grid-cols-2">
-                {upcomingEvents.map((event) => (
-                  <EventCard key={event.id} event={event} onReserve={setSelectedEvent} />
-                ))}
-              </div>
-            )}
-          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">Nadcházející akce</h3>
+          {upcomingEvents.length === 0 ? (
+            <p className="text-white/60">Žádné plánované akce.</p>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {upcomingEvents.map((event) => (
+                <EventCard key={event.id} event={event} onReserve={setSelectedEvent} />
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* === REZERVAČNÍ FORMULÁŘ (modální) === */}
         {selectedEvent && (
-          <ReservationForm
-            event={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
-          />
+          <ReservationForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />
         )}
 
-        {/* === PŘEDEŠLÉ AKCE === */}
         <section className="card space-y-6 mt-12" id="past-events">
           <h3 className="text-xl font-semibold text-white">Předešlé akce</h3>
-          <div className="grid gap-6 lg:grid-cols-2">
-            {pastEvents.length === 0 ? (
-              <p className="text-white/60">Zatím žádné proběhlé akce.</p>
-            ) : (
-              pastEvents.map((event) => (
+          {pastEvents.length === 0 ? (
+            <p className="text-white/60">Zatím žádné proběhlé akce.</p>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {pastEvents.map((event) => (
                 <EventCard key={event.id} event={event} variant="past" />
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* === FEEDBACK === */}
         <section id="feedback" className="card mt-12">
           <h3 className="text-xl font-semibold mb-2">
             Chceš, abychom uspořádali večer i pro tebe?
@@ -173,7 +159,6 @@ export default function PublicApp() {
           <FeedbackForm />
         </section>
 
-        {/* === PATIČKA === */}
         <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
           © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
         </footer>
@@ -181,6 +166,7 @@ export default function PublicApp() {
     </div>
   );
 }
+
 
 
 
