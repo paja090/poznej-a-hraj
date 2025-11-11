@@ -1,4 +1,6 @@
 import FeedbackForm from "./components/FeedbackForm.jsx";
+import { useState } from "react";
+import ReservationForm from "./components/ReservationForm";
 
 // === DATA ===
 const heroTags = ["🎮 Herní turnaje", "🎤 Live moderátoři", "📸 Foto koutek", "💬 Seznamování"];
@@ -121,6 +123,7 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
 }
 
 
+
 function PollOption({ option }) {
   const totalVotes = pollOptions.reduce((sum, item) => sum + item.votes, 0);
   const ratio = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
@@ -144,6 +147,8 @@ function PollOption({ option }) {
 
 // === HLAVNÍ KOMPONENTA ===
 export default function PublicApp() {
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
   return (
     <div className="min-h-screen bg-poznej font-rubik text-white">
       <div className="mx-auto max-w-6xl px-4 pb-20">
