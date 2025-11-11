@@ -35,3 +35,19 @@
     @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4 py-1 font-medium text-white/75;
   }
 }
+.admin-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  transition: 0.2s;
+}
+.admin-tile:hover {
+  background: rgba(139, 92, 246, 0.35);
+  transform: translateY(-2px);
+}
