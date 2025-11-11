@@ -86,7 +86,7 @@ function StatCard({ label, value }) {
   );
 }
 
-function EventCard({ event, variant = "upcoming" }) {
+function EventCard({ event, onReserve, variant = "upcoming" }) {
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/40 backdrop-blur">
       <div className="flex items-start justify-between gap-4">
@@ -103,11 +103,14 @@ function EventCard({ event, variant = "upcoming" }) {
         <span className="pill">📍 {event.place}</span>
         {"capacity" in event && <span className="pill">Kapacita: {event.capacity}</span>}
         {"available" in event && <span className="pill text-a2">Volná místa: {event.available}</span>}
-        {"price" in event && event.price && <span className="pill text-[#b4ffd9]">💳 {event.price} Kč</span>}
+        {"price" in event && event.price && (
+          <span className="pill text-[#b4ffd9]">💳 {event.price} Kč</span>
+        )}
       </div>
       {variant === "upcoming" && (
         <button
           type="button"
+          onClick={() => onReserve(event)}
           className="self-start rounded-xl border border-white/20 px-4 py-2 text-sm text-a1 transition hover:border-a1/80 hover:text-white"
         >
           Rezervovat
@@ -116,6 +119,7 @@ function EventCard({ event, variant = "upcoming" }) {
     </article>
   );
 }
+
 
 function PollOption({ option }) {
   const totalVotes = pollOptions.reduce((sum, item) => sum + item.votes, 0);
