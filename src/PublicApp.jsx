@@ -1,4 +1,7 @@
-import FeedbackForm from './components/FeedbackForm.jsx';
+export default function PublicApp() {
+  return (
+    <div className="min-h-screen bg-poznej font-rubik text-white">
+      {/import FeedbackForm from './components/FeedbackForm.jsx';
 
 const heroTags = ['🎮 Herní turnaje', '🎤 Live moderátoři', '📸 Foto koutek', '💬 Seznamování'];
 
@@ -398,3 +401,8 @@ function App() {
 }
 
 export default App;
+/}
+    </div>
+  );
+}
+
