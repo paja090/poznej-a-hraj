@@ -122,8 +122,6 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-
-
 function PollOption({ option }) {
   const totalVotes = pollOptions.reduce((sum, item) => sum + item.votes, 0);
   const ratio = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
@@ -166,8 +164,27 @@ export default function PublicApp() {
           </div>
         </header>
 
-        {/* --- sem patří zbytek tvého obsahu (sekce about, stats, events, gallery, poll, crew, feedback atd.) --- */}
+        {/* === Sekce akcí === */}
+        <section className="card space-y-8" id="events">
+          <div>
+            <h3 className="text-xl font-semibold text-white mb-2">Nadcházející akce</h3>
+            <div className="grid gap-6 lg:grid-cols-2">
+              {upcomingEvents.map((event) => (
+                <EventCard key={event.id} event={event} onReserve={setSelectedEvent} />
+              ))}
+            </div>
+          </div>
+        </section>
 
+        {/* === Rezervační formulář (modální okno) === */}
+        {selectedEvent && (
+          <ReservationForm
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
+
+        {/* === Feedback === */}
         <section id="feedback" className="card mt-12">
           <h3 className="text-xl font-semibold mb-2">Chceš, abychom uspořádali večer i pro tebe?</h3>
           <p className="text-sm text-white/70 mb-6">
@@ -183,4 +200,5 @@ export default function PublicApp() {
     </div>
   );
 }
+
 
