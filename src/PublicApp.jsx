@@ -58,11 +58,12 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
 const [heroTags, setHeroTags] = useState([]);
 
 useEffect(() => {
-  const unsub = onSnapshot(collection(db, "heroTags"), (snap) => {
-    setHeroTags(snap.docs.map((d) => d.data().text));
+  const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
+    setHeroTags(snapshot.docs.map((doc) => doc.data().title));
   });
   return () => unsub();
 }, []);
+
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
