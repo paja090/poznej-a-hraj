@@ -1,6 +1,6 @@
 // src/components/AdminDashboard.jsx
 import { useEffect, useState } from "react";
-import { db } from "../firebaseConfig";
+import { db, storage } from "../firebaseConfig";
 import {
   collection,
   addDoc,
@@ -8,13 +8,24 @@ import {
   doc,
   onSnapshot,
   serverTimestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import AdminPolls from "./AdminPolls.jsx"; // ✅ OPRAVENO – správná cesta
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("events");
   const [events, setEvents] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [newImage, setNewImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
     date: "",
@@ -24,7 +35,7 @@ export default function AdminDashboard({ user, onLogout }) {
     price: "",
   });
 
-  // 🔹 Načti akce
+  // === Načti akce ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
       setEvents(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
@@ -32,7 +43,7 @@ export default function AdminDashboard({ user, onLogout }) {
     return () => unsub();
   }, []);
 
-  // 🔹 Načti rezervace
+  // === Načti rezervace ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "reservations"), (snapshot) => {
       setReservations(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
@@ -40,7 +51,16 @@ export default function AdminDashboard({ user, onLogout }) {
     return () => unsub();
   }, []);
 
-  // 🔹 Přidej novou akci
+  // === Načti galerii ===
+  useEffect(() => {
+    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, (snapshot) => {
+      setGallery(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  // === Přidat akci ===
   const handleAddEvent = async (e) => {
     e.preventDefault();
     if (!newEvent.title || !newEvent.date || !newEvent.place) return;
@@ -51,6 +71,7 @@ export default function AdminDashboard({ user, onLogout }) {
       price: Number(newEvent.price) || 0,
       createdAt: serverTimestamp(),
     });
+
     setNewEvent({
       title: "",
       date: "",
@@ -68,6 +89,39 @@ export default function AdminDashboard({ user, onLogout }) {
   const handleDeleteReservation = async (id) => {
     if (window.confirm("Opravdu smazat rezervaci?"))
       await deleteDoc(doc(db, "reservations", id));
+  };
+
+  // === Nahrát fotku do galerie ===
+  const handleUploadImage = async () => {
+    if (!newImage) return alert("Vyber fotku k nahrání.");
+    setUploading(true);
+    try {
+      const fileRef = ref(storage, `gallery/${Date.now()}_${newImage.name}`);
+      await uploadBytes(fileRef, newImage);
+      const url = await getDownloadURL(fileRef);
+      await addDoc(collection(db, "gallery"), {
+        url,
+        name: newImage.name,
+        createdAt: serverTimestamp(),
+      });
+      setNewImage(null);
+    } catch (e) {
+      console.error("Chyba při nahrávání:", e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // === Smazat fotku ===
+  const handleDeleteImage = async (id, url) => {
+    if (!window.confirm("Smazat tuto fotku?")) return;
+    try {
+      await deleteDoc(doc(db, "gallery", id));
+      const fileRef = ref(storage, url);
+      await deleteObject(fileRef);
+    } catch (e) {
+      console.error("Mazání selhalo:", e);
+    }
   };
 
   return (
@@ -91,7 +145,7 @@ export default function AdminDashboard({ user, onLogout }) {
       </header>
 
       {/* === NAVIGACE === */}
-      <nav className="flex gap-3 mb-8">
+      <nav className="flex gap-3 mb-8 flex-wrap">
         <button
           onClick={() => setActiveTab("events")}
           className={`px-4 py-2 rounded-md font-semibold ${
@@ -122,6 +176,16 @@ export default function AdminDashboard({ user, onLogout }) {
         >
           🗳️ Ankety
         </button>
+        <button
+          onClick={() => setActiveTab("gallery")}
+          className={`px-4 py-2 rounded-md font-semibold ${
+            activeTab === "gallery"
+              ? "bg-violet-600"
+              : "bg-slate-800 hover:bg-slate-700 text-white/80"
+          }`}
+        >
+          📷 Galerie
+        </button>
       </nav>
 
       {/* === SEKCE OBSAHU === */}
@@ -135,7 +199,9 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="text"
                 placeholder="Název akce"
                 value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, title: e.target.value })
+                }
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
@@ -143,14 +209,18 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="text"
                 placeholder="Místo konání"
                 value={newEvent.place}
-                onChange={(e) => setNewEvent({ ...newEvent, place: e.target.value })}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, place: e.target.value })
+                }
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
               <input
                 type="date"
                 value={newEvent.date}
-                onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, date: e.target.value })
+                }
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
@@ -158,14 +228,18 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="number"
                 placeholder="Kapacita"
                 value={newEvent.capacity}
-                onChange={(e) => setNewEvent({ ...newEvent, capacity: e.target.value })}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, capacity: e.target.value })
+                }
                 className="bg-slate-700 p-2 rounded-md text-white"
               />
               <input
                 type="number"
                 placeholder="Cena vstupenky (Kč)"
                 value={newEvent.price}
-                onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })}
+                onChange={(e) =>
+                  setNewEvent({ ...newEvent, price: e.target.value })
+                }
                 className="bg-slate-700 p-2 rounded-md text-white"
               />
               <textarea
@@ -202,7 +276,9 @@ export default function AdminDashboard({ user, onLogout }) {
                       <p className="text-sm text-gray-400">
                         📅 {ev.date} | 📍 {ev.place}
                       </p>
-                      <p className="text-sm text-gray-400 mt-1">{ev.description}</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {ev.description}
+                      </p>
                     </div>
                     <button
                       onClick={() => handleDeleteEvent(ev.id)}
@@ -234,13 +310,16 @@ export default function AdminDashboard({ user, onLogout }) {
                   <div>
                     <p className="font-semibold">{r.name}</p>
                     <p className="text-sm text-gray-400">
-                      📅 {r.eventTitle} | {r.ageRange} | {r.gender} | {r.relationship}
+                      📅 {r.eventTitle} | {r.ageRange} | {r.gender} |{" "}
+                      {r.relationship}
                     </p>
                     <p className="text-sm text-gray-400">
                       👥 {r.peopleCount} os. · 📧 {r.email}
                     </p>
                     {r.message && (
-                      <p className="text-xs text-gray-500 mt-1">💬 {r.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        💬 {r.message}
+                      </p>
                     )}
                   </div>
                   <button
@@ -258,6 +337,51 @@ export default function AdminDashboard({ user, onLogout }) {
 
       {/* === SEKCE ANKETY === */}
       {activeTab === "polls" && <AdminPolls />}
+
+      {/* === SEKCE GALERIE === */}
+      {activeTab === "gallery" && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4">📷 Galerie (Firebase)</h2>
+          <div className="bg-slate-800 p-6 rounded-xl mb-6 shadow-lg">
+            <div className="flex items-center gap-4 mb-6">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImage(e.target.files[0])}
+                className="text-sm text-white/70"
+              />
+              <button
+                onClick={handleUploadImage}
+                disabled={uploading}
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
+              >
+                {uploading ? "Nahrávám..." : "Nahrát fotku"}
+              </button>
+            </div>
+            {gallery.length === 0 ? (
+              <p className="text-gray-400">Zatím žádné fotky.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {gallery.map((img) => (
+                  <div key={img.id} className="relative group">
+                    <img
+                      src={img.url}
+                      alt={img.name}
+                      className="rounded-lg border border-white/10"
+                    />
+                    <button
+                      onClick={() => handleDeleteImage(img.id, img.url)}
+                      className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
