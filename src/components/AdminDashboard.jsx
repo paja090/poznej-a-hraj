@@ -18,7 +18,8 @@ import {
   deleteObject,
 } from "firebase/storage";
 import AdminPolls from "./AdminPolls.jsx";
-import AdminCrew from "./AdminCrew.jsx"; // ✅ nová komponenta
+import AdminCrew from "./AdminCrew.jsx";
+import AdminHeroTags from "./AdminHeroTags.jsx"; // ✅ Nová sekce pro hlavní tagy
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("events");
@@ -34,6 +35,7 @@ export default function AdminDashboard({ user, onLogout }) {
     description: "",
     capacity: "",
     price: "",
+    tags: "",
   });
 
   // === Načti akce ===
@@ -68,6 +70,9 @@ export default function AdminDashboard({ user, onLogout }) {
 
     await addDoc(collection(db, "events"), {
       ...newEvent,
+      tags: newEvent.tags
+        ? newEvent.tags.split(",").map((t) => t.trim())
+        : [],
       capacity: Number(newEvent.capacity) || 0,
       price: Number(newEvent.price) || 0,
       createdAt: serverTimestamp(),
@@ -80,6 +85,7 @@ export default function AdminDashboard({ user, onLogout }) {
       description: "",
       capacity: "",
       price: "",
+      tags: "",
     });
   };
 
@@ -199,6 +205,16 @@ export default function AdminDashboard({ user, onLogout }) {
         >
           👥 Tým
         </button>
+        <button
+          onClick={() => setActiveTab("heroTags")}
+          className={`px-4 py-2 rounded-md font-semibold ${
+            activeTab === "heroTags"
+              ? "bg-violet-600"
+              : "bg-slate-800 hover:bg-slate-700 text-white/80"
+          }`}
+        >
+          🎯 Hlavní tagy
+        </button>
       </nav>
 
       {/* === OBSAH SEKCE === */}
@@ -253,6 +269,13 @@ export default function AdminDashboard({ user, onLogout }) {
                 }
                 className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
               />
+              <input
+                type="text"
+                placeholder="Tagy (oddělené čárkou – např. Party, Seznamka)"
+                value={newEvent.tags}
+                onChange={(e) => setNewEvent({ ...newEvent, tags: e.target.value })}
+                className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
+              />
               <button
                 type="submit"
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md md:col-span-2"
@@ -280,6 +303,18 @@ export default function AdminDashboard({ user, onLogout }) {
                         📅 {ev.date} | 📍 {ev.place}
                       </p>
                       <p className="text-sm text-gray-400 mt-1">{ev.description}</p>
+                      {ev.tags && ev.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2 text-xs text-fuchsia-300">
+                          {ev.tags.map((tag, i) => (
+                            <span
+                              key={i}
+                              className="border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 rounded-full"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => handleDeleteEvent(ev.id)}
@@ -377,9 +412,11 @@ export default function AdminDashboard({ user, onLogout }) {
         </section>
       )}
       {activeTab === "crew" && <AdminCrew />}
+      {activeTab === "heroTags" && <AdminHeroTags />}
     </div>
   );
 }
+
 
 
 
