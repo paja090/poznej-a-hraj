@@ -77,7 +77,7 @@ export default function PublicApp() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
-  const [heroTags, setHeroTags] = useState([]);
+const [heroTags, setHeroTags] = useState([]);
 
   const handleSmoothScroll = (e, id) => {
     e.preventDefault();
@@ -87,11 +87,11 @@ export default function PublicApp() {
 
   // === Načti tagy ===
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
-      setHeroTags(snapshot.docs.map((doc) => doc.data().title));
-    });
-    return () => unsub();
-  }, []);
+  const unsub = onSnapshot(collection(db, "heroTags"), (snapshot) => {
+    setHeroTags(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+  });
+  return () => unsub();
+}, []);
 
 
 
