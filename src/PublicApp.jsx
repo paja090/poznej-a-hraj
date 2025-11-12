@@ -54,17 +54,11 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-
-
+// === DATA (statické části zůstávají) ===
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
   { title: "Hookah & Chill", description: "vodní dýmka & chill", votes: 4 },
-];
-const crew = [
-  { name: "Marek", role: "Moderátor", desc: "Připravuje výzvy a dělá atmosféru.", photo: "https://i.pravatar.cc/200?img=12" },
-  { name: "Petra", role: "Koordinátorka", desc: "Propojuje hosty a hlídá flow večera.", photo: "https://i.pravatar.cc/200?img=47" },
-  { name: "Tomáš", role: "DJ & Tech", desc: "Hudba, světla a technika vyladěná na party.", photo: "https://i.pravatar.cc/200?img=33" },
 ];
 const reviews = [
   { text: "Skvěle připravené aktivity, poznala jsem úžasné lidi.", author: "Anna" },
@@ -81,29 +75,17 @@ export default function PublicApp() {
   const [gallery, setGallery] = useState([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
-  const handleSmoothScroll = (e, id) => {
-  e.preventDefault();
-  const target = document.querySelector(id);
-  if (target) {
-    target.scrollIntoView({ behavior: "smooth" });
-  }
-};
-  const [crewMembers, setCrewMembers] = useState([]);
-const [loadingCrew, setLoadingCrew] = useState(true);
-  export default function PublicApp() {
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [upcoming, setUpcoming] = useState([]);
-  const [past, setPast] = useState([]);
-  const [stats, setStats] = useState({ events: 0, past: 0, attendees: 0, reviews: 0 });
-  const [gallery, setGallery] = useState([]);
-  const [loadingGallery, setLoadingGallery] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
-
-  // ✅ sem patří i heroTags
   const [heroTags, setHeroTags] = useState([]);
 
+  const handleSmoothScroll = (e, id) => {
+    e.preventDefault();
+    const target = document.querySelector(id);
+    if (target) target.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // === Načti tagy ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
       setHeroTags(snapshot.docs.map((doc) => doc.data().title));
