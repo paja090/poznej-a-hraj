@@ -55,14 +55,16 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
 }
 
 // === DATA (statické části zůstávají) ===
-const [heroTags, setHeroTags] = useState([]);
+// ✅ sem patří i heroTags
+  const [heroTags, setHeroTags] = useState([]);
 
-useEffect(() => {
-  const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
-    setHeroTags(snapshot.docs.map((doc) => doc.data().title));
-  });
-  return () => unsub();
-}, []);
+  // načtení tagů
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
+      setHeroTags(snapshot.docs.map((doc) => doc.data().title));
+    });
+    return () => unsub();
+  }, []);
 
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
