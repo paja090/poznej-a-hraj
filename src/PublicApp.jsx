@@ -329,9 +329,119 @@ export default function PublicApp() {
         )}
 
         {/* === FOOTER === */}
-        <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
-          © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
-        </footer>
+       {/* === FOOTER === */}
+<footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
+  <div className="flex flex-col items-center gap-4">
+    <p>
+      © {new Date().getFullYear()} <strong>Poznej &amp; Hraj</strong> · Těšíme se na další společnou hru!
+    </p>
+
+    <div className="flex gap-5">
+      {/* Instagram */}
+      <a
+        href="https://instagram.com/poznejahraj"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+        className="group relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:shadow-[0_0_25px_rgba(236,72,153,0.4)] hover:border-fuchsia-400"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="w-5 h-5 text-white/70 group-hover:text-fuchsia-400 transition-colors"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <circle cx="17.5" cy="6.5" r="0.5" />
+        </svg>
+      </a>
+
+      {/* Facebook */}
+      <a
+        href="https://facebook.com/poznejahraj"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Facebook"
+        className="group relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] hover:border-violet-400"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="w-5 h-5 text-white/70 group-hover:text-violet-400 transition-colors"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9.197 21V12H6v-3.5h3.197V6.174C9.197 3.004 10.982 2 13.694 2c1.239 0 2.303.09 2.614.132v3.033h-1.796c-1.41 0-1.682.668-1.682 1.649V8.5H16L15.5 12h-2.67v9h-3.633z"
+          />
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>
+{/* === FOOTER === */}
+<footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
+  <div className="flex flex-col items-center gap-4">
+    <p>
+      © {new Date().getFullYear()} <strong>Poznej &amp; Hraj</strong> · Těšíme se na další společnou hru!
+    </p>
+
+    <div className="flex gap-5">
+      {/* Instagram */}
+      <a
+        href="https://instagram.com/poznejahraj"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Instagram"
+        className="group relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:shadow-[0_0_25px_rgba(236,72,153,0.4)] hover:border-fuchsia-400"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="w-5 h-5 text-white/70 group-hover:text-fuchsia-400 transition-colors"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <circle cx="17.5" cy="6.5" r="0.5" />
+        </svg>
+      </a>
+
+      {/* Facebook */}
+      <a
+        href="https://facebook.com/poznejahraj"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Facebook"
+        className="group relative grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] hover:border-violet-400"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="w-5 h-5 text-white/70 group-hover:text-violet-400 transition-colors"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9.197 21V12H6v-3.5h3.197V6.174C9.197 3.004 10.982 2 13.694 2c1.239 0 2.303.09 2.614.132v3.033h-1.796c-1.41 0-1.682.668-1.682 1.649V8.5H16L15.5 12h-2.67v9h-3.633z"
+          />
+        </svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
       </div>
     </div>
   );
