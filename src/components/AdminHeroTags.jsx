@@ -27,7 +27,7 @@ export default function AdminHeroTags() {
     e.preventDefault();
     if (!newTag.trim()) return;
     await addDoc(collection(db, "heroTags"), {
-      text: newTag.trim(),
+      label: newTag.trim(), // ✅ sjednoceno
       createdAt: serverTimestamp(),
     });
     setNewTag("");
@@ -69,7 +69,7 @@ export default function AdminHeroTags() {
               key={t.id}
               className="border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 rounded-full flex items-center gap-2"
             >
-              <span>{t.text}</span>
+              <span>{t.label}</span> {/* ✅ sjednoceno */}
               <button
                 onClick={() => handleDelete(t.id)}
                 className="text-red-400 hover:text-red-500 text-xs"
@@ -83,3 +83,4 @@ export default function AdminHeroTags() {
     </section>
   );
 }
+
