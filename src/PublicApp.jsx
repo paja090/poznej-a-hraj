@@ -81,6 +81,14 @@ export default function PublicApp() {
   const [gallery, setGallery] = useState([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
+  const handleSmoothScroll = (e, id) => {
+  e.preventDefault();
+  const target = document.querySelector(id);
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
 
   // === Načti akce, rezervace, feedback ===
   useEffect(() => {
@@ -146,15 +154,16 @@ export default function PublicApp() {
             </div>
           </div>
           <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm shadow-md backdrop-blur">
-            <ul className="flex flex-wrap items-center gap-3 text-white/70">
-              <li><a href="#events" className="hover:text-white">Akce</a></li>
-              <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
-              <li><a href="#poll" className="hover:text-white">Anketa</a></li>
-              <li><a href="#crew" className="hover:text-white">Tým</a></li>
-              <li><a href="#reviews" className="hover:text-white">Recenze</a></li>
-              <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
-            </ul>
-          </nav>
+  <ul className="flex flex-wrap items-center gap-3 text-white/70">
+    <li><a href="#events" onClick={(e) => handleSmoothScroll(e, "#events")} className="hover:text-white">Akce</a></li>
+    <li><a href="#stats" onClick={(e) => handleSmoothScroll(e, "#stats")} className="hover:text-white">Statistiky</a></li>
+    <li><a href="#poll" onClick={(e) => handleSmoothScroll(e, "#poll")} className="hover:text-white">Anketa</a></li>
+    <li><a href="#crew" onClick={(e) => handleSmoothScroll(e, "#crew")} className="hover:text-white">Tým</a></li>
+    <li><a href="#reviews" onClick={(e) => handleSmoothScroll(e, "#reviews")} className="hover:text-white">Recenze</a></li>
+    <li><a href="#feedback" onClick={(e) => handleSmoothScroll(e, "#feedback")} className="hover:text-white">Kontakt</a></li>
+  </ul>
+</nav>
+
         </header>
 
         {/* === HERO === */}
