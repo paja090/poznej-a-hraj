@@ -261,21 +261,83 @@ export default function PublicApp() {
           </div>
         </section>
 
-        {/* === GALERIE === */}
-        <section id="gallery" className="mt-16 space-y-6">
-          <h3 className="text-xl font-semibold">Momentky z večerů</h3>
-          <p className="text-sm text-white/60">📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong></p>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {galleryImages.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt="Momentka"
-                className="rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
-              />
-            ))}
-          </div>
-        </section>
+{/* === GALERIE === */}
+<section id="gallery" className="mt-16 space-y-6">
+  <h3 className="text-xl font-semibold">Momentky z večerů</h3>
+  <p className="text-sm text-white/60">
+    📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong>
+  </p>
+
+  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    {galleryImages.map((src, i) => (
+      <img
+        key={i}
+        src={src}
+        alt="Momentka"
+        onClick={() => setSelectedImage(src)}
+        className="cursor-pointer rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
+      />
+    ))}
+  </div>
+
+  {/* === LIGHTBOX === */}
+  {selectedImage && (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      onClick={() => setSelectedImage(null)}
+    >
+      <img
+        src={selectedImage}
+        alt="Zvětšená fotka"
+        className="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl border border-white/10"
+      />
+      <button
+        className="absolute top-6 right-6 text-white/80 hover:text-white text-2xl font-bold"
+        onClick={() => setSelectedImage(null)}
+      >
+        ✕
+      </button>
+    </div>
+  )}
+</section>{/* === GALERIE === */}
+<section id="gallery" className="mt-16 space-y-6">
+  <h3 className="text-xl font-semibold">Momentky z večerů</h3>
+  <p className="text-sm text-white/60">
+    📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong>
+  </p>
+
+  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    {galleryImages.map((src, i) => (
+      <img
+        key={i}
+        src={src}
+        alt="Momentka"
+        onClick={() => setSelectedImage(src)}
+        className="cursor-pointer rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
+      />
+    ))}
+  </div>
+
+  {/* === LIGHTBOX === */}
+  {selectedImage && (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      onClick={() => setSelectedImage(null)}
+    >
+      <img
+        src={selectedImage}
+        alt="Zvětšená fotka"
+        className="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl border border-white/10"
+      />
+      <button
+        className="absolute top-6 right-6 text-white/80 hover:text-white text-2xl font-bold"
+        onClick={() => setSelectedImage(null)}
+      >
+        ✕
+      </button>
+    </div>
+  )}
+</section>
 
         {/* === RECENZE === */}
         <section id="reviews" className="mt-16 space-y-6">
