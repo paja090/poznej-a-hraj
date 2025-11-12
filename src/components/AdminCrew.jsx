@@ -8,7 +8,8 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db, storage } from "../firebaseConfig";
 
 export default function AdminCrew() {
   const [crew, setCrew] = useState([]);
@@ -16,10 +17,11 @@ export default function AdminCrew() {
     name: "",
     role: "",
     desc: "",
-    photo: "",
   });
+  const [newPhoto, setNewPhoto] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  // 🔹 Načti tým z Firestore
+  // 🔹 Načíst tým z Firestore
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "crew"), (snap) => {
       setCrew(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -27,30 +29,60 @@ export default function AdminCrew() {
     return () => unsub();
   }, []);
 
-  // 🔹 Přidat nového člena
-  const handleAddMember = async (e) => {
+  // 🔹 Přidat člena
+  const handleAdd = async (e) => {
     e.preventDefault();
-    if (!newMember.name || !newMember.role) return;
-    await addDoc(collection(db, "crew"), {
-      ...newMember,
-      createdAt: serverTimestamp(),
-    });
-    setNewMember({ name: "", role: "", desc: "", photo: "" });
+    if (!newMember.name || !newMember.role) return alert("Vyplň jméno a roli");
+
+    try {
+      setUploading(true);
+      let photoURL = "";
+
+      // ✅ Pokud je vybraná fotka, nahraj ji do Firebase Storage
+      if (newPhoto) {
+        const fileRef = ref(storage, `crew/${Date.now()}_${newPhoto.name}`);
+        await uploadBytes(fileRef, newPhoto);
+        photoURL = await getDownloadURL(fileRef);
+      }
+
+      // ✅ Ulož data člena do Firestore
+      await addDoc(collection(db, "crew"), {
+        ...newMember,
+        photo: photoURL,
+        createdAt: serverTimestamp(),
+      });
+
+      // Reset formuláře
+      setNewMember({ name: "", role: "", desc: "" });
+      setNewPhoto(null);
+    } catch (error) {
+      console.error("Chyba při přidávání člena:", error);
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // 🔹 Smazat člena
-  const handleDelete = async (id) => {
+  // 🔹 Smazat člena (včetně fotky, pokud existuje)
+  const handleDelete = async (id, photoURL) => {
     if (window.confirm("Opravdu smazat člena týmu?")) {
-      await deleteDoc(doc(db, "crew", id));
+      try {
+        await deleteDoc(doc(db, "crew", id));
+        if (photoURL) {
+          const fileRef = ref(storage, photoURL);
+          await deleteObject(fileRef);
+        }
+      } catch (err) {
+        console.error("Chyba při mazání člena:", err);
+      }
     }
   };
 
   return (
-    <div className="bg-slate-800 p-6 rounded-xl shadow-lg text-white">
-      <h2 className="text-xl font-semibold mb-4">👥 Správa týmu</h2>
+    <section className="bg-slate-800 p-6 rounded-xl shadow-lg text-white">
+      <h2 className="text-xl font-semibold mb-6">👥 Správa týmu (Crew)</h2>
 
-      {/* FORMULÁŘ */}
-      <form onSubmit={handleAddMember} className="grid gap-4 md:grid-cols-2 mb-8">
+      {/* ✅ FORMULÁŘ */}
+      <form onSubmit={handleAdd} className="grid gap-4 md:grid-cols-2 mb-8">
         <input
           type="text"
           placeholder="Jméno"
@@ -67,61 +99,5 @@ export default function AdminCrew() {
           className="bg-slate-700 p-2 rounded-md text-white"
           required
         />
-        <input
-          type="text"
-          placeholder="URL fotky"
-          value={newMember.photo}
-          onChange={(e) => setNewMember({ ...newMember, photo: e.target.value })}
-          className="bg-slate-700 p-2 rounded-md text-white"
-        />
-        <textarea
-          placeholder="Popis"
-          value={newMember.desc}
-          onChange={(e) => setNewMember({ ...newMember, desc: e.target.value })}
-          className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
-        />
-        <button
-          type="submit"
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md md:col-span-2"
-        >
-          ➕ Přidat člena
-        </button>
-      </form>
 
-      {/* SEZNAM */}
-      {crew.length === 0 ? (
-        <p className="text-gray-400">Zatím žádní členové týmu.</p>
-      ) : (
-        <ul className="space-y-3">
-          {crew.map((c) => (
-            <li
-              key={c.id}
-              className="bg-slate-700 p-4 rounded-lg flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4">
-                {c.photo && (
-                  <img
-                    src={c.photo}
-                    alt={c.name}
-                    className="w-12 h-12 rounded-full object-cover border border-white/20"
-                  />
-                )}
-                <div>
-                  <p className="font-semibold">{c.name}</p>
-                  <p className="text-sm text-fuchsia-300">{c.role}</p>
-                  <p className="text-xs text-white/60">{c.desc}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleDelete(c.id)}
-                className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm"
-              >
-                🗑️ Smazat
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+        {/* ✅ Nahrání fotky */}
