@@ -1,3 +1,4 @@
+// src/components/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import { db } from "../firebaseConfig";
 import {
@@ -8,7 +9,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-import AdminPolls from "./components/AdminPolls.jsx";
+import AdminPolls from "./AdminPolls.jsx"; // ✅ OPRAVENO – správná cesta
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("events");
@@ -123,7 +124,7 @@ export default function AdminDashboard({ user, onLogout }) {
         </button>
       </nav>
 
-      {/* === OBSAH SEKCE === */}
+      {/* === SEKCE OBSAHU === */}
       {activeTab === "events" && (
         <>
           {/* 🗓️ Přidat akci */}
@@ -260,5 +261,6 @@ export default function AdminDashboard({ user, onLogout }) {
     </div>
   );
 }
+
 
 
