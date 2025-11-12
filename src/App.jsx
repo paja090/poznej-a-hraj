@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
@@ -19,10 +19,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Veřejná část */}
         <Route path="/" element={<PublicApp />} />
-
-        {/* Admin sekce */}
         <Route
           path="/admin"
           element={
@@ -37,4 +34,5 @@ export default function App() {
     </Router>
   );
 }
+
 
