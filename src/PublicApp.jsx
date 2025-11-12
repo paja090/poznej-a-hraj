@@ -88,6 +88,9 @@ export default function PublicApp() {
     target.scrollIntoView({ behavior: "smooth" });
   }
 };
+  const [crewMembers, setCrewMembers] = useState([]);
+const [loadingCrew, setLoadingCrew] = useState(true);
+
 
 
   // === Načti akce, rezervace, feedback ===
@@ -117,6 +120,15 @@ export default function PublicApp() {
     });
     return () => unsub();
   }, []);
+// === Načti tým (Crew) z Firestore ===
+useEffect(() => {
+  const q = query(collection(db, "crew"), orderBy("createdAt", "desc"));
+  const unsub = onSnapshot(q, (snapshot) => {
+    setCrewMembers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    setLoadingCrew(false);
+  });
+  return () => unsub();
+}, []);
 
   // === Načti galerii z Firestore ===
   useEffect(() => {
@@ -264,22 +276,36 @@ export default function PublicApp() {
 
 
         {/* === CREW === */}
-        <section id="crew" className="mt-16 space-y-6">
-          <h3 className="text-xl font-semibold">The Crew</h3>
-          <div className="grid gap-6 md:grid-cols-3">
-            {crew.map((m) => (
-              <div
-                key={m.name}
-                className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-fuchsia-400/50 transition"
-              >
-                <img src={m.photo} alt={m.name} className="h-24 w-24 mx-auto rounded-full border border-white/20" />
-                <p className="mt-3 font-semibold text-white">{m.name}</p>
-                <p className="text-sm text-fuchsia-300">{m.role}</p>
-                <p className="mt-2 text-sm text-white/70">{m.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+<section id="crew" className="mt-16 space-y-6">
+  <h3 className="text-xl font-semibold">The Crew</h3>
+
+  {loadingCrew ? (
+    <p className="text-white/50 text-sm">Načítám tým...</p>
+  ) : crewMembers.length === 0 ? (
+    <p className="text-white/50 text-sm">Zatím žádní členové týmu.</p>
+  ) : (
+    <div className="grid gap-6 md:grid-cols-3">
+      {crewMembers.map((m) => (
+        <div
+          key={m.id}
+          className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-fuchsia-400/50 transition"
+        >
+          {m.photo && (
+            <img
+              src={m.photo}
+              alt={m.name}
+              className="h-24 w-24 mx-auto rounded-full border border-white/20 object-cover"
+            />
+          )}
+          <p className="mt-3 font-semibold text-white">{m.name}</p>
+          <p className="text-sm text-fuchsia-300">{m.role}</p>
+          <p className="mt-2 text-sm text-white/70">{m.desc}</p>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
 
         {/* === GALERIE === */}
         <section id="gallery" className="mt-16 space-y-6">
