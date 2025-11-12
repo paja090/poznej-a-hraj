@@ -8,7 +8,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-import AdminPolls from "./components/admin/AdminPolls.jsx";
+import AdminPolls from "./components/AdminPolls.jsx";
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("events");
