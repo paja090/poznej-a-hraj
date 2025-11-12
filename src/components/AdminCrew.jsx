@@ -101,3 +101,64 @@ export default function AdminCrew() {
         />
 
         {/* ✅ Nahrání fotky */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewPhoto(e.target.files[0])}
+          className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
+        />
+
+        <textarea
+          placeholder="Popis"
+          value={newMember.desc}
+          onChange={(e) => setNewMember({ ...newMember, desc: e.target.value })}
+          className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
+        />
+
+        <button
+          type="submit"
+          disabled={uploading}
+          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md md:col-span-2"
+        >
+          {uploading ? "Nahrávám..." : "➕ Přidat člena"}
+        </button>
+      </form>
+
+      {/* ✅ SEZNAM ČLENŮ */}
+      {crew.length === 0 ? (
+        <p className="text-gray-400">Zatím žádní členové.</p>
+      ) : (
+        <ul className="space-y-3">
+          {crew.map((m) => (
+            <li
+              key={m.id}
+              className="bg-slate-700 p-4 rounded-xl flex items-center justify-between"
+            >
+              <div className="flex items-center gap-4">
+                {m.photo && (
+                  <img
+                    src={m.photo}
+                    alt={m.name}
+                    className="w-12 h-12 rounded-full object-cover border border-white/20"
+                  />
+                )}
+                <div>
+                  <p className="font-semibold">{m.name}</p>
+                  <p className="text-sm text-fuchsia-300">{m.role}</p>
+                  <p className="text-xs text-white/60">{m.desc}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => handleDelete(m.id, m.photo)}
+                className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm"
+              >
+                🗑️ Smazat
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
