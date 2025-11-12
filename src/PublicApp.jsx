@@ -5,6 +5,9 @@ import { db } from "./firebaseConfig";
 
 import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
+import PollSection from "./components/PollSection.jsx";
+...
+<PollSection />
 
 // === MINI-KOMPONENTY ===
 function StatCard({ label, value }) {
