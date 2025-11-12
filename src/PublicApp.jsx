@@ -7,7 +7,7 @@ import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
 
-// === MINI-KOMPONENTY ===
+// === MINI KOMPONENTY ===
 function StatCard({ label, value }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-md backdrop-blur-sm hover:shadow-[0_0_20px_rgba(236,72,153,0.2)] transition">
@@ -54,12 +54,13 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-// === DATA (statické části zůstávají) ===
+// === STATICKÁ DATA ===
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
   { title: "Hookah & Chill", description: "vodní dýmka & chill", votes: 4 },
 ];
+
 const reviews = [
   { text: "Skvěle připravené aktivity, poznala jsem úžasné lidi.", author: "Anna" },
   { text: "Program odsýpal a moderátoři byli k nezaplacení.", author: "Jakub" },
@@ -77,33 +78,22 @@ export default function PublicApp() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
-// === Načti tagy z Firestore ===
-const [heroTags, setHeroTags] = useState([]);
+  const [heroTags, setHeroTags] = useState([]);
 
+  // === SMOOTH SCROLL ===
   const handleSmoothScroll = (e, id) => {
     e.preventDefault();
     const target = document.querySelector(id);
     if (target) target.scrollIntoView({ behavior: "smooth" });
   };
 
+  // === HERO TAGS ===
   useEffect(() => {
-  const unsub = onSnapshot(collection(db, "heroTags"), (snapshot) => {
-    setHeroTags(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  });
-  return () => unsub();
-}, []);
-
-// === HERO TAGS (v renderu)
-<div className="mt-6 flex flex-wrap gap-3">
-  {heroTags.map((tag) => (
-    <span
-      key={tag.id}
-      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-fuchsia-400/50 hover:text-white"
-    >
-      {tag.label}
-    </span>
-  ))}
-</div>
+    const unsub = onSnapshot(collection(db, "heroTags"), (snapshot) => {
+      setHeroTags(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, []);
 
 
 
