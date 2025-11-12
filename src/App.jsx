@@ -6,7 +6,7 @@ import { auth } from "./firebaseConfig";
 
 import PublicApp from "./PublicApp.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
-import Login from "./components/Login.jsx";
+import AdminLogin from "./components/AdminLogin.jsx"; // ✅ změna
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -26,7 +26,7 @@ export default function App() {
             user ? (
               <AdminDashboard user={user} onLogout={() => signOut(auth)} />
             ) : (
-              <Login onLogin={setUser} />
+              <AdminLogin onLogin={setUser} /> // ✅ změna
             )
           }
         />
@@ -34,5 +34,6 @@ export default function App() {
     </Router>
   );
 }
+
 
 
