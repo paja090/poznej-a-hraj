@@ -54,17 +54,7 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-// === DATA (statické části zůstávají) ===
-// ✅ sem patří i heroTags
-  const [heroTags, setHeroTags] = useState([]);
 
-  // načtení tagů
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
-      setHeroTags(snapshot.docs.map((doc) => doc.data().title));
-    });
-    return () => unsub();
-  }, []);
 
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
@@ -100,6 +90,27 @@ export default function PublicApp() {
 };
   const [crewMembers, setCrewMembers] = useState([]);
 const [loadingCrew, setLoadingCrew] = useState(true);
+  export default function PublicApp() {
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [upcoming, setUpcoming] = useState([]);
+  const [past, setPast] = useState([]);
+  const [stats, setStats] = useState({ events: 0, past: 0, attendees: 0, reviews: 0 });
+  const [gallery, setGallery] = useState([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [crewMembers, setCrewMembers] = useState([]);
+  const [loadingCrew, setLoadingCrew] = useState(true);
+
+  // ✅ sem patří i heroTags
+  const [heroTags, setHeroTags] = useState([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "tags"), (snapshot) => {
+      setHeroTags(snapshot.docs.map((doc) => doc.data().title));
+    });
+    return () => unsub();
+  }, []);
+
 
 
 
