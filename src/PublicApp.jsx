@@ -77,6 +77,7 @@ export default function PublicApp() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
+// === Načti tagy z Firestore ===
 const [heroTags, setHeroTags] = useState([]);
 
   const handleSmoothScroll = (e, id) => {
@@ -85,13 +86,24 @@ const [heroTags, setHeroTags] = useState([]);
     if (target) target.scrollIntoView({ behavior: "smooth" });
   };
 
-  // === Načti tagy ===
   useEffect(() => {
   const unsub = onSnapshot(collection(db, "heroTags"), (snapshot) => {
     setHeroTags(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
   });
   return () => unsub();
 }, []);
+
+// === HERO TAGS (v renderu)
+<div className="mt-6 flex flex-wrap gap-3">
+  {heroTags.map((tag) => (
+    <span
+      key={tag.id}
+      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-fuchsia-400/50 hover:text-white"
+    >
+      {tag.label}
+    </span>
+  ))}
+</div>
 
 
 
