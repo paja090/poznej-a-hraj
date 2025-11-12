@@ -30,12 +30,28 @@ export default function FeedbackForm() {
 
     setLoading(true);
     try {
+      // 🔹 1) Odeslat do vlastního backendu / Firestore
       await sendFeedback(form, file);
+
+      // 🔹 2) Odeslat i do Formspree
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('email', form.email);
+      formData.append('message', form.message);
+      if (file) formData.append('attachment', file);
+
+      await fetch('https://formspree.io/f/xovyawqv', {
+        method: 'POST',
+        body: formData,
+        headers: { Accept: 'application/json' },
+      });
+
       setSuccess(true);
       setForm(initialForm);
       setFile(null);
       event.target.reset();
     } catch (err) {
+      console.error(err);
       setError(err.message || 'Odeslání se nezdařilo. Zkus to prosím znovu.');
     } finally {
       setLoading(false);
@@ -69,6 +85,7 @@ export default function FeedbackForm() {
           />
         </label>
       </div>
+
       <label className="flex flex-col gap-2 text-sm text-white/70">
         Zpráva
         <textarea
@@ -81,6 +98,7 @@ export default function FeedbackForm() {
           className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
         />
       </label>
+
       <label className="flex flex-col gap-2 text-sm text-white/70">
         Přilož fotku (volitelné)
         <input
@@ -90,8 +108,14 @@ export default function FeedbackForm() {
           className="rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-base text-white/70 file:mr-4 file:rounded-full file:border-0 file:bg-gradient-to-r file:from-a1 file:to-a2 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#071022]"
         />
       </label>
+
       <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
-        <span>Raději e‑mail? Napiš na <a className="text-a2 underline" href="mailto:poznejahraj@seznam.cz">poznejahraj@seznam.cz</a></span>
+        <span>
+          Raději e-mail? Napiš na{' '}
+          <a className="text-a2 underline" href="mailto:poznejahraj@seznam.cz">
+            poznejahraj@seznam.cz
+          </a>
+        </span>
         <button
           type="submit"
           disabled={loading}
@@ -100,8 +124,13 @@ export default function FeedbackForm() {
           {loading ? 'Odesílání…' : 'Odeslat zprávu'}
         </button>
       </div>
+
       {error && <p className="text-sm text-red-300">{error}</p>}
-      {success && <p className="rounded-xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">Děkujeme za zpětnou vazbu!</p>}
+      {success && (
+        <p className="rounded-xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">
+          Děkujeme za zpětnou vazbu!
+        </p>
+      )}
     </form>
   );
 }
