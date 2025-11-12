@@ -17,7 +17,8 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import AdminPolls from "./AdminPolls.jsx"; // ✅ OPRAVENO – správná cesta
+import AdminPolls from "./AdminPolls.jsx";
+import AdminCrew from "./AdminCrew.jsx"; // ✅ nová komponenta
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("events");
@@ -82,10 +83,12 @@ export default function AdminDashboard({ user, onLogout }) {
     });
   };
 
+  // === Smazat akci ===
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Opravdu smazat akci?")) await deleteDoc(doc(db, "events", id));
   };
 
+  // === Smazat rezervaci ===
   const handleDeleteReservation = async (id) => {
     if (window.confirm("Opravdu smazat rezervaci?"))
       await deleteDoc(doc(db, "reservations", id));
@@ -186,12 +189,22 @@ export default function AdminDashboard({ user, onLogout }) {
         >
           📷 Galerie
         </button>
+        <button
+          onClick={() => setActiveTab("crew")}
+          className={`px-4 py-2 rounded-md font-semibold ${
+            activeTab === "crew"
+              ? "bg-violet-600"
+              : "bg-slate-800 hover:bg-slate-700 text-white/80"
+          }`}
+        >
+          👥 Tým
+        </button>
       </nav>
 
-      {/* === SEKCE OBSAHU === */}
+      {/* === OBSAH SEKCE === */}
       {activeTab === "events" && (
         <>
-          {/* 🗓️ Přidat akci */}
+          {/* Přidat akci */}
           <section className="bg-slate-800 p-6 rounded-xl mb-10 shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Přidat novou akci</h2>
             <form onSubmit={handleAddEvent} className="grid gap-4 md:grid-cols-2">
@@ -199,9 +212,7 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="text"
                 placeholder="Název akce"
                 value={newEvent.title}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, title: e.target.value })
-                }
+                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
@@ -209,18 +220,14 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="text"
                 placeholder="Místo konání"
                 value={newEvent.place}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, place: e.target.value })
-                }
+                onChange={(e) => setNewEvent({ ...newEvent, place: e.target.value })}
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
               <input
                 type="date"
                 value={newEvent.date}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, date: e.target.value })
-                }
+                onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
                 className="bg-slate-700 p-2 rounded-md text-white"
                 required
               />
@@ -228,18 +235,14 @@ export default function AdminDashboard({ user, onLogout }) {
                 type="number"
                 placeholder="Kapacita"
                 value={newEvent.capacity}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, capacity: e.target.value })
-                }
+                onChange={(e) => setNewEvent({ ...newEvent, capacity: e.target.value })}
                 className="bg-slate-700 p-2 rounded-md text-white"
               />
               <input
                 type="number"
                 placeholder="Cena vstupenky (Kč)"
                 value={newEvent.price}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, price: e.target.value })
-                }
+                onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })}
                 className="bg-slate-700 p-2 rounded-md text-white"
               />
               <textarea
@@ -259,7 +262,7 @@ export default function AdminDashboard({ user, onLogout }) {
             </form>
           </section>
 
-          {/* 📋 Seznam akcí */}
+          {/* Seznam akcí */}
           <section>
             <h2 className="text-xl font-semibold mb-4">Seznam akcí</h2>
             {events.length === 0 ? (
@@ -276,9 +279,7 @@ export default function AdminDashboard({ user, onLogout }) {
                       <p className="text-sm text-gray-400">
                         📅 {ev.date} | 📍 {ev.place}
                       </p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {ev.description}
-                      </p>
+                      <p className="text-sm text-gray-400 mt-1">{ev.description}</p>
                     </div>
                     <button
                       onClick={() => handleDeleteEvent(ev.id)}
@@ -294,7 +295,6 @@ export default function AdminDashboard({ user, onLogout }) {
         </>
       )}
 
-      {/* === SEKCE REZERVACE === */}
       {activeTab === "reservations" && (
         <section>
           <h2 className="text-xl font-semibold mb-4">Rezervace</h2>
@@ -310,16 +310,13 @@ export default function AdminDashboard({ user, onLogout }) {
                   <div>
                     <p className="font-semibold">{r.name}</p>
                     <p className="text-sm text-gray-400">
-                      📅 {r.eventTitle} | {r.ageRange} | {r.gender} |{" "}
-                      {r.relationship}
+                      📅 {r.eventTitle} | {r.ageRange} | {r.gender} | {r.relationship}
                     </p>
                     <p className="text-sm text-gray-400">
                       👥 {r.peopleCount} os. · 📧 {r.email}
                     </p>
                     {r.message && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        💬 {r.message}
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">💬 {r.message}</p>
                     )}
                   </div>
                   <button
@@ -335,10 +332,7 @@ export default function AdminDashboard({ user, onLogout }) {
         </section>
       )}
 
-      {/* === SEKCE ANKETY === */}
       {activeTab === "polls" && <AdminPolls />}
-
-      {/* === SEKCE GALERIE === */}
       {activeTab === "gallery" && (
         <section>
           <h2 className="text-xl font-semibold mb-4">📷 Galerie (Firebase)</h2>
@@ -382,9 +376,11 @@ export default function AdminDashboard({ user, onLogout }) {
           </div>
         </section>
       )}
+      {activeTab === "crew" && <AdminCrew />}
     </div>
   );
 }
+
 
 
 
