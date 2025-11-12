@@ -1,20 +1,40 @@
-import { useState } from "react";
-import AdminLogin from "./components/AdminLogin";
-import AdminDashboard from "./components/AdminDashboard";
-import PublicApp from "./PublicApp";
+// src/App.jsx
+import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./firebaseConfig";
+
+import PublicApp from "./PublicApp.jsx";
+import AdminDashboard from "./components/AdminDashboard.jsx";
+import Login from "./components/Login.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const isAdminRoute = window.location.pathname.startsWith("/admin");
 
-  if (isAdminRoute) {
-    return user ? (
-      <AdminDashboard user={user} onLogout={() => setUser(null)} />
-    ) : (
-      <AdminLogin onLogin={(u) => setUser(u)} />
-    );
-  }
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
 
-  return <PublicApp />;
+  return (
+    <Router>
+      <Routes>
+        {/* Veřejná část */}
+        <Route path="/" element={<PublicApp />} />
+
+        {/* Admin sekce */}
+        <Route
+          path="/admin"
+          element={
+            user ? (
+              <AdminDashboard user={user} onLogout={() => signOut(auth)} />
+            ) : (
+              <Login onLogin={setUser} />
+            )
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
