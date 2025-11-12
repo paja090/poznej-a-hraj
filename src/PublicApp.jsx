@@ -95,10 +95,7 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
-
-
-
-  // === Načti akce, rezervace, feedback ===
+  // === AKCE ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
       const now = new Date();
@@ -112,6 +109,7 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
+  // === REZERVACE ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "reservations"), (snap) => {
       setStats((s) => ({ ...s, attendees: snap.size }));
@@ -119,23 +117,25 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
+  // === FEEDBACK ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "feedback"), (snap) => {
       setStats((s) => ({ ...s, reviews: snap.size }));
     });
     return () => unsub();
   }, []);
-// === Načti tým (Crew) z Firestore ===
-useEffect(() => {
-  const q = query(collection(db, "crew"), orderBy("createdAt", "desc"));
-  const unsub = onSnapshot(q, (snapshot) => {
-    setCrewMembers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    setLoadingCrew(false);
-  });
-  return () => unsub();
-}, []);
 
-  // === Načti galerii z Firestore ===
+  // === CREW ===
+  useEffect(() => {
+    const q = query(collection(db, "crew"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, (snapshot) => {
+      setCrewMembers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setLoadingCrew(false);
+    });
+    return () => unsub();
+  }, []);
+
+  // === GALERIE ===
   useEffect(() => {
     const loadGallery = async () => {
       try {
@@ -152,8 +152,7 @@ useEffect(() => {
     loadGallery();
   }, []);
 
-  const pollTotal = pollOptions.reduce((a, b) => a + b.votes, 0);
-
+  // === RENDER ===
   return (
     <div className="min-h-screen bg-[#05060a] font-rubik text-white">
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(124,58,237,0.25),transparent_60%),radial-gradient(40%_40%_at_80%_20%,rgba(236,72,153,0.15),transparent_60%)]" />
@@ -167,23 +166,24 @@ useEffect(() => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Poznej &amp; Hraj</h1>
-              <p className="text-sm text-white/70">Zábavné večery plné her, kvízů a nových známostí.</p>
+              <p className="text-sm text-white/70">
+                Zábavné večery plné her, kvízů a nových známostí.
+              </p>
             </div>
           </div>
           <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm shadow-md backdrop-blur">
-  <ul className="flex flex-wrap items-center gap-3 text-white/70">
-    <li><a href="#events" onClick={(e) => handleSmoothScroll(e, "#events")} className="hover:text-white">Akce</a></li>
-    <li><a href="#stats" onClick={(e) => handleSmoothScroll(e, "#stats")} className="hover:text-white">Statistiky</a></li>
-    <li><a href="#poll" onClick={(e) => handleSmoothScroll(e, "#poll")} className="hover:text-white">Anketa</a></li>
-    <li><a href="#crew" onClick={(e) => handleSmoothScroll(e, "#crew")} className="hover:text-white">Tým</a></li>
-    <li><a href="#reviews" onClick={(e) => handleSmoothScroll(e, "#reviews")} className="hover:text-white">Recenze</a></li>
-    <li><a href="#feedback" onClick={(e) => handleSmoothScroll(e, "#feedback")} className="hover:text-white">Kontakt</a></li>
-  </ul>
-</nav>
-
+            <ul className="flex flex-wrap items-center gap-3 text-white/70">
+              <li><a href="#events" onClick={(e) => handleSmoothScroll(e, "#events")} className="hover:text-white">Akce</a></li>
+              <li><a href="#stats" onClick={(e) => handleSmoothScroll(e, "#stats")} className="hover:text-white">Statistiky</a></li>
+              <li><a href="#poll" onClick={(e) => handleSmoothScroll(e, "#poll")} className="hover:text-white">Anketa</a></li>
+              <li><a href="#crew" onClick={(e) => handleSmoothScroll(e, "#crew")} className="hover:text-white">Tým</a></li>
+              <li><a href="#reviews" onClick={(e) => handleSmoothScroll(e, "#reviews")} className="hover:text-white">Recenze</a></li>
+              <li><a href="#feedback" onClick={(e) => handleSmoothScroll(e, "#feedback")} className="hover:text-white">Kontakt</a></li>
+            </ul>
+          </nav>
         </header>
 
-        {/* === HERO === */}
+       {/* === HERO === */}
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
             <iframe
@@ -200,17 +200,19 @@ useEffect(() => {
             >
               Rezervuj místo 🔔 Kapacita se rychle plní
             </button>
-            <h2 className="text-4xl font-extrabold leading-tight">Místo, kde se lidé potkávají přirozeně</h2>
+            <h2 className="text-4xl font-extrabold leading-tight">
+              Místo, kde se lidé potkávají přirozeně
+            </h2>
             <p className="mt-4 text-lg text-white/80">
               Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               {heroTags.map((tag) => (
                 <span
-                  key={tag}
+                  key={tag.id}
                   className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-fuchsia-400/50 hover:text-white"
                 >
-                  {tag}
+                  {tag.label || tag.text}
                 </span>
               ))}
             </div>
