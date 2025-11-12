@@ -55,6 +55,14 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
 
 // === DATA (do budoucna propojit s Firestore) ===
 const heroTags = ["🎮 Herní turnaje", "🎤 Live moderátoři", "📸 Foto koutek", "💬 Seznamování"];
+const galleryImages = [
+  "https://picsum.photos/seed/party01/800/533",
+  "https://picsum.photos/seed/party02/800/533",
+  "https://picsum.photos/seed/party03/800/533",
+  "https://picsum.photos/seed/party04/800/533",
+  "https://picsum.photos/seed/party05/800/533",
+  "https://picsum.photos/seed/party06/800/533",
+];
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
@@ -147,6 +155,12 @@ export default function PublicApp() {
             />
           </div>
           <div>
+            <button
+              type="button"
+              className="mb-6 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-5 py-2 text-sm font-semibold text-[#071022] shadow-lg transition hover:-translate-y-0.5"
+            >
+              Rezervuj místo 🔔 Kapacita se rychle plní
+            </button>
             <h2 className="text-4xl font-extrabold leading-tight">Místo, kde se lidé potkávají přirozeně</h2>
             <p className="mt-4 text-lg text-white/80">
               Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.
@@ -161,7 +175,32 @@ export default function PublicApp() {
                 </span>
               ))}
             </div>
+            <div className="mt-8 flex items-center gap-4 text-sm text-white/70">
+              <a href="https://instagram.com/poznejahraj" target="_blank" rel="noreferrer"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg">
+                📸
+              </a>
+              <a href="https://facebook.com/poznejahraj" target="_blank" rel="noreferrer"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg">
+                📘
+              </a>
+              <p className="text-sm text-white/60">Sleduj momentky a označ <strong>@poznejahraj</strong></p>
+            </div>
           </div>
+        </section>
+
+        {/* === ABOUT SECTION === */}
+        <section id="about" className="card mt-10">
+          <h3 className="text-xl font-semibold text-white">O projektu</h3>
+          <p className="mt-4 text-white/70">
+            <strong className="text-white">Poznej &amp; Hraj</strong> vzniklo z touhy spojovat lidi jinak — ne přes aplikace,
+            ale skrze zážitky, hry a skutečné emoce. Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají,
+            aby se každý cítil vítaný.
+          </p>
+          <p className="mt-4 text-white/70">
+            Program vede tým moderátorů. Dáváme dohromady mix aktivit: kvízy, mini-hry, výzvy v týmech i úkoly pro dvojice.
+            Díky řízenému programu se i introverti snadno zapojí a seznámení působí přirozeně.
+          </p>
         </section>
 
         {/* === STATISTIKY === */}
@@ -175,7 +214,7 @@ export default function PublicApp() {
           </div>
         </section>
 
-        {/* === NADCHÁZEJÍCÍ + PŘEDEŠLÉ AKCE === */}
+        {/* === AKCE === */}
         <section id="events" className="mt-14 space-y-12">
           <div>
             <h3 className="text-xl font-semibold mb-3">Nadcházející akce</h3>
@@ -243,6 +282,22 @@ export default function PublicApp() {
           </div>
         </section>
 
+        {/* === GALERIE === */}
+        <section id="gallery" className="mt-16 space-y-6">
+          <h3 className="text-xl font-semibold">Momentky z večerů</h3>
+          <p className="text-sm text-white/60">📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong></p>
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {galleryImages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt="Momentka"
+                className="rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
+              />
+            ))}
+          </div>
+        </section>
+
         {/* === RECENZE === */}
         <section id="reviews" className="mt-16 space-y-6">
           <h3 className="text-xl font-semibold">Recenze</h3>
@@ -275,12 +330,13 @@ export default function PublicApp() {
 
         {/* === FOOTER === */}
         <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
-          © {new Date().getFullYear()} Poznej & Hraj · Těšíme se na další společnou hru!
+          © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
         </footer>
       </div>
     </div>
   );
 }
+
 
 
 
