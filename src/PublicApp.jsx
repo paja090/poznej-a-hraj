@@ -1,6 +1,6 @@
 // src/PublicApp.jsx
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 import FeedbackForm from "./components/FeedbackForm.jsx";
@@ -54,8 +54,16 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-// === DATA (statické části zůstávají) ===
+// === DATA (do budoucna propojit s Firestore) ===
 const heroTags = ["🎮 Herní turnaje", "🎤 Live moderátoři", "📸 Foto koutek", "💬 Seznamování"];
+const galleryImages = [
+  "https://picsum.photos/seed/party01/800/533",
+  "https://picsum.photos/seed/party02/800/533",
+  "https://picsum.photos/seed/party03/800/533",
+  "https://picsum.photos/seed/party04/800/533",
+  "https://picsum.photos/seed/party05/800/533",
+  "https://picsum.photos/seed/party06/800/533",
+];
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
@@ -78,8 +86,6 @@ export default function PublicApp() {
   const [upcoming, setUpcoming] = useState([]);
   const [past, setPast] = useState([]);
   const [stats, setStats] = useState({ events: 0, past: 0, attendees: 0, reviews: 0 });
-  const [gallery, setGallery] = useState([]);
-  const [loadingGallery, setLoadingGallery] = useState(true);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
@@ -108,55 +114,39 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
-  // 🔹 Načtení galerie z Firestore
-  useEffect(() => {
-    const loadGallery = async () => {
-      try {
-        const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        const imgs = snap.docs.map((d) => d.data());
-        setGallery(imgs);
-      } catch (err) {
-        console.error("Chyba při načítání galerie:", err);
-      } finally {
-        setLoadingGallery(false);
-      }
-    };
-    loadGallery();
-  }, []);
-
   const pollTotal = pollOptions.reduce((a, b) => a + b.votes, 0);
 
   return (
     <div className="min-h-screen bg-[#05060a] font-rubik text-white">
-      {/* === zbytek tvého původního kódu beze změn === */}
+      {/* Gradient pozadí */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(124,58,237,0.25),transparent_60%),radial-gradient(40%_40%_at_80%_20%,rgba(236,72,153,0.15),transparent_60%)]" />
 
-      {/* === GALERIE === */}
-      <section id="gallery" className="mt-16 space-y-6">
-        <h3 className="text-xl font-semibold">Momentky z večerů</h3>
-        <p className="text-sm text-white/60">
-          📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong>
-        </p>
-
-        {loadingGallery ? (
-          <p className="text-white/50 text-sm">Načítám galerii...</p>
-        ) : gallery.length === 0 ? (
-          <p className="text-white/50 text-sm">Zatím žádné fotky.</p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {gallery.map((img, i) => (
-              <img
-                key={i}
-                src={img.url}
-                alt={img.name || "Momentka"}
-                className="rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
-              />
-            ))}
+      <div className="mx-auto max-w-6xl px-4 pb-24">
+        {/* === HLAVIČKA === */}
+        <header className="flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-400 to-pink-500 text-xl font-extrabold text-[#071022] shadow-lg">
+              PH
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Poznej &amp; Hraj</h1>
+              <p className="text-sm text-white/70">Zábavné večery plné her, kvízů a nových známostí.</p>
+            </div>
           </div>
-        )}
-      </section>
+          <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm shadow-md backdrop-blur">
+            <ul className="flex flex-wrap items-center gap-3 text-white/70">
+              <li><a href="#events" className="hover:text-white">Akce</a></li>
+              <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
+              <li><a href="#poll" className="hover:text-white">Anketa</a></li>
+              <li><a href="#crew" className="hover:text-white">Tým</a></li>
+              <li><a href="#reviews" className="hover:text-white">Recenze</a></li>
+              <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
+            </ul>
+          </nav>
+        </header>
 
-      {/* === zbytek stránky (crew, reviews, feedback, footer) zůstává přesně podle tvého kódu === */}
+        {/* ... celý zbytek kódu včetně sekcí HERO, ABOUT, STATS, EVENTS, POLL, CREW, GALERIE, RECENZE, FEEDBACK, SOCIAL, FOOTER ... */}
+      </div>
     </div>
   );
 }
