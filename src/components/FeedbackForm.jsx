@@ -30,28 +30,34 @@ export default function FeedbackForm() {
 
     setLoading(true);
     try {
-      // 🔹 1) Odeslat do vlastního backendu / Firestore
+      // 1️⃣ Uložení do Firestore
       await sendFeedback(form, file);
 
-      // 🔹 2) Odeslat i do Formspree
+      // 2️⃣ Odeslání do Formspree
       const formData = new FormData();
       formData.append('name', form.name);
       formData.append('email', form.email);
       formData.append('message', form.message);
       if (file) formData.append('attachment', file);
 
-      await fetch('https://formspree.io/f/xovyawqv', {
+      const response = await fetch('https://formspree.io/f/xovyawqv', {
         method: 'POST',
-        body: formData,
         headers: { Accept: 'application/json' },
+        body: formData,
       });
 
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Chyba Formspree: ${response.status}`);
+      }
+
+      console.log('✅ Odesláno do Formspree');
       setSuccess(true);
       setForm(initialForm);
       setFile(null);
       event.target.reset();
     } catch (err) {
-      console.error(err);
+      console.error('❌ Chyba při odesílání:', err);
       setError(err.message || 'Odeslání se nezdařilo. Zkus to prosím znovu.');
     } finally {
       setLoading(false);
@@ -128,9 +134,11 @@ export default function FeedbackForm() {
       {error && <p className="text-sm text-red-300">{error}</p>}
       {success && (
         <p className="rounded-xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">
-          Děkujeme za zpětnou vazbu!
+          Děkujeme za zpětnou vazbu! ✉️
         </p>
       )}
     </form>
   );
 }
+
+
