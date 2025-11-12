@@ -1,12 +1,11 @@
 // src/PublicApp.jsx
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
-
 
 // === MINI-KOMPONENTY ===
 function StatCard({ label, value }) {
@@ -55,16 +54,8 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
   );
 }
 
-// === DATA (do budoucna propojit s Firestore) ===
+// === DATA (statické části zůstávají) ===
 const heroTags = ["🎮 Herní turnaje", "🎤 Live moderátoři", "📸 Foto koutek", "💬 Seznamování"];
-const galleryImages = [
-  "https://picsum.photos/seed/party01/800/533",
-  "https://picsum.photos/seed/party02/800/533",
-  "https://picsum.photos/seed/party03/800/533",
-  "https://picsum.photos/seed/party04/800/533",
-  "https://picsum.photos/seed/party05/800/533",
-  "https://picsum.photos/seed/party06/800/533",
-];
 const pollOptions = [
   { title: "Retro Night", description: "80s & 90s", votes: 6 },
   { title: "Beer & Quiz", description: "kvízy + pivo", votes: 9 },
@@ -87,7 +78,11 @@ export default function PublicApp() {
   const [upcoming, setUpcoming] = useState([]);
   const [past, setPast] = useState([]);
   const [stats, setStats] = useState({ events: 0, past: 0, attendees: 0, reviews: 0 });
+  const [gallery, setGallery] = useState([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
 
+  // === Načti akce, rezervace, feedback ===
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
       const now = new Date();
@@ -115,11 +110,27 @@ export default function PublicApp() {
     return () => unsub();
   }, []);
 
+  // === Načti galerii z Firestore ===
+  useEffect(() => {
+    const loadGallery = async () => {
+      try {
+        const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        const imgs = snap.docs.map((d) => d.data());
+        setGallery(imgs);
+      } catch (err) {
+        console.error("Chyba při načítání galerie:", err);
+      } finally {
+        setLoadingGallery(false);
+      }
+    };
+    loadGallery();
+  }, []);
+
   const pollTotal = pollOptions.reduce((a, b) => a + b.votes, 0);
 
   return (
     <div className="min-h-screen bg-[#05060a] font-rubik text-white">
-      {/* Gradient pozadí */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(124,58,237,0.25),transparent_60%),radial-gradient(40%_40%_at_80%_20%,rgba(236,72,153,0.15),transparent_60%)]" />
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
@@ -264,17 +275,47 @@ export default function PublicApp() {
         {/* === GALERIE === */}
         <section id="gallery" className="mt-16 space-y-6">
           <h3 className="text-xl font-semibold">Momentky z večerů</h3>
-          <p className="text-sm text-white/60">📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong></p>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {galleryImages.map((src, i) => (
+          <p className="text-sm text-white/60">
+            📸 Sdílej své fotky s hashtagem <strong>#poznejahraj</strong>
+          </p>
+
+          {loadingGallery ? (
+            <p className="text-white/50 text-sm">Načítám galerii...</p>
+          ) : gallery.length === 0 ? (
+            <p className="text-white/50 text-sm">Zatím žádné fotky.</p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {gallery.map((img, i) => (
+                <img
+                  key={i}
+                  src={img.url}
+                  alt={img.name || "Momentka"}
+                  onClick={() => setSelectedImage(img.url)}
+                  className="cursor-pointer rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
+                />
+              ))}
+            </div>
+          )}
+
+          {/* === LIGHTBOX === */}
+          {selectedImage && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+              onClick={() => setSelectedImage(null)}
+            >
               <img
-                key={i}
-                src={src}
-                alt="Momentka"
-                className="rounded-2xl border border-white/10 object-cover h-40 w-full hover:scale-[1.03] hover:border-fuchsia-400/50 transition"
+                src={selectedImage}
+                alt="Zvětšená fotka"
+                className="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl border border-white/10"
               />
-            ))}
-          </div>
+              <button
+                className="absolute top-6 right-6 text-white/80 hover:text-white text-2xl font-bold"
+                onClick={() => setSelectedImage(null)}
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </section>
 
         {/* === RECENZE === */}
