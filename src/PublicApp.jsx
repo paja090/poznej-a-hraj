@@ -5,6 +5,11 @@ import { db } from "./firebaseConfig";
 
 import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm";
+import PollSection from "./components/PollSection";
+import CrewSection from "./components/CrewSection";
+import ReviewsSection from "./components/ReviewsSection";
+import GallerySection from "./components/GallerySection";
+
 
 // --- Pomocné mini-komponenty ---
 function StatCard({ label, value }) {
