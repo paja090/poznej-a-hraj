@@ -44,23 +44,40 @@ export default async function handler(req, res) {
   }
 
   // 🟢 Úspěšná platba — označíme rezervaci jako "paid"
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const reservationId = session.metadata.reservationId;
+if (event.type === "checkout.session.completed") {
+  const session = event.data.object;
+  const reservationId = session.metadata.reservationId;
 
-    if (reservationId) {
-      try {
-        await adminDb.collection("reservations").doc(reservationId).update({
-          paymentStatus: "paid",
-        });
+  if (reservationId) {
+    try {
+      // 1️⃣ Označit jako zaplaceno
+      await adminDb.collection("reservations").doc(reservationId).update({
+        paymentStatus: "paid",
+      });
 
-        console.log("🔥 Rezervace označena jako paid:", reservationId);
+      console.log("🔥 Rezervace označena jako paid:", reservationId);
 
-      } catch (error) {
-        console.error("❌ Firestore update failed:", error);
-      }
+      // 2️⃣ Odeslat HTML vstupenku s QR kódem
+      await fetch(`${process.env.DOMAIN}/api/send-ticket`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: session.customer_email,
+          name: session.customer_details?.name || "Host",
+          eventTitle: session.metadata.eventTitle,
+          reservationId,
+          peopleCount: session.metadata.peopleCount,
+        }),
+      });
+
+      console.log("📨 Vstupenka odeslána na email:", session.customer_email);
+
+    } catch (error) {
+      console.error("❌ Webhook finalize error:", error);
     }
   }
+}
+
 
   res.status(200).send("OK");
 }
