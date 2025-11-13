@@ -1,5 +1,6 @@
 import Stripe from "stripe";
-import { adminDb } from "../../firebaseAdmin.js";
+import { adminDb } from "./firebaseAdmin.js";
+
 
 // Vypneme defaultní body parsing – Stripe potřebuje raw body
 export const config = {
