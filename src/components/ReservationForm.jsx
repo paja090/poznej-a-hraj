@@ -14,6 +14,7 @@ export default function ReservationForm({ event, onClose }) {
   });
 
   const [status, setStatus] = useState("idle");
+  const [reservationData, setReservationData] = useState(null);
 
   // 🧩 univerzální změna formuláře
   const handleChange = (e) => {
@@ -26,7 +27,7 @@ export default function ReservationForm({ event, onClose }) {
     setStatus("sending");
 
     try {
-      // 1️⃣ Odeslat do Formspree (asynchronně)
+      // 1️⃣ Odeslat do Formspree
       const formspreeResponse = await fetch("https://formspree.io/f/xovyawqv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,32 +39,54 @@ export default function ReservationForm({ event, onClose }) {
 
       if (!formspreeResponse.ok) throw new Error("Formspree error");
 
-      // 2️⃣ Uložit do Firestore
-      await addDoc(collection(db, "reservations"), {
+      // 2️⃣ Uložit do Firestore a získat ID rezervace
+      const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
         eventTitle: event.title,
+        peopleCount: Number(formData.peopleCount),
+        price: event.price ?? null,
+        paymentStatus: "pending", // výchozí stav
         createdAt: serverTimestamp(),
       });
 
-      // ✅ Hotovo
-      setStatus("success");
-
-      // Vyčištění formuláře po odeslání
-      setFormData({
-        name: "",
-        email: "",
-        gender: "",
-        ageRange: "",
-        relationship: "",
-        peopleCount: 1,
-        message: "",
+      // 3️⃣ Uložit rezervaci do stavu pro Stripe
+      setReservationData({
+        id: docRef.id,
+        event,
+        ...formData,
       });
 
-      // Automatické zavření formuláře po pár sekundách
-      setTimeout(() => onClose(), 3000);
+      // 4️⃣ Úspěch
+      setStatus("success");
     } catch (error) {
       console.error("❌ Chyba při odesílání rezervace:", error);
       setStatus("error");
+    }
+  };
+
+  // 🔧 Stripe platba
+  const handleStripePayment = async () => {
+    if (!reservationData) return;
+
+    try {
+      const resp = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId: reservationData.id,
+          eventTitle: event.title,
+          price: event.price,
+          peopleCount: reservationData.peopleCount || 1,
+          email: reservationData.email,
+        }),
+      });
+
+      const data = await resp.json();
+      if (data.url) window.location.href = data.url;
+      else alert("Nepodařilo se otevřít platební bránu.");
+    } catch (err) {
+      console.error(err);
+      alert("Chyba při přípravě platby.");
     }
   };
 
@@ -73,7 +96,6 @@ export default function ReservationForm({ event, onClose }) {
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/70 hover:text-white text-lg"
-          title="Zavřít"
         >
           ✖
         </button>
@@ -82,13 +104,35 @@ export default function ReservationForm({ event, onClose }) {
           Rezervace: {event.title}
         </h2>
 
-        {status === "success" ? (
-          <p className="text-green-400 text-center font-medium">
-            ✅ Díky! Tvoje rezervace byla úspěšně odeslána.
-            <br />
-            Těšíme se na tebe!
-          </p>
+        {/* 🟢 Úspěch – zobrazíme volitelné tlačítko Stripe */}
+        {status === "success" && reservationData ? (
+          <div className="text-center space-y-4">
+            <p className="text-green-400 font-medium">
+              ✅ Tvoje rezervace byla úspěšně odeslána!
+            </p>
+
+            {event.price ? (
+              <button
+                onClick={handleStripePayment}
+                className="w-full bg-gradient-to-r from-fuchsia-400 to-pink-500 text-[#071022] py-2 rounded-lg font-semibold shadow-md hover:opacity-90 transition"
+              >
+                💳 Zaplatit online
+              </button>
+            ) : (
+              <p className="text-white/70 text-sm">
+                Tato akce nemá cenu – platba není potřeba.
+              </p>
+            )}
+
+            <button
+              onClick={onClose}
+              className="w-full bg-white/10 border border-white/30 py-2 rounded-lg font-medium text-white hover:bg-white/20 transition"
+            >
+              Zavřít
+            </button>
+          </div>
         ) : (
+          /* 🔄 Formulář */
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="text"
@@ -116,7 +160,7 @@ export default function ReservationForm({ event, onClose }) {
                 value={formData.gender}
                 onChange={handleChange}
                 required
-                className="p-2 rounded-lg bg-white/10 border border-white/20 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+                className="p-2 rounded-lg bg-white/10 border border-white/20"
               >
                 <option value="">Pohlaví</option>
                 <option value="Muž">Muž</option>
@@ -129,7 +173,7 @@ export default function ReservationForm({ event, onClose }) {
                 value={formData.ageRange}
                 onChange={handleChange}
                 required
-                className="p-2 rounded-lg bg-white/10 border border-white/20 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+                className="p-2 rounded-lg bg-white/10 border border-white/20"
               >
                 <option value="">Věk</option>
                 <option value="18–25">18–25</option>
@@ -144,7 +188,7 @@ export default function ReservationForm({ event, onClose }) {
               value={formData.relationship}
               onChange={handleChange}
               required
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             >
               <option value="">Vztahový stav</option>
               <option value="Single">Single</option>
@@ -158,7 +202,7 @@ export default function ReservationForm({ event, onClose }) {
               min="1"
               value={formData.peopleCount}
               onChange={handleChange}
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
               placeholder="Počet osob"
             />
 
@@ -167,7 +211,7 @@ export default function ReservationForm({ event, onClose }) {
               placeholder="Poznámka (volitelné)"
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/50 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
               rows="3"
             />
 
