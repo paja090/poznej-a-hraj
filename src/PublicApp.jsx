@@ -80,6 +80,19 @@ export default function PublicApp() {
   const [loadingCrew, setLoadingCrew] = useState(true);
   const [heroTags, setHeroTags] = useState([]);
 
+   // === Stripe návrat ===
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("stripe_success") === "1") {
+      alert("🎉 Platba proběhla úspěšně! Těšíme se na tebe na akci.");
+    }
+
+    if (params.get("stripe_cancel") === "1") {
+      console.log("Uživatel zrušil platbu.");
+    }
+  }, []);
+
   // === SMOOTH SCROLL ===
   const handleSmoothScroll = (e, id) => {
     e.preventDefault();
