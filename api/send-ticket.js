@@ -504,11 +504,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Rezervace nemá e-mail účastníka.' });
     }
 
-    const baseUrl =
-      process.env.PUBLIC_TICKET_BASE_URL || 'https://poznejahraj.cz';
-    const ticketUrl = `${baseUrl.replace(/\\/$/, '')}/ticket?id=${encodeURIComponent(
-      reservationId,
-    )}`;
+    const rawBase =
+  process.env.PUBLIC_TICKET_BASE_URL || 'https://poznejahraj.cz';
+const normalizedBase = rawBase.endsWith('/')
+  ? rawBase.slice(0, -1)
+  : rawBase;
+
+const ticketUrl = `${normalizedBase}/ticket?id=${encodeURIComponent(reservationId)}`;
 
     // 2) Vygeneruj QR kód (data URL, base64)
     const qrDataUrl = await QRCode.toDataURL(ticketUrl, {
