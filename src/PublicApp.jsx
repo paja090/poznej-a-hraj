@@ -172,29 +172,42 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-        <header className="flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-400 to-pink-500 text-xl font-extrabold text-[#071022] shadow-lg">
-              PH
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Poznej &amp; Hraj</h1>
-              <p className="text-sm text-white/70">
-                Zábavné večery plné her, kvízů a nových známostí.
-              </p>
-            </div>
-          </div>
-          <nav className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm shadow-md backdrop-blur">
-            <ul className="flex flex-wrap items-center gap-3 text-white/70">
-              <li><a href="#events" onClick={(e) => handleSmoothScroll(e, "#events")} className="hover:text-white">Akce</a></li>
-              <li><a href="#stats" onClick={(e) => handleSmoothScroll(e, "#stats")} className="hover:text-white">Statistiky</a></li>
-              <li><a href="#poll" onClick={(e) => handleSmoothScroll(e, "#poll")} className="hover:text-white">Anketa</a></li>
-              <li><a href="#crew" onClick={(e) => handleSmoothScroll(e, "#crew")} className="hover:text-white">Tým</a></li>
-              <li><a href="#reviews" onClick={(e) => handleSmoothScroll(e, "#reviews")} className="hover:text-white">Recenze</a></li>
-              <li><a href="#feedback" onClick={(e) => handleSmoothScroll(e, "#feedback")} className="hover:text-white">Kontakt</a></li>
-            </ul>
-          </nav>
-        </header>
+       <header className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+  {/* Logo + Text */}
+  <div className="flex items-center gap-5">
+    <div className="h-20 w-20 flex items-center justify-center rounded-2xl p-1
+      bg-white/5 border border-white/10 shadow-[0_0_25px_rgba(236,72,153,0.35)] backdrop-blur-sm">
+      <img
+        src="/logo3.png"
+        alt="Logo Poznej & Hraj"
+        className="object-contain w-full h-full drop-shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+      />
+    </div>
+
+    <div>
+      <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-white 
+        drop-shadow-[0_0_18px_rgba(139,92,246,0.55)]">
+        Poznej &amp; Hraj
+      </h1>
+      <p className="text-base md:text-lg text-white/70 mt-1">
+        Zábavné večery plné her, kvízů a nových známostí.
+      </p>
+    </div>
+  </div>
+
+  {/* Navigace */}
+  <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
+    <ul className="flex flex-wrap items-center gap-4 text-white/70">
+      <li><a href="#events" className="hover:text-white">Akce</a></li>
+      <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
+      <li><a href="#poll" className="hover:text-white">Anketa</a></li>
+      <li><a href="#crew" className="hover:text-white">Tým</a></li>
+      <li><a href="#reviews" className="hover:text-white">Recenze</a></li>
+      <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
+    </ul>
+  </nav>
+</header>
+
 
        {/* === HERO === */}
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
