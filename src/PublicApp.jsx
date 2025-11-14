@@ -178,7 +178,7 @@ export default function PublicApp() {
     {/* Logo + Text */}
     <div className="flex items-center gap-4">
       {/* Logo (64px) */}
-      <div className="h-16 w-16 flex items-center justify-center">
+      <div className="h-28 w-28 flex items-center justify-center">
         <img
           src="/logo3.png"
           alt="Logo Poznej & Hraj"
