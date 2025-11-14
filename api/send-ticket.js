@@ -532,16 +532,16 @@ const ticketUrl = `${normalizedBase}/ticket?id=${encodeURIComponent(reservationI
       ticketUrl,
     });
 
-   // 4) Odeslání e-mailu
+  // 4) Odeslání e-mailu
 await transporter.sendMail({
   from: `"Poznej & Hraj" <${process.env.GMAIL_USER || 'poznejahraj@gmail.com'}>`,
   to: email,
   subject: `Tvá vstupenka – ${eventTitle || 'Poznej & Hraj'}`,
 
+  // Nahradí jakýkoli inline QR obrázek cid verzí
   html: html.replace(
-    // nahradí inline QR tag v HTML za CID verzi
-    /<img src="[^"]*" alt="QR kód vstupenky"/,
-    '<img src="cid:qrimage" alt="QR kód vstupenky"'
+    /<img[^>]*alt="QR kód vstupenky"[^>]*>/,
+    '<img src="cid:qrimage" alt="QR kód vstupenky" width="210" height="210" />'
   ),
 
   attachments: [
@@ -549,10 +549,11 @@ await transporter.sendMail({
       filename: "qr.png",
       content: qrDataUrl.split("base64,")[1],
       encoding: "base64",
-      cid: "qrimage", // stejné CID jako v HTML
+      cid: "qrimage",
     },
   ],
 });
+
 
     return res.status(200).json({ ok: true, sentTo: email, ticketUrl });
   } catch (err) {
