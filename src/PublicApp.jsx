@@ -43,12 +43,12 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
         {event.price && <span className="pill text-emerald-200">💳 {event.price} Kč</span>}
       </div>
 <button
-  <button
   onClick={() => onDetail(event)}
   className="self-start rounded-xl bg-white/5 px-4 py-2 text-sm text-white/70 border border-white/10 hover:border-fuchsia-400/40 transition"
 >
   Zobrazit detail
 </button>
+
       {variant === "upcoming" && (
         <button
           onClick={() => onReserve(event)}
