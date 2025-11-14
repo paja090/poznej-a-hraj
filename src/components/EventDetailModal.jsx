@@ -2,10 +2,23 @@ import React from "react";
 
 export default function EventDetailModal({ event, onClose, onReserve }) {
   if (!event) return null;
+  React.useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") onClose();
+  };
+  window.addEventListener("keydown", handleEsc);
+  return () => window.removeEventListener("keydown", handleEsc);
+}, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#0b0f19] text-white w-full max-w-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-fadeIn relative">
+    <div
+  className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+  onClick={onClose}  // zavření kliknutím mimo modal
+>
+     <div
+  className="bg-[#0b0f19] text-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl animate-fadeIn relative"
+  onClick={(e) => e.stopPropagation()} // zabrání zavření při kliknutí dovnitř
+>
 
         {/* Zavření */}
         <button
