@@ -51,17 +51,27 @@
   background: rgba(139, 92, 246, 0.35);
   transform: translateY(-2px);
 }
-  /* === FIX čitelnosti select prvků v modalu rezervace === */
-select, option {
-  background-color: rgba(15, 23, 42, 0.95) !important; /* tmavý dropdown */
-  color: #ffffff !important; /* bílý text */
+ /* === SJEDNOCENÝ FIX pro selecty v modalu rezervace === */
+
+select {
+  appearance: none;                      /* schová defaultní systémovou šipku */
+  background-color: rgba(255,255,255,0.07) !important; /* stejné pozadí jako inputy */
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  font-size: 0.95rem;
 }
 
 select:focus {
   outline: none !important;
   border-color: var(--a2) !important;
+  box-shadow: 0 0 0 1px var(--a2);
 }
 
+/* dropdown položky */
 option {
-  padding: 8px 12px;
+  background-color: #0f172a !important;  /* tmavý dropdown */
+  color: #ffffff !important;
+  padding: 10px;
 }
