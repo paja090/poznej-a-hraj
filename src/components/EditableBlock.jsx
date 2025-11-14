@@ -2,11 +2,19 @@
 import { useEditor } from "../context/EditorContext.jsx";
 
 export default function EditableBlock({ blockId, children }) {
-  const { setActiveBlock } = useEditor();
+  const editor = useEditor();
+
+  // ❗ Když nejsme v editoru (není EditorProvider),
+  // vrátíme jen obsah bez ⚙️ a bez hooků
+  if (!editor) {
+    return <>{children}</>;
+  }
+
+  const { setActiveBlock } = editor;
 
   return (
     <div className="relative group">
-      {/* Ikona ⚙️ zobrazí se jen v editoru a při hoveru */}
+      {/* Ikona ⚙️ – jen v editoru a při hoveru */}
       <button
         onClick={() => setActiveBlock(blockId)}
         className="
@@ -16,7 +24,7 @@ export default function EditableBlock({ blockId, children }) {
           bg-black/60 border border-white/10 backdrop-blur
           text-white text-sm shadow-md
           hover:bg-violet-600/80 hover:border-violet-400
-          transition 
+          transition
         "
         title="Upravit sekci"
       >
@@ -27,3 +35,4 @@ export default function EditableBlock({ blockId, children }) {
     </div>
   );
 }
+
