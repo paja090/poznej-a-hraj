@@ -18,7 +18,7 @@ function StatCard({ label, value }) {
   );
 }
 
-function EventCard({ event, onReserve, variant = "upcoming" }) {
+function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg backdrop-blur-sm transition hover:border-fuchsia-400/40">
       <div className="flex items-start justify-between">
@@ -43,7 +43,7 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
         {event.price && <span className="pill text-emerald-200">💳 {event.price} Kč</span>}
       </div>
 <button
-  onClick={() => setDetailEvent(event)}
+  onClick={() => onDetail(event)}onClick={() => onDetail(event)}
   className="self-start rounded-xl bg-white/5 px-4 py-2 text-sm text-white/70 border border-white/10 hover:border-fuchsia-400/40 transition"
 >
   Zobrazit detail
@@ -313,7 +313,7 @@ useEffect(() => {
             <div className="grid gap-6 lg:grid-cols-2">
               {upcoming.length
                 ? upcoming.map((e) => (
-                    <EventCard key={e.id} event={e} onReserve={setSelectedEvent} />
+                    <EventCard key={e.id} event={e} onReserve={setSelectedEvent} onDetail={setDetailEvent} />
                   ))
                 : <p className="text-white/60">Žádné plánované akce.</p>}
             </div>
@@ -323,7 +323,7 @@ useEffect(() => {
             <h3 className="text-xl font-semibold mb-3">Předešlé akce</h3>
             <div className="grid gap-6 lg:grid-cols-2">
               {past.length
-                ? past.map((e) => <EventCard key={e.id} event={e} variant="past" />)
+                ? past.map((e) => <EventCard key={e.id} event={e} variant="past" onDetail={setDetailEvent} />
                 : <p className="text-white/60">Zatím žádné proběhlé akce.</p>}
             </div>
           </div>
