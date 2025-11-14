@@ -273,11 +273,15 @@ export default function ReservationForm({ event, onClose }) {
                 />
                 <span>Potvrzuji, že mi je 18 let nebo více.</span>
               </label>
-
-              <p className="text-xs text-white/40">
-                <a href="#" className="underline">Podmínky účasti (PDF)</a> – doplníme.
-              </p>
-            </div>
+            <p className="text-xs text-white/40">  <a
+    href="/podminky-ucasti.html"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="underline"
+  >
+    Podmínky účasti </a>
+</p>
+        </div>
 
             <button
               type="submit"
