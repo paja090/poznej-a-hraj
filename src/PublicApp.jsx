@@ -237,6 +237,7 @@ useEffect(() => {
   </div>
 </header>
        {/* === HERO === */}
+        <EditableBlock blockId="hero">
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
             <iframe
@@ -282,8 +283,9 @@ useEffect(() => {
             </div>
           </div>
         </section>
-
+</EditableBlock>
         {/* === ABOUT SECTION === */}
+        <EditableBlock blockId="about">
         <section id="about" className="card mt-10">
           <h3 className="text-xl font-semibold text-white">O projektu</h3>
           <p className="mt-4 text-white/70">
@@ -296,6 +298,7 @@ useEffect(() => {
             Díky řízenému programu se i introverti snadno zapojí a seznámení působí přirozeně.
           </p>
         </section>
+          </EditableBlock>
 
         {/* === STATISTIKY === */}
         <section id="stats" className="mt-10 space-y-6">
@@ -518,9 +521,11 @@ useEffect(() => {
 )}
        
 {/* === FOOTER === */}
+        <EditableBlock blockId="footer">
 <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
   © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
 </footer>
+    </EditableBlock>
 
       </div>
     </div>
