@@ -1,9 +1,11 @@
 // src/components/EditorShell.jsx
 import PublicApp from "../PublicApp.jsx";
+import { EditorProvider } from "../context/EditorContext.jsx";
 
 export default function EditorShell({ user, onLogout }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+    <EditorProvider>
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col">
       {/* Horní lišta editoru */}
       <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <div className="flex items-center gap-3">
