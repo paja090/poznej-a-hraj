@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Podmínky účasti – Poznej &amp; Hraj</title>
-  <style>
+ <style>
     :root {
       --bg: #050814;
       --bg-card: #0b1020;
@@ -38,11 +38,36 @@
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
       padding: 32px 24px 28px;
     }
-    @media (min-width: 768px) {
-      .card {
-        padding: 40px 40px 32px;
-      }
+
+    /* 🔥 DOPLNĚNO – toto chybělo! */
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
     }
+    .logo-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.08);
+      padding: 6px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .logo-text-main {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      font-size: 1.4rem;
+    }
+    .logo-text-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
     h1 {
       font-size: 1.9rem;
       margin: 0 0 0.5rem;
@@ -88,14 +113,10 @@
       background: var(--accent2);
       box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
     }
-    .highlight {
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .muted {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 1.5rem;
+    hr {
+      border: none;
+      border-top: 1px solid rgba(148, 163, 184, 0.3);
+      margin: 1.5rem 0 1.2rem;
     }
     .footer {
       margin-top: 1.75rem;
@@ -106,34 +127,6 @@
       gap: 1rem;
       flex-wrap: wrap;
     }
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.25rem;
-    }
-    .logo-mark {
-      width: 32px;
-      height: 32px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 30% 20%, #f97316, transparent 50%),
-                  radial-gradient(circle at 70% 80%, #ec4899, transparent 55%),
-                  linear-gradient(135deg, #4f46e5, #0ea5e9);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #020617;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.9);
-    }
-    .logo-text-main {
-      font-weight: 700;
-      letter-spacing: 0.03em;
-    }
-    .logo-text-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
     a {
       color: var(--accent2);
       text-decoration: none;
@@ -141,12 +134,8 @@
     a:hover {
       text-decoration: underline;
     }
-    hr {
-      border: none;
-      border-top: 1px solid rgba(148, 163, 184, 0.3);
-      margin: 1.5rem 0 1.2rem;
-    }
-  </style>
+</style>
+
 </head>
 <body>
   <main class="wrapper">
