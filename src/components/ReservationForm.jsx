@@ -73,12 +73,15 @@ export default function ReservationForm({ event, onClose }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reservationId: reservationData.id,
-          eventTitle: event.title,
-          price: event.price,
-          peopleCount: reservationData.peopleCount || 1,
-          email: reservationData.email,
-        }),
+  reservationId: reservationData.id,
+  eventTitle: event.title,
+  eventDate: event.date,     // ⬅️ DOPLNĚNO
+  eventPlace: event.place,   // ⬅️ DOPLNĚNO
+  price: event.price,
+  peopleCount: reservationData.peopleCount || 1,
+  email: reservationData.email,
+}),
+
       });
 
       const data = await resp.json();
