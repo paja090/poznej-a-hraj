@@ -172,7 +172,7 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-      <header className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+       <header className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
   {/* Logo + Text */}
   <div className="flex items-center gap-5">
     {/* Větší logo */}
@@ -211,19 +211,6 @@ export default function PublicApp() {
   </nav>
 </header>
 
-
-  {/* Navigace */}
-  <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
-    <ul className="flex flex-wrap items-center gap-4 text-white/70">
-      <li><a href="#events" className="hover:text-white">Akce</a></li>
-      <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
-      <li><a href="#poll" className="hover:text-white">Anketa</a></li>
-      <li><a href="#crew" className="hover:text-white">Tým</a></li>
-      <li><a href="#reviews" className="hover:text-white">Recenze</a></li>
-      <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
-    </ul>
-  </nav>
-</header>
 
 
        {/* === HERO === */}
