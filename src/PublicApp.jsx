@@ -172,31 +172,31 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-       <header className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+      <header className="flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+
   {/* Logo + Text */}
   <div className="flex items-center gap-5">
-    {/* Větší logo */}
- <div className="flex items-center gap-5">
-  <div className="h-22 w-22 flex items-center justify-center">
-    <img
-      src="/logo3.PNG"
-      alt="Logo Poznej & Hraj"
-      className="object-contain w-full h-full 
-        drop-shadow-[0_0_10px_rgba(236,72,153,0.25)]
-        brightness-110"
-    />
-  </div>
 
-  <div>
-    <h1 className="text-xl md:text-2xl font-bold leading-tight text-white">
-      Poznej &amp; Hraj
-    </h1>
-    <p className="text-sm md:text-base text-white/70">
-      Zábavné večery plné her, kvízů a nových známostí.
-    </p>
-  </div>
-</div>
+    <div className="h-22 w-22 flex items-center justify-center">
+      <img
+        src="/logo3.png"
+        alt="Logo Poznej & Hraj"
+        className="object-contain w-full h-full 
+          drop-shadow-[0_0_10px_rgba(236,72,153,0.25)]
+          brightness-110"
+      />
+    </div>
 
+    <div>
+      <h1 className="text-xl md:text-2xl font-bold leading-tight text-white">
+        Poznej &amp; Hraj
+      </h1>
+      <p className="text-sm md:text-base text-white/70">
+        Zábavné večery plné her, kvízů a nových známostí.
+      </p>
+    </div>
+
+  </div>
 
   {/* Navigace */}
   <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
@@ -209,7 +209,9 @@ export default function PublicApp() {
       <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
     </ul>
   </nav>
+
 </header>
+
 
 
 
