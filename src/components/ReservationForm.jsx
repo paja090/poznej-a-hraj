@@ -11,6 +11,9 @@ export default function ReservationForm({ event, onClose }) {
     relationship: "",
     peopleCount: 1,
     message: "",
+    gdpr: false,
+    safety: false,
+    age18plus: false,
   });
 
   const [status, setStatus] = useState("idle");
@@ -18,13 +21,24 @@ export default function ReservationForm({ event, onClose }) {
 
   // 🧩 univerzální změna formuláře
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   // 🧾 odeslání dat do Formspree + Firestore
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
+
+    // POVINNÉ SOUHLASY
+    if (!formData.gdpr || !formData.safety || !formData.age18plus) {
+      alert("Pro pokračování musíš potvrdit všechny tři souhlasy.");
+      setStatus("idle");
+      return;
+    }
 
     try {
       // 1️⃣ Odeslat do Formspree
@@ -39,27 +53,29 @@ export default function ReservationForm({ event, onClose }) {
 
       if (!formspreeResponse.ok) throw new Error("Formspree error");
 
-      // 2️⃣ Uložit do Firestore a získat ID rezervace
+      // 2️⃣ Uložit do Firestore
       const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
-        eventTitle: event.title,
         peopleCount: Number(formData.peopleCount),
+        eventTitle: event.title,
         price: event.price ?? null,
-        paymentStatus: "pending", // výchozí stav
+        paymentStatus: "pending",
+        gdprConsent: formData.gdpr,
+        safetyConsent: formData.safety,
+        age18plus: formData.age18plus,
         createdAt: serverTimestamp(),
       });
 
-      // 3️⃣ Uložit rezervaci do stavu pro Stripe
+      // 3️⃣ Uložit data pro Stripe
       setReservationData({
         id: docRef.id,
         event,
         ...formData,
       });
 
-      // 4️⃣ Úspěch
       setStatus("success");
     } catch (error) {
-      console.error("❌ Chyba při odesílání rezervace:", error);
+      console.error("❌ Chyba:", error);
       setStatus("error");
     }
   };
@@ -73,20 +89,19 @@ export default function ReservationForm({ event, onClose }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  reservationId: reservationData.id,
-  eventTitle: event.title,
-  eventDate: event.date,     // ⬅️ DOPLNĚNO
-  eventPlace: event.place,   // ⬅️ DOPLNĚNO
-  price: event.price,
-  peopleCount: reservationData.peopleCount || 1,
-  email: reservationData.email,
-}),
-
+          reservationId: reservationData.id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventPlace: event.place,
+          price: event.price,
+          peopleCount: reservationData.peopleCount || 1,
+          email: reservationData.email,
+        }),
       });
 
       const data = await resp.json();
       if (data.url) window.location.href = data.url;
-      else alert("Nepodařilo se otevřít platební bránu.");
+      else alert("Nepodařilo se spustit platební bránu.");
     } catch (err) {
       console.error(err);
       alert("Chyba při přípravě platby.");
@@ -95,10 +110,11 @@ export default function ReservationForm({ event, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative animate-fadeIn">
+      <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
+
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white/70 hover:text-white text-lg"
+          className="absolute top-3 right-3 text-white/70 hover:text-white"
         >
           ✖
         </button>
@@ -107,17 +123,17 @@ export default function ReservationForm({ event, onClose }) {
           Rezervace: {event.title}
         </h2>
 
-        {/* 🟢 Úspěch – zobrazíme volitelné tlačítko Stripe */}
+        {/* 🟢 Úspěch */}
         {status === "success" && reservationData ? (
           <div className="text-center space-y-4">
             <p className="text-green-400 font-medium">
-              ✅ Tvoje rezervace byla úspěšně odeslána!
+              ✅ Rezervace byla úspěšně odeslána!
             </p>
 
             {event.price ? (
               <button
                 onClick={handleStripePayment}
-                className="w-full bg-gradient-to-r from-fuchsia-400 to-pink-500 text-[#071022] py-2 rounded-lg font-semibold shadow-md hover:opacity-90 transition"
+                className="w-full bg-gradient-to-r from-fuchsia-400 to-pink-500 text-[#071022] py-2 rounded-lg font-semibold shadow-md transition"
               >
                 💳 Zaplatit online
               </button>
@@ -129,7 +145,7 @@ export default function ReservationForm({ event, onClose }) {
 
             <button
               onClick={onClose}
-              className="w-full bg-white/10 border border-white/30 py-2 rounded-lg font-medium text-white hover:bg-white/20 transition"
+              className="w-full bg-white/10 border border-white/30 py-2 rounded-lg"
             >
               Zavřít
             </button>
@@ -137,6 +153,7 @@ export default function ReservationForm({ event, onClose }) {
         ) : (
           /* 🔄 Formulář */
           <form onSubmit={handleSubmit} className="space-y-3">
+
             <input
               type="text"
               name="name"
@@ -144,7 +161,7 @@ export default function ReservationForm({ event, onClose }) {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/50 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             />
 
             <input
@@ -154,7 +171,7 @@ export default function ReservationForm({ event, onClose }) {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/50 focus:border-a2 focus:ring-1 focus:ring-a2 outline-none"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             />
 
             <div className="grid grid-cols-2 gap-2">
@@ -168,7 +185,6 @@ export default function ReservationForm({ event, onClose }) {
                 <option value="">Pohlaví</option>
                 <option value="Muž">Muž</option>
                 <option value="Žena">Žena</option>
-                <option value="Jiné">Jiné</option>
               </select>
 
               <select
@@ -196,7 +212,6 @@ export default function ReservationForm({ event, onClose }) {
               <option value="">Vztahový stav</option>
               <option value="Single">Single</option>
               <option value="Zadaný/á">Zadaný/á</option>
-              <option value="Jiné">Jiné</option>
             </select>
 
             <input
@@ -214,24 +229,66 @@ export default function ReservationForm({ event, onClose }) {
               placeholder="Poznámka (volitelné)"
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
               rows="3"
+              className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             />
+
+            {/* 🔥 POVINNÉ SOUHLASY */}
+            <div className="space-y-2 text-sm text-white/80">
+
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  name="gdpr"
+                  checked={formData.gdpr}
+                  onChange={handleChange}
+                  required
+                  className="mt-1"
+                />
+                <span>Souhlasím se zpracováním osobních údajů (GDPR).</span>
+              </label>
+
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  name="safety"
+                  checked={formData.safety}
+                  onChange={handleChange}
+                  required
+                  className="mt-1"
+                />
+                <span>
+                  Účastním se akce na vlastní zodpovědnost. Organizátor nenese odpovědnost za úrazy vzniklé nepozorností nebo náhodou.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  name="age18plus"
+                  checked={formData.age18plus}
+                  onChange={handleChange}
+                  required
+                  className="mt-1"
+                />
+                <span>Potvrzuji, že mi je 18 let nebo více.</span>
+              </label>
+
+              <p className="text-xs text-white/40">
+                <a href="#" className="underline">Podmínky účasti (PDF)</a> – doplníme.
+              </p>
+            </div>
 
             <button
               type="submit"
               disabled={status === "sending"}
-              className={`w-full bg-gradient-to-r from-a1 to-a2 text-[#071022] py-2 rounded-lg font-semibold shadow-md hover:opacity-90 transition ${
-                status === "sending" ? "opacity-60 cursor-wait" : ""
-              }`}
+              className="w-full bg-gradient-to-r from-a1 to-a2 text-[#071022] py-2 rounded-lg font-semibold shadow-md"
             >
               {status === "sending" ? "Odesílám..." : "Odeslat rezervaci"}
             </button>
 
             {status === "error" && (
-              <p className="text-red-400 text-sm text-center mt-2">
-                ❌ Nastala chyba při odesílání. Zkus to prosím znovu.
-              </p>
+              <p className="text-red-400 text-center">❌ Chyba při odesílání.</p>
             )}
           </form>
         )}
@@ -239,4 +296,5 @@ export default function ReservationForm({ event, onClose }) {
     </div>
   );
 }
+
 
