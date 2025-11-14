@@ -172,22 +172,20 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-     <header className="py-4">
+    {/* === HLAVIČKA === */}
+<header className="py-2">
   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
     {/* Logo + Text */}
     <div className="flex items-center gap-4">
-      
-      {/* Menší logo (72px) */}
-      <div className="h-18 w-18 flex items-center justify-center">
+      {/* Logo (64px) */}
+      <div className="h-16 w-16 flex items-center justify-center">
         <img
           src="/logo3.png"
           alt="Logo Poznej & Hraj"
           className="object-contain w-full h-full drop-shadow-[0_0_8px_rgba(236,72,153,0.25)] brightness-110"
         />
       </div>
-
-      {/* Text */}
+      {/* Text pod logem */}
       <div className="leading-tight">
         <h1 className="text-lg md:text-xl font-bold">
           Poznej &amp; Hraj
@@ -196,21 +194,24 @@ export default function PublicApp() {
           Zábavné večery plné her, kvízů a nových známostí.
         </p>
       </div>
-
     </div>
-
-    {/* Navigace zarovnaná na střed loga */}
+    {/* Navigace – Smooth Scroll */}
     <nav className="md:self-center rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
       <ul className="flex items-center gap-4 text-white/70">
-        <li><a href="#events" className="hover:text-white">Akce</a></li>
-        <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
-        <li><a href="#poll" className="hover:text-white">Anketa</a></li>
-        <li><a href="#crew" className="hover:text-white">Tým</a></li>
-        <li><a href="#reviews" className="hover:text-white">Recenze</a></li>
-        <li><a href="#feedback" className="hover:text-white">Kontakt</a></li>
+
+        <li><button onClick={() => document.querySelector('#events').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Akce</button></li>
+
+        <li><button onClick={() => document.querySelector('#stats').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Statistiky</button></li>
+
+        <li><button onClick={() => document.querySelector('#poll').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Anketa</button></li>
+
+        <li><button onClick={() => document.querySelector('#crew').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Tým</button></li>
+
+        <li><button onClick={() => document.querySelector('#reviews').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Recenze</button></li>
+
+        <li><button onClick={() => document.querySelector('#feedback').scrollIntoView({ behavior: 'smooth' })} className="hover:text-white">Kontakt</button></li>
       </ul>
     </nav>
-
   </div>
 </header>
        {/* === HERO === */}
