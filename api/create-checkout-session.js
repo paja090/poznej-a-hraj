@@ -7,7 +7,15 @@ export default async function handler(req, res) {
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-  const { reservationId, eventTitle, price, peopleCount, email } = req.body;
+  const {
+    reservationId,
+    eventTitle,
+    price,
+    peopleCount,
+    email,
+    eventDate,
+    eventPlace
+  } = req.body;
 
   if (!eventTitle || !price || !peopleCount || !email) {
     return res.status(400).json({ error: "Missing data" });
@@ -29,12 +37,12 @@ export default async function handler(req, res) {
         },
       ],
       metadata: {
-  reservationId,
-  eventTitle,
-  eventDate,
-  eventPlace,
-  peopleCount
-},
+        reservationId,
+        eventTitle,
+        eventDate,
+        eventPlace,
+        peopleCount
+      },
       success_url: `${process.env.DOMAIN}/?stripe_success=1`,
       cancel_url: `${process.env.DOMAIN}/?stripe_cancel=1`,
     });
