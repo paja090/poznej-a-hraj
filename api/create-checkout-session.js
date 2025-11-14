@@ -29,9 +29,12 @@ export default async function handler(req, res) {
         },
       ],
       metadata: {
-        reservationId,
-        eventTitle,
-      },
+  reservationId,
+  eventTitle,
+  eventDate,
+  eventPlace,
+  peopleCount
+},
       success_url: `${process.env.DOMAIN}/?stripe_success=1`,
       cancel_url: `${process.env.DOMAIN}/?stripe_cancel=1`,
     });
