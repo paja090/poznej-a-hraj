@@ -7,6 +7,7 @@ import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
 import EventDetailModal from "./components/EventDetailModal.jsx";
+import EditableBlock from "./components/EditableBlock.jsx";
 
 // === MINI KOMPONENTY ===
 function StatCard({ label, value }) {
