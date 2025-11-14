@@ -175,16 +175,21 @@ export default function PublicApp() {
      <header className="py-6">
   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-    {/* Logo + Text */}
-    <div className="flex items-center gap-4">
+    {/* Logo + Text pod sebou */}
+    <div className="flex flex-col items-start gap-2 md:gap-3">
+
+      {/* Logo */}
       <div className="h-22 w-22 flex items-center justify-center">
         <img
           src="/logo3.png"
           alt="Logo Poznej & Hraj"
-          className="object-contain w-full h-full drop-shadow-[0_0_10px_rgba(236,72,153,0.25)] brightness-110"
+          className="object-contain w-full h-full 
+            drop-shadow-[0_0_10px_rgba(236,72,153,0.25)]
+            brightness-110"
         />
       </div>
 
+      {/* Text pod logem */}
       <div>
         <h1 className="text-xl md:text-2xl font-bold leading-tight">
           Poznej &amp; Hraj
@@ -193,10 +198,11 @@ export default function PublicApp() {
           Zábavné večery plné her, kvízů a nových známostí.
         </p>
       </div>
+
     </div>
 
-    {/* Navigace */}
-    <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
+    {/* Navigace (zarovnaná na úroveň loga) */}
+    <nav className="md:self-center rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
       <ul className="flex flex-wrap items-center gap-4 text-white/70">
         <li><a href="#events" className="hover:text-white">Akce</a></li>
         <li><a href="#stats" className="hover:text-white">Statistiky</a></li>
@@ -209,6 +215,7 @@ export default function PublicApp() {
 
   </div>
 </header>
+
 
 
 
