@@ -43,7 +43,8 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
         {event.price && <span className="pill text-emerald-200">💳 {event.price} Kč</span>}
       </div>
 <button
-  onClick={() => onDetail(event)}onClick={() => onDetail(event)}
+  <button
+  onClick={() => onDetail(event)}
   className="self-start rounded-xl bg-white/5 px-4 py-2 text-sm text-white/70 border border-white/10 hover:border-fuchsia-400/40 transition"
 >
   Zobrazit detail
@@ -318,15 +319,23 @@ useEffect(() => {
                 : <p className="text-white/60">Žádné plánované akce.</p>}
             </div>
           </div>
-
-          <div>
-            <h3 className="text-xl font-semibold mb-3">Předešlé akce</h3>
-            <div className="grid gap-6 lg:grid-cols-2">
-              {past.length
-                ? past.map((e) => <EventCard key={e.id} event={e} variant="past" onDetail={setDetailEvent} />
-                : <p className="text-white/60">Zatím žádné proběhlé akce.</p>}
-            </div>
-          </div>
+         <div>
+  <h3 className="text-xl font-semibold mb-3">Předešlé akce</h3>
+  <div className="grid gap-6 lg:grid-cols-2">
+    {past.length ? (
+      past.map((e) => (
+        <EventCard
+          key={e.id}
+          event={e}
+          variant="past"
+          onDetail={setDetailEvent}
+        />
+      ))
+    ) : (
+      <p className="text-white/60">Zatím žádné proběhlé akce.</p>
+    )}
+  </div>
+</div>
         </section>
 
        {/* === ANKETA === */}
