@@ -1,6 +1,12 @@
 // src/components/EditorShell.jsx
 import PublicApp from "../PublicApp.jsx";
 import { EditorProvider } from "../context/EditorContext.jsx";
+import { useEditor } from "../context/EditorContext.jsx";
+
+import EditorHero from "./editors/EditorHero.jsx";
+import EditorAbout from "./editors/EditorAbout.jsx";
+import EditorFooter from "./editors/EditorFooter.jsx";
+
 
 export default function EditorShell({ user, onLogout }) {
   return (
@@ -65,17 +71,53 @@ export default function EditorShell({ user, onLogout }) {
 
           {/* Levý panel – PublicApp */}
           <section className="flex-1 min-w-0 border-r border-slate-800 bg-[#05060a] overflow-y-auto">
-            <PublicApp />
+            <PublicApp isEditor={true} />
           </section>
 
           {/* Pravý panel – zatím placeholder */}
           <aside className="w-full max-w-md bg-slate-950/95 border-l border-slate-800 flex flex-col">
             <div className="px-5 py-4 border-b border-slate-800">
-              <p className="text-sm font-semibold">Panel úprav</p>
-              <p className="text-xs text-slate-400 mt-1">
-                V další fázi sem přidáme formuláře pro úpravu jednotlivých bloků (hero,
-                akce, recenze, footer…).
-              </p>
+              const { activeBlock } = useEditor();
+
+const editors = {
+  hero: { title: "Hero sekce", component: <EditorHero /> },
+  about: { title: "O projektu", component: <EditorAbout /> },
+  footer: { title: "Patička", component: <EditorFooter /> },
+};
+
+return (
+  <EditorProvider>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+      {/* ... horní lišta ... */}
+
+      <main className="flex flex-1 min-h-0">
+        {/* levý panel */}
+        <section className="flex-1 min-w-0 border-r border-slate-800 bg-[#05060a] overflow-y-auto">
+          <PublicApp isEditor={true} />
+        </section>
+
+        {/* pravý panel – TADY DOSADÍŠ TENTO KÓD */}
+        <aside className="w-full max-w-md bg-slate-950/95 border-l border-slate-800 flex flex-col">
+          <div className="px-5 py-4 border-b border-slate-800">
+            <p className="text-sm font-semibold">
+              {activeBlock ? editors[activeBlock].title : "Vyber sekci"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {activeBlock
+                ? "Uprav hodnoty a změny se automaticky uloží."
+                : "Klikni vlevo na ikonu ⚙️ u libovolné sekce."}
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-5 text-sm text-slate-300">
+            {activeBlock ? editors[activeBlock].component : null}
+          </div>
+        </aside>
+      </main>
+    </div>
+  </EditorProvider>
+);
+
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 text-sm text-slate-300 space-y-4">
