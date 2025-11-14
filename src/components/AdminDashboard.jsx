@@ -1,5 +1,5 @@
 // src/components/AdminDashboard.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db, storage } from "../firebaseConfig";
 import {
   collection,
@@ -8,26 +8,51 @@ import {
   doc,
   onSnapshot,
   serverTimestamp,
+  updateDoc,
+  setDoc,
   query,
   orderBy,
 } from "firebase/firestore";
 import {
-  ref,
+  ref as storageRef,
   uploadBytes,
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
 import AdminPolls from "./AdminPolls.jsx";
-import AdminCrew from "./AdminCrew.jsx";
-import AdminHeroTags from "./AdminHeroTags.jsx"; // ✅ Nová sekce pro hlavní tagy
 
 export default function AdminDashboard({ user, onLogout }) {
-  const [activeTab, setActiveTab] = useState("events");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [darkMode, setDarkMode] = useState(true);
+
+  // === DATA STAVY ===
   const [events, setEvents] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [feedbackCount, setFeedbackCount] = useState(0);
+  const [reviews, setReviews] = useState([]);
   const [gallery, setGallery] = useState([]);
-  const [newImage, setNewImage] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [crew, setCrew] = useState([]);
+  const [content, setContent] = useState({
+    heroTitle: "Místo, kde se lidé potkávají přirozeně",
+    heroSubtitle: "Večery plné her, kvízů a nových přátel.",
+    aboutIntro:
+      "Poznej & Hraj vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce.",
+    aboutBody:
+      "Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.",
+  });
+  const [profile, setProfile] = useState({
+    displayName: "",
+    role: "",
+    bio: "",
+    avatarURL: "",
+  });
+
+  const [savingContent, setSavingContent] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // === NOVÁ AKCE FORM ===
   const [newEvent, setNewEvent] = useState({
     title: "",
     date: "",
@@ -35,44 +60,146 @@ export default function AdminDashboard({ user, onLogout }) {
     description: "",
     capacity: "",
     price: "",
-    tags: "",
   });
 
-  // === Načti akce ===
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "events"), (snapshot) => {
-      setEvents(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
-  }, []);
+  // === NOVÝ CREW MEMBER ===
+  const [newCrewMember, setNewCrewMember] = useState({
+    name: "",
+    role: "",
+    description: "",
+    photoFile: null,
+  });
 
-  // === Načti rezervace ===
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "reservations"), (snapshot) => {
-      setReservations(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
-  }, []);
+  // === NOVÁ RECENZE (MANUÁLNÍ PŘIDÁNÍ) ===
+  const [newReview, setNewReview] = useState({
+    name: "",
+    rating: 5,
+    message: "",
+  });
 
-  // === Načti galerii ===
+  // === SUBSCRIBE NA DATA ===
   useEffect(() => {
-    const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snapshot) => {
-      setGallery(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    // Akce
+    const eventsQ = query(collection(db, "events"), orderBy("date", "asc"));
+    const unsubEvents = onSnapshot(eventsQ, (snapshot) => {
+      setEvents(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
-    return () => unsub();
-  }, []);
 
-  // === Přidat akci ===
+    // Rezervace
+    const reservationsQ = query(
+      collection(db, "reservations"),
+      orderBy("createdAt", "desc")
+    );
+    const unsubReservations = onSnapshot(reservationsQ, (snapshot) => {
+      setReservations(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
+    // Feedback (jen count)
+    const unsubFeedback = onSnapshot(collection(db, "feedback"), (snap) => {
+      setFeedbackCount(snap.size);
+    });
+
+    // Recenze
+    const reviewsQ = query(
+      collection(db, "reviews"),
+      orderBy("createdAt", "desc")
+    );
+    const unsubReviews = onSnapshot(reviewsQ, (snap) => {
+      setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
+    // Galerie
+    const galleryQ = query(
+      collection(db, "gallery"),
+      orderBy("createdAt", "desc")
+    );
+    const unsubGallery = onSnapshot(galleryQ, (snap) => {
+      setGallery(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
+    // Crew
+    const crewQ = query(
+      collection(db, "crew"),
+      orderBy("order", "asc")
+    );
+    const unsubCrew = onSnapshot(crewQ, (snap) => {
+      setCrew(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
+    // Public content
+    const unsubContent = onSnapshot(
+      doc(db, "settings", "publicContent"),
+      (d) => {
+        if (d.exists()) {
+          setContent((prev) => ({ ...prev, ...d.data() }));
+        }
+      }
+    );
+
+    // Admin profil
+    const unsubProfile = onSnapshot(doc(db, "admins", user.uid), (d) => {
+      if (d.exists()) {
+        setProfile((prev) => ({
+          ...prev,
+          ...d.data(),
+        }));
+      } else {
+        // default podle Firebase usera
+        setProfile((prev) => ({
+          ...prev,
+          displayName: user.displayName || "",
+          avatarURL: user.photoURL || "",
+        }));
+      }
+    });
+
+    return () => {
+      unsubEvents();
+      unsubReservations();
+      unsubFeedback();
+      unsubReviews();
+      unsubGallery();
+      unsubCrew();
+      unsubContent();
+      unsubProfile();
+    };
+  }, [user.uid, user.displayName, user.photoURL]);
+
+  // === ODHADNUTÉ STATISTIKY PRO OVERVIEW ===
+  const stats = useMemo(() => {
+    const upcoming = events.filter((ev) => {
+      if (!ev.date) return false;
+      try {
+        return new Date(ev.date) >= new Date();
+      } catch {
+        return false;
+      }
+    });
+    const past = events.length - upcoming.length;
+    const totalAttendees = reservations.reduce(
+      (sum, r) => sum + (Number(r.peopleCount || 1)),
+      0
+    );
+    return {
+      eventsTotal: events.length,
+      eventsUpcoming: upcoming.length,
+      eventsPast: past,
+      reservations: reservations.length,
+      attendees: totalAttendees,
+      feedback: feedbackCount,
+      reviews: reviews.length,
+    };
+  }, [events, reservations, feedbackCount, reviews]);
+
+  // === HANDLERY ===
+
+  // Přidání akce
   const handleAddEvent = async (e) => {
     e.preventDefault();
     if (!newEvent.title || !newEvent.date || !newEvent.place) return;
 
     await addDoc(collection(db, "events"), {
       ...newEvent,
-      tags: newEvent.tags
-        ? newEvent.tags.split(",").map((t) => t.trim())
-        : [],
       capacity: Number(newEvent.capacity) || 0,
       price: Number(newEvent.price) || 0,
       createdAt: serverTimestamp(),
@@ -85,337 +212,1205 @@ export default function AdminDashboard({ user, onLogout }) {
       description: "",
       capacity: "",
       price: "",
-      tags: "",
     });
   };
 
-  // === Smazat akci ===
   const handleDeleteEvent = async (id) => {
-    if (window.confirm("Opravdu smazat akci?")) await deleteDoc(doc(db, "events", id));
+    if (window.confirm("Opravdu smazat akci?")) {
+      await deleteDoc(doc(db, "events", id));
+    }
   };
 
-  // === Smazat rezervaci ===
+  // Rezervace – smazání & zaplaceno
   const handleDeleteReservation = async (id) => {
-    if (window.confirm("Opravdu smazat rezervaci?"))
+    if (window.confirm("Opravdu smazat rezervaci?")) {
       await deleteDoc(doc(db, "reservations", id));
+    }
   };
 
-  // === Nahrát fotku do galerie ===
-  const handleUploadImage = async () => {
-    if (!newImage) return alert("Vyber fotku k nahrání.");
-    setUploading(true);
+  const toggleReservationPaid = async (reservation) => {
+    await updateDoc(doc(db, "reservations", reservation.id), {
+      paid: !reservation.paid,
+    });
+  };
+
+  const exportReservationsToCSV = () => {
+    if (!reservations.length) return;
+
+    const header = [
+      "Jméno",
+      "E-mail",
+      "Akce",
+      "Pohlaví",
+      "Věk",
+      "Vztahový stav",
+      "Počet osob",
+      "Zaplaceno",
+      "Vytvořeno",
+    ];
+
+    const rows = reservations.map((r) => [
+      r.name || "",
+      r.email || "",
+      r.eventTitle || "",
+      r.gender || "",
+      r.ageRange || "",
+      r.relationship || "",
+      r.peopleCount || 1,
+      r.paid ? "ANO" : "NE",
+      r.createdAt?.toDate
+        ? r.createdAt.toDate().toLocaleString("cs-CZ")
+        : "",
+    ]);
+
+    const csvContent = [header, ...rows]
+      .map((row) =>
+        row
+          .map((val) =>
+            `"${String(val ?? "")
+              .replace(/"/g, '""')
+              .replace(/\n/g, " ")}"`
+          )
+          .join(";")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rezervace-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Uložení contentu
+  const handleSaveContent = async (e) => {
+    e.preventDefault();
+    setSavingContent(true);
     try {
-      const fileRef = ref(storage, `gallery/${Date.now()}_${newImage.name}`);
-      await uploadBytes(fileRef, newImage);
-      const url = await getDownloadURL(fileRef);
+      await setDoc(
+        doc(db, "settings", "publicContent"),
+        {
+          ...content,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } finally {
+      setSavingContent(false);
+    }
+  };
+
+  // Galerie – upload
+  const handleGalleryUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingGallery(true);
+    try {
+      const path = `gallery/${Date.now()}-${file.name}`;
+      const ref = storageRef(storage, path);
+      await uploadBytes(ref, file);
+      const url = await getDownloadURL(ref);
       await addDoc(collection(db, "gallery"), {
         url,
-        name: newImage.name,
+        storagePath: path,
+        label: file.name,
         createdAt: serverTimestamp(),
       });
-      setNewImage(null);
-    } catch (e) {
-      console.error("Chyba při nahrávání:", e);
     } finally {
-      setUploading(false);
+      setUploadingGallery(false);
+      event.target.value = "";
     }
   };
 
-  // === Smazat fotku ===
-  const handleDeleteImage = async (id, url) => {
-    if (!window.confirm("Smazat tuto fotku?")) return;
+  const handleDeleteGalleryItem = async (item) => {
+    if (!window.confirm("Smazat tento obrázek z galerie?")) return;
     try {
-      await deleteDoc(doc(db, "gallery", id));
-      const fileRef = ref(storage, url);
-      await deleteObject(fileRef);
-    } catch (e) {
-      console.error("Mazání selhalo:", e);
+      if (item.storagePath) {
+        const ref = storageRef(storage, item.storagePath);
+        await deleteObject(ref);
+      }
+    } catch {
+      // i kdyby storage selhal, smažeme meta
+    }
+    await deleteDoc(doc(db, "gallery", item.id));
+  };
+
+  // Crew – přidání + smazání
+  const handleAddCrewMember = async (e) => {
+    e.preventDefault();
+    if (!newCrewMember.name || !newCrewMember.role) return;
+
+    let photoURL = "";
+    if (newCrewMember.photoFile) {
+      const path = `crew/${Date.now()}-${newCrewMember.photoFile.name}`;
+      const ref = storageRef(storage, path);
+      await uploadBytes(ref, newCrewMember.photoFile);
+      photoURL = await getDownloadURL(ref);
+    }
+
+    await addDoc(collection(db, "crew"), {
+      name: newCrewMember.name,
+      role: newCrewMember.role,
+      description: newCrewMember.description,
+      photoURL,
+      order: crew.length,
+      createdAt: serverTimestamp(),
+    });
+
+    setNewCrewMember({
+      name: "",
+      role: "",
+      description: "",
+      photoFile: null,
+    });
+  };
+
+  const handleDeleteCrewMember = async (member) => {
+    if (!window.confirm("Smazat člena týmu?")) return;
+    await deleteDoc(doc(db, "crew", member.id));
+  };
+
+  // Recenze – přidání + smazání
+  const handleAddReview = async (e) => {
+    e.preventDefault();
+    if (!newReview.message.trim()) return;
+
+    await addDoc(collection(db, "reviews"), {
+      name: newReview.name || "Anonym",
+      rating: Number(newReview.rating) || 5,
+      message: newReview.message.trim(),
+      approved: true,
+      createdAt: serverTimestamp(),
+    });
+
+    setNewReview({
+      name: "",
+      rating: 5,
+      message: "",
+    });
+  };
+
+  const toggleReviewApproved = async (review) => {
+    await updateDoc(doc(db, "reviews", review.id), {
+      approved: !review.approved,
+    });
+  };
+
+  const handleDeleteReview = async (review) => {
+    if (!window.confirm("Smazat recenzi?")) return;
+    await deleteDoc(doc(db, "reviews", review.id));
+  };
+
+  // Profil – uložení a avatar upload
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    try {
+      await setDoc(
+        doc(db, "admins", user.uid),
+        {
+          ...profile,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } finally {
+      setSavingProfile(false);
     }
   };
+
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    try {
+      const path = `admins/${user.uid}/avatar-${Date.now()}-${file.name}`;
+      const ref = storageRef(storage, path);
+      await uploadBytes(ref, file);
+      const url = await getDownloadURL(ref);
+      setProfile((prev) => ({ ...prev, avatarURL: url }));
+      await setDoc(
+        doc(db, "admins", user.uid),
+        { avatarURL: url, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
+    }
+  };
+
+  // === UI KLASY PRO DARK / LIGHT ===
+  const layoutClasses = darkMode
+    ? "min-h-screen bg-slate-900 text-white"
+    : "min-h-screen bg-slate-50 text-slate-900";
+
+  const cardClasses = darkMode
+    ? "bg-slate-800 text-white"
+    : "bg-white text-slate-900 border-slate-200";
+
+  const subCardClasses = darkMode
+    ? "bg-slate-800 text-white"
+    : "bg-slate-100 text-slate-900";
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      {/* === HLAVIČKA === */}
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">Admin Panel – Poznej & Hraj</h1>
-        <div className="flex items-center gap-4">
-          <img
-            src={user.photoURL}
-            alt="user"
-            className="w-10 h-10 rounded-full border border-white/20"
-          />
-          <button
-            onClick={onLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg"
-          >
-            Odhlásit se
-          </button>
-        </div>
-      </header>
-
-      {/* === NAVIGACE === */}
-      <nav className="flex gap-3 mb-8 flex-wrap">
-        <button
-          onClick={() => setActiveTab("events")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "events"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          📅 Akce
-        </button>
-        <button
-          onClick={() => setActiveTab("reservations")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "reservations"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          🧾 Rezervace
-        </button>
-        <button
-          onClick={() => setActiveTab("polls")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "polls"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          🗳️ Ankety
-        </button>
-        <button
-          onClick={() => setActiveTab("gallery")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "gallery"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          📷 Galerie
-        </button>
-        <button
-          onClick={() => setActiveTab("crew")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "crew"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          👥 Tým
-        </button>
-        <button
-          onClick={() => setActiveTab("heroTags")}
-          className={`px-4 py-2 rounded-md font-semibold ${
-            activeTab === "heroTags"
-              ? "bg-violet-600"
-              : "bg-slate-800 hover:bg-slate-700 text-white/80"
-          }`}
-        >
-          🎯 Hlavní tagy
-        </button>
-      </nav>
-
-      {/* === OBSAH SEKCE === */}
-      {activeTab === "events" && (
-        <>
-          {/* Přidat akci */}
-          <section className="bg-slate-800 p-6 rounded-xl mb-10 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Přidat novou akci</h2>
-            <form onSubmit={handleAddEvent} className="grid gap-4 md:grid-cols-2">
-              <input
-                type="text"
-                placeholder="Název akce"
-                value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Místo konání"
-                value={newEvent.place}
-                onChange={(e) => setNewEvent({ ...newEvent, place: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white"
-                required
-              />
-              <input
-                type="date"
-                value={newEvent.date}
-                onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Kapacita"
-                value={newEvent.capacity}
-                onChange={(e) => setNewEvent({ ...newEvent, capacity: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white"
-              />
-              <input
-                type="number"
-                placeholder="Cena vstupenky (Kč)"
-                value={newEvent.price}
-                onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white"
-              />
-              <textarea
-                placeholder="Popis akce"
-                value={newEvent.description}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, description: e.target.value })
-                }
-                className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
-              />
-              <input
-                type="text"
-                placeholder="Tagy (oddělené čárkou – např. Party, Seznamka)"
-                value={newEvent.tags}
-                onChange={(e) => setNewEvent({ ...newEvent, tags: e.target.value })}
-                className="bg-slate-700 p-2 rounded-md text-white md:col-span-2"
-              />
+    <div className={layoutClasses}>
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        {/* === HLAVIČKA === */}
+        <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">
+              Admin panel – Poznej &amp; Hraj
+            </h1>
+            <p className="text-sm text-slate-400">
+              Spravuj akce, rezervace, tým, obsah i ankety na jednom místě.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setDarkMode((v) => !v)}
+              className="rounded-full border border-slate-600/60 bg-slate-800/60 px-3 py-1 text-xs font-medium shadow-sm hover:bg-slate-700/80"
+            >
+              {darkMode ? "🌙 Dark" : "☀️ Light"}
+            </button>
+            <div className="flex items-center gap-3">
+              {profile.avatarURL || user.photoURL ? (
+                <img
+                  src={profile.avatarURL || user.photoURL}
+                  alt="Admin avatar"
+                  className="h-10 w-10 rounded-full border border-slate-500 object-cover"
+                />
+              ) : (
+                <div className="grid h-10 w-10 place-items-center rounded-full bg-violet-500 text-sm font-bold text-white">
+                  {user.email?.[0]?.toUpperCase() || "A"}
+                </div>
+              )}
+              <div className="text-right">
+                <p className="text-sm font-semibold">
+                  {profile.displayName || user.displayName || "Admin"}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {profile.role || user.email}
+                </p>
+              </div>
               <button
-                type="submit"
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md md:col-span-2"
+                onClick={onLogout}
+                className="rounded-lg bg-red-600 px-3 py-1 text-xs font-semibold shadow hover:bg-red-700"
               >
-                ➕ Přidat akci
-              </button>
-            </form>
-          </section>
-
-          {/* Seznam akcí */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Seznam akcí</h2>
-            {events.length === 0 ? (
-              <p className="text-gray-400">Zatím nejsou žádné akce.</p>
-            ) : (
-              <ul className="space-y-4">
-                {events.map((ev) => (
-                  <li
-                    key={ev.id}
-                    className="bg-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between"
-                  >
-                    <div>
-                      <p className="font-semibold text-lg">{ev.title}</p>
-                      <p className="text-sm text-gray-400">
-                        📅 {ev.date} | 📍 {ev.place}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-1">{ev.description}</p>
-                      {ev.tags && ev.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2 text-xs text-fuchsia-300">
-                          {ev.tags.map((tag, i) => (
-                            <span
-                              key={i}
-                              className="border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 rounded-full"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDeleteEvent(ev.id)}
-                      className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md mt-3 md:mt-0"
-                    >
-                      🗑️ Smazat
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </>
-      )}
-
-      {activeTab === "reservations" && (
-        <section>
-          <h2 className="text-xl font-semibold mb-4">Rezervace</h2>
-          {reservations.length === 0 ? (
-            <p className="text-gray-400">Zatím žádné rezervace.</p>
-          ) : (
-            <ul className="space-y-3">
-              {reservations.map((r) => (
-                <li
-                  key={r.id}
-                  className="bg-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between"
-                >
-                  <div>
-                    <p className="font-semibold">{r.name}</p>
-                    <p className="text-sm text-gray-400">
-                      📅 {r.eventTitle} | {r.ageRange} | {r.gender} | {r.relationship}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      👥 {r.peopleCount} os. · 📧 {r.email}
-                    </p>
-                    {r.message && (
-                      <p className="text-xs text-gray-500 mt-1">💬 {r.message}</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => handleDeleteReservation(r.id)}
-                    className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md mt-3 md:mt-0"
-                  >
-                    🗑️ Smazat
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
-
-      {activeTab === "polls" && <AdminPolls />}
-      {activeTab === "gallery" && (
-        <section>
-          <h2 className="text-xl font-semibold mb-4">📷 Galerie (Firebase)</h2>
-          <div className="bg-slate-800 p-6 rounded-xl mb-6 shadow-lg">
-            <div className="flex items-center gap-4 mb-6">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setNewImage(e.target.files[0])}
-                className="text-sm text-white/70"
-              />
-              <button
-                onClick={handleUploadImage}
-                disabled={uploading}
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md"
-              >
-                {uploading ? "Nahrávám..." : "Nahrát fotku"}
+                Odhlásit se
               </button>
             </div>
-            {gallery.length === 0 ? (
-              <p className="text-gray-400">Zatím žádné fotky.</p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {gallery.map((img) => (
-                  <div key={img.id} className="relative group">
-                    <img
-                      src={img.url}
-                      alt={img.name}
-                      className="rounded-lg border border-white/10"
+          </div>
+        </header>
+
+        {/* === NAVIGACE / TABS === */}
+        <nav className={`mb-6 grid gap-2 md:grid-cols-4 lg:grid-cols-8`}>
+          <TabButton
+            active={activeTab === "overview"}
+            onClick={() => setActiveTab("overview")}
+            label="📊 Přehled"
+          />
+          <TabButton
+            active={activeTab === "events"}
+            onClick={() => setActiveTab("events")}
+            label="📅 Akce"
+          />
+          <TabButton
+            active={activeTab === "reservations"}
+            onClick={() => setActiveTab("reservations")}
+            label="🧾 Rezervace"
+          />
+          <TabButton
+            active={activeTab === "polls"}
+            onClick={() => setActiveTab("polls")}
+            label="🗳️ Ankety"
+          />
+          <TabButton
+            active={activeTab === "content"}
+            onClick={() => setActiveTab("content")}
+            label="✏️ Obsah webu"
+          />
+          <TabButton
+            active={activeTab === "gallery"}
+            onClick={() => setActiveTab("gallery")}
+            label="📸 Galerie"
+          />
+          <TabButton
+            active={activeTab === "crew"}
+            onClick={() => setActiveTab("crew")}
+            label="🎧 The Crew"
+          />
+          <TabButton
+            active={activeTab === "reviews"}
+            onClick={() => setActiveTab("reviews")}
+            label="⭐ Recenze"
+          />
+          <TabButton
+            active={activeTab === "profile"}
+            onClick={() => setActiveTab("profile")}
+            label="👤 Profil admina"
+          />
+        </nav>
+
+        {/* === OBSAH TABS === */}
+        <main className="space-y-6">
+          {activeTab === "overview" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">Přehled</h2>
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+                <StatTile
+                  label="Celkem akcí"
+                  value={stats.eventsTotal}
+                  hint={`${stats.eventsUpcoming} nadcházejících, ${stats.eventsPast} proběhlých`}
+                />
+                <StatTile
+                  label="Rezervace"
+                  value={stats.reservations}
+                  hint={`${stats.attendees} účastníků`}
+                />
+                <StatTile
+                  label="Recenze"
+                  value={stats.reviews}
+                  hint="schválené i čekající"
+                />
+                <StatTile
+                  label="Feedback"
+                  value={stats.feedback}
+                  hint="z kontaktního formuláře"
+                />
+              </div>
+
+              {/* Poslední rezervace */}
+              <div className="mt-6 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+                <div
+                  className={`rounded-xl border border-slate-700/60 p-4 ${subCardClasses}`}
+                >
+                  <h3 className="mb-2 text-sm font-semibold">
+                    Poslední rezervace
+                  </h3>
+                  {reservations.length === 0 ? (
+                    <p className="text-sm text-slate-400">
+                      Zatím žádné rezervace.
+                    </p>
+                  ) : (
+                    <ul className="space-y-2 text-xs">
+                      {reservations.slice(0, 6).map((r) => (
+                        <li
+                          key={r.id}
+                          className="flex items-center justify-between rounded-lg bg-slate-900/40 px-3 py-2"
+                        >
+                          <div>
+                            <p className="font-semibold">
+                              {r.name || "Bez jména"}
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              {r.eventTitle} • {r.ageRange} • {r.gender}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                              r.paid
+                                ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/50"
+                                : "bg-amber-500/10 text-amber-300 border border-amber-400/40"
+                            }`}
+                          >
+                            {r.paid ? "Zaplaceno" : "Nezaplaceno"}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Malý "fake" graf návštěvnosti z rezervací */}
+                <div
+                  className={`rounded-xl border border-slate-700/60 p-4 ${subCardClasses}`}
+                >
+                  <h3 className="mb-2 text-sm font-semibold">Návštěvnost</h3>
+                  <p className="mb-2 text-xs text-slate-400">
+                    Jednoduchý odhad na základě rezervací za poslední akce.
+                  </p>
+                  <div className="flex h-32 items-end gap-1">
+                    {events.slice(0, 8).map((ev) => {
+                      const totalForEvent = reservations.filter(
+                        (r) => r.eventTitle === ev.title
+                      ).length;
+                      const height = Math.min(
+                        100,
+                        10 + totalForEvent * 10
+                      );
+                      return (
+                        <div
+                          key={ev.id}
+                          className="flex-1 rounded-t-md bg-gradient-to-t from-violet-600 via-fuchsia-500 to-emerald-400"
+                          style={{ height: `${height}%` }}
+                          title={`${ev.title} – ${totalForEvent} rezervací`}
+                        />
+                      );
+                    })}
+                    {events.length === 0 && (
+                      <p className="text-xs text-slate-400">
+                        Přidej první akci a začne se kreslit „graf“ 🙂
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* === AKCE === */}
+          {activeTab === "events" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">Akce</h2>
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+                {/* Seznam akcí */}
+                <div>
+                  {events.length === 0 ? (
+                    <p className="text-sm text-slate-400">
+                      Zatím nejsou žádné akce.
+                    </p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {events.map((ev) => (
+                        <li
+                          key={ev.id}
+                          className="flex flex-col gap-2 rounded-xl bg-slate-900/40 p-3 text-sm md:flex-row md:items-center md:justify-between"
+                        >
+                          <div>
+                            <p className="text-base font-semibold">
+                              {ev.title}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              📅 {ev.date} • 📍 {ev.place}
+                            </p>
+                            {ev.description && (
+                              <p className="mt-1 text-xs text-slate-300">
+                                {ev.description}
+                              </p>
+                            )}
+                            <p className="mt-1 text-xs text-slate-400">
+                              Kapacita:{" "}
+                              {ev.capacity ? `${ev.capacity} osob` : "neuvedena"}
+                              {ev.price
+                                ? ` • Cena: ${ev.price} Kč`
+                                : ""}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteEvent(ev.id)}
+                            className="self-start rounded-md bg-red-600 px-3 py-1 text-xs font-semibold hover:bg-red-700 md:self-auto"
+                          >
+                            🗑️ Smazat
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Přidání akce */}
+                <div className={`rounded-xl border border-slate-700/60 p-3 ${subCardClasses}`}>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    Přidat novou akci
+                  </h3>
+                  <form onSubmit={handleAddEvent} className="space-y-2 text-xs">
+                    <input
+                      type="text"
+                      placeholder="Název akce"
+                      value={newEvent.title}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, title: e.target.value })
+                      }
+                      required
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Místo konání"
+                      value={newEvent.place}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, place: e.target.value })
+                      }
+                      required
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                    <input
+                      type="date"
+                      value={newEvent.date}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, date: e.target.value })
+                      }
+                      required
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Kapacita"
+                        value={newEvent.capacity}
+                        onChange={(e) =>
+                          setNewEvent({
+                            ...newEvent,
+                            capacity: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="Cena (Kč)"
+                        value={newEvent.price}
+                        onChange={(e) =>
+                          setNewEvent({ ...newEvent, price: e.target.value })
+                        }
+                        className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      />
+                    </div>
+                    <textarea
+                      placeholder="Popis akce"
+                      value={newEvent.description}
+                      onChange={(e) =>
+                        setNewEvent({
+                          ...newEvent,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={3}
+                      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
                     />
                     <button
-                      onClick={() => handleDeleteImage(img.id, img.url)}
-                      className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
+                      type="submit"
+                      className="w-full rounded-md bg-emerald-600 py-2 text-xs font-semibold hover:bg-emerald-700"
                     >
-                      🗑️
+                      ➕ Přidat akci
                     </button>
-                  </div>
-                ))}
+                  </form>
+                </div>
               </div>
-            )}
-          </div>
-        </section>
-      )}
-      {activeTab === "crew" && <AdminCrew />}
-      {activeTab === "heroTags" && <AdminHeroTags />}
+            </section>
+          )}
+
+          {/* === REZERVACE === */}
+          {activeTab === "reservations" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Rezervace</h2>
+                <button
+                  onClick={exportReservationsToCSV}
+                  className="rounded-md bg-slate-700 px-3 py-1 text-xs font-semibold hover:bg-slate-600"
+                >
+                  ⬇️ Export CSV
+                </button>
+              </div>
+              {reservations.length === 0 ? (
+                <p className="text-sm text-slate-400">
+                  Zatím žádné rezervace.
+                </p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-slate-700/60">
+                  <table className="min-w-full text-xs">
+                    <thead className="bg-slate-900/60">
+                      <tr className="text-left">
+                        <Th>Jméno</Th>
+                        <Th>Akce</Th>
+                        <Th>Věk</Th>
+                        <Th>Pohlaví</Th>
+                        <Th>Vztah</Th>
+                        <Th>Počet</Th>
+                        <Th>E-mail</Th>
+                        <Th>Zaplaceno</Th>
+                        <Th>Akce</Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reservations.map((r) => (
+                        <tr
+                          key={r.id}
+                          className="border-t border-slate-800/80 hover:bg-slate-900/50"
+                        >
+                          <Td>{r.name || "Bez jména"}</Td>
+                          <Td>{r.eventTitle}</Td>
+                          <Td>{r.ageRange}</Td>
+                          <Td>{r.gender}</Td>
+                          <Td>{r.relationship}</Td>
+                          <Td>{r.peopleCount || 1}</Td>
+                          <Td>{r.email}</Td>
+                          <Td>
+                            <button
+                              onClick={() => toggleReservationPaid(r)}
+                              className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                                r.paid
+                                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/40"
+                                  : "bg-amber-500/10 text-amber-300 border border-amber-400/40"
+                              }`}
+                            >
+                              {r.paid ? "Zaplaceno" : "Nezaplaceno"}
+                            </button>
+                          </Td>
+                          <Td>
+                            <button
+                              onClick={() => handleDeleteReservation(r.id)}
+                              className="rounded-md bg-red-600 px-2 py-1 text-[11px] hover:bg-red-700"
+                            >
+                              🗑️
+                            </button>
+                          </Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* === ANKETY === */}
+          {activeTab === "polls" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <AdminPolls />
+            </section>
+          )}
+
+          {/* === OBSAH WEBU === */}
+          {activeTab === "content" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">Texty na webu</h2>
+              <form
+                onSubmit={handleSaveContent}
+                className="grid gap-4 md:grid-cols-2"
+              >
+                <label className="flex flex-col gap-2 text-xs">
+                  Hero – nadpis
+                  <input
+                    type="text"
+                    value={content.heroTitle}
+                    onChange={(e) =>
+                      setContent({ ...content, heroTitle: e.target.value })
+                    }
+                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-2 text-xs">
+                  Hero – podnadpis
+                  <input
+                    type="text"
+                    value={content.heroSubtitle}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        heroSubtitle: e.target.value,
+                      })
+                    }
+                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-2 text-xs md:col-span-2">
+                  O projektu – úvod
+                  <textarea
+                    rows={3}
+                    value={content.aboutIntro}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        aboutIntro: e.target.value,
+                      })
+                    }
+                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-2 text-xs md:col-span-2">
+                  O projektu – text
+                  <textarea
+                    rows={4}
+                    value={content.aboutBody}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        aboutBody: e.target.value,
+                      })
+                    }
+                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                  />
+                </label>
+                <div className="md:col-span-2 flex items-center justify-between gap-3 text-xs text-slate-400">
+                  <span>
+                    Tyto texty můžeš na public stránce načítat z
+                    Firestore kolekce <code>settings/publicContent</code>.
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={savingContent}
+                    className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold hover:bg-emerald-700 disabled:opacity-60"
+                  >
+                    {savingContent ? "Ukládám…" : "💾 Uložit texty"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* === GALERIE === */}
+          {activeTab === "gallery" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Galerie</h2>
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
+                  <span className="rounded-md bg-slate-700 px-3 py-1 hover:bg-slate-600">
+                    📤 Nahrát fotku
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleGalleryUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              {uploadingGallery && (
+                <p className="mb-3 text-xs text-slate-400">
+                  Nahrávám obrázek…
+                </p>
+              )}
+              {gallery.length === 0 ? (
+                <p className="text-sm text-slate-400">
+                  Zatím nejsou žádné fotky v galerii.
+                </p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  {gallery.map((item) => (
+                    <div
+                      key={item.id}
+                      className="relative overflow-hidden rounded-xl bg-slate-900/40"
+                    >
+                      <img
+                        src={item.url}
+                        alt={item.label}
+                        className="h-40 w-full object-cover"
+                      />
+                      <div className="flex items-center justify-between px-3 py-2 text-[11px] text-slate-200">
+                        <span className="truncate">{item.label}</span>
+                        <button
+                          onClick={() => handleDeleteGalleryItem(item)}
+                          className="rounded-md bg-red-600 px-2 py-1 hover:bg-red-700"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* === CREW === */}
+          {activeTab === "crew" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">The Crew</h2>
+              <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+                <div>
+                  {crew.length === 0 ? (
+                    <p className="text-sm text-slate-400">
+                      Zatím žádný tým – přidej první členy.
+                    </p>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {crew.map((m) => (
+                        <article
+                          key={m.id}
+                          className="flex flex-col items-center gap-2 rounded-xl bg-slate-900/40 p-3 text-center text-xs"
+                        >
+                          {m.photoURL ? (
+                            <img
+                              src={m.photoURL}
+                              alt={m.name}
+                              className="h-16 w-16 rounded-full border border-slate-500 object-cover"
+                            />
+                          ) : (
+                            <div className="grid h-16 w-16 place-items-center rounded-full bg-violet-500 text-sm font-bold">
+                              {m.name?.[0] || "?"}
+                            </div>
+                          )}
+                          <p className="text-sm font-semibold">{m.name}</p>
+                          <p className="text-[11px] text-emerald-300">
+                            {m.role}
+                          </p>
+                          <p className="text-[11px] text-slate-300">
+                            {m.description}
+                          </p>
+                          <button
+                            onClick={() => handleDeleteCrewMember(m)}
+                            className="mt-1 rounded-md bg-red-600 px-2 py-1 text-[11px] hover:bg-red-700"
+                          >
+                            🗑️ Odebrat
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* Přidání člena */}
+                <div className={`rounded-xl border border-slate-700/60 p-3 ${subCardClasses}`}>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    Přidat člena týmu
+                  </h3>
+                  <form
+                    onSubmit={handleAddCrewMember}
+                    className="space-y-2 text-xs"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Jméno"
+                      value={newCrewMember.name}
+                      onChange={(e) =>
+                        setNewCrewMember({
+                          ...newCrewMember,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Role"
+                      value={newCrewMember.role}
+                      onChange={(e) =>
+                        setNewCrewMember({
+                          ...newCrewMember,
+                          role: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      required
+                    />
+                    <textarea
+                      placeholder="Krátký popis"
+                      rows={3}
+                      value={newCrewMember.description}
+                      onChange={(e) =>
+                        setNewCrewMember({
+                          ...newCrewMember,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                    <label className="flex cursor-pointer items-center gap-2 text-xs">
+                      <span className="rounded-md bg-slate-700 px-3 py-1 hover:bg-slate-600">
+                        📷 Nahrát fotku
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setNewCrewMember({
+                            ...newCrewMember,
+                            photoFile: e.target.files?.[0] || null,
+                          })
+                        }
+                        className="hidden"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      className="w-full rounded-md bg-emerald-600 py-2 text-xs font-semibold hover:bg-emerald-700"
+                    >
+                      ➕ Přidat člena
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* === RECENZE === */}
+          {activeTab === "reviews" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">Recenze</h2>
+              <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+                <div>
+                  {reviews.length === 0 ? (
+                    <p className="text-sm text-slate-400">
+                      Zatím žádné recenze.
+                    </p>
+                  ) : (
+                    <ul className="space-y-3 text-xs">
+                      {reviews.map((r) => (
+                        <li
+                          key={r.id}
+                          className="rounded-xl bg-slate-900/40 p-3"
+                        >
+                          <div className="mb-1 flex items-center justify-between">
+                            <div>
+                              <p className="font-semibold">
+                                {r.name || "Anonym"}
+                              </p>
+                              <p className="text-[11px] text-amber-300">
+                                {"⭐".repeat(r.rating || 5)}
+                              </p>
+                            </div>
+                            <div className="flex gap-2 text-[11px]">
+                              <button
+                                onClick={() => toggleReviewApproved(r)}
+                                className={`rounded-md px-3 py-1 font-semibold ${
+                                  r.approved
+                                    ? "bg-emerald-600 hover:bg-emerald-700"
+                                    : "bg-slate-700 hover:bg-slate-600"
+                                }`}
+                              >
+                                {r.approved ? "Schváleno" : "Čeká"}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReview(r)}
+                                className="rounded-md bg-red-600 px-2 py-1 hover:bg-red-700"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-200">
+                            {r.message}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Přidání recenze */}
+                <div className={`rounded-xl border border-slate-700/60 p-3 ${subCardClasses}`}>
+                  <h3 className="mb-2 text-sm font-semibold">
+                    Přidat recenzi ručně
+                  </h3>
+                  <form
+                    onSubmit={handleAddReview}
+                    className="space-y-2 text-xs"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Jméno (volitelné)"
+                      value={newReview.name}
+                      onChange={(e) =>
+                        setNewReview({
+                          ...newReview,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                    <select
+                      value={newReview.rating}
+                      onChange={(e) =>
+                        setNewReview({
+                          ...newReview,
+                          rating: Number(e.target.value),
+                        })
+                      }
+                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    >
+                      <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
+                      <option value={4}>⭐⭐⭐⭐ (4)</option>
+                      <option value={3}>⭐⭐⭐ (3)</option>
+                      <option value={2}>⭐⭐ (2)</option>
+                      <option value={1}>⭐ (1)</option>
+                    </select>
+                    <textarea
+                      placeholder="Text recenze"
+                      rows={4}
+                      value={newReview.message}
+                      onChange={(e) =>
+                        setNewReview({
+                          ...newReview,
+                          message: e.target.value,
+                        })
+                      }
+                      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="w-full rounded-md bg-emerald-600 py-2 text-xs font-semibold hover:bg-emerald-700"
+                    >
+                      ➕ Uložit recenzi
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* === PROFIL ADMINA === */}
+          {activeTab === "profile" && (
+            <section
+              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+            >
+              <h2 className="mb-4 text-lg font-semibold">Profil administrátora</h2>
+              <div className="grid gap-6 md:grid-cols-[auto,1fr]">
+                <div className="flex flex-col items-center gap-3">
+                  {profile.avatarURL || user.photoURL ? (
+                    <img
+                      src={profile.avatarURL || user.photoURL}
+                      alt="Admin avatar"
+                      className="h-24 w-24 rounded-full border border-slate-500 object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-24 w-24 place-items-center rounded-full bg-violet-500 text-xl font-bold">
+                      {user.email?.[0]?.toUpperCase() || "A"}
+                    </div>
+                  )}
+                  <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold">
+                    <span className="rounded-md bg-slate-700 px-3 py-1 hover:bg-slate-600">
+                      📷 Změnit avatar
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  {uploadingAvatar && (
+                    <p className="text-[11px] text-slate-400">
+                      Nahrávám avatar…
+                    </p>
+                  )}
+                </div>
+
+                <form
+                  onSubmit={handleSaveProfile}
+                  className="space-y-3 text-xs"
+                >
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label className="flex flex-col gap-1">
+                      Zobrazované jméno
+                      <input
+                        type="text"
+                        value={profile.displayName}
+                        onChange={(e) =>
+                          setProfile({
+                            ...profile,
+                            displayName: e.target.value,
+                          })
+                        }
+                        className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      Role / pozice
+                      <input
+                        type="text"
+                        value={profile.role}
+                        onChange={(e) =>
+                          setProfile({
+                            ...profile,
+                            role: e.target.value,
+                          })
+                        }
+                        placeholder="Např. Organizátor, Produkce, Tech…"
+                        className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                      />
+                    </label>
+                  </div>
+                  <label className="flex flex-col gap-1">
+                    Krátký bio text (uvidíš jen v adminu, klidně osobnější)
+                    <textarea
+                      rows={4}
+                      value={profile.bio}
+                      onChange={(e) =>
+                        setProfile({
+                          ...profile,
+                          bio: e.target.value,
+                        })
+                      }
+                      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+                    />
+                  </label>
+                  <p className="text-[11px] text-slate-400">
+                    E-mail z přihlášení: {user.email}
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={savingProfile}
+                    className="mt-2 rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold hover:bg-emerald-700 disabled:opacity-60"
+                  >
+                    {savingProfile ? "Ukládám…" : "💾 Uložit profil"}
+                  </button>
+                </form>
+              </div>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
+
+// === POMOCNÉ MINI KOMPONENTY ===
+function TabButton({ active, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center justify-center rounded-full px-3 py-2 text-xs font-semibold transition ${
+        active
+          ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow"
+          : "bg-slate-800/80 text-slate-300 hover:bg-slate-700/90"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function StatTile({ label, value, hint }) {
+  return (
+    <div className="rounded-xl bg-slate-900/60 px-4 py-3 shadow-sm ring-1 ring-slate-700/70">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-fuchsia-300">{value}</p>
+      {hint && <p className="mt-1 text-[11px] text-slate-500">{hint}</p>}
+    </div>
+  );
+}
+
+function Th({ children }) {
+  return (
+    <th className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-300">
+      {children}
+    </th>
+  );
+}
+
+function Td({ children }) {
+  return <td className="px-3 py-2 text-[11px]">{children}</td>;
+}
+
 
 
 
