@@ -6,6 +6,7 @@ import { db } from "./firebaseConfig";
 import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
+import EventDetailModal from "./components/EventDetailModal.jsx";
 
 // === MINI KOMPONENTY ===
 function StatCard({ label, value }) {
@@ -41,7 +42,12 @@ function EventCard({ event, onReserve, variant = "upcoming" }) {
         )}
         {event.price && <span className="pill text-emerald-200">💳 {event.price} Kč</span>}
       </div>
-
+<button
+  onClick={() => setDetailEvent(event)}
+  className="self-start rounded-xl bg-white/5 px-4 py-2 text-sm text-white/70 border border-white/10 hover:border-fuchsia-400/40 transition"
+>
+  Zobrazit detail
+</button>
       {variant === "upcoming" && (
         <button
           onClick={() => onReserve(event)}
@@ -79,6 +85,7 @@ export default function PublicApp() {
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
   const [heroTags, setHeroTags] = useState([]);
+  const [detailEvent, setDetailEvent] = useState(null);
 
    // === Stripe návrat ===
   useEffect(() => {
@@ -123,12 +130,25 @@ export default function PublicApp() {
   }, []);
 
   // === REZERVACE ===
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "reservations"), (snap) => {
-      setStats((s) => ({ ...s, attendees: snap.size }));
-    });
-    return () => unsub();
-  }, []);
+useEffect(() => {
+  const unsub = onSnapshot(collection(db, "reservations"), (snap) => {
+    const reservations = snap.docs.map((doc) => doc.data());
+
+    // Přepočet podle názvu akce
+    setUpcoming((prev) =>
+      prev.map((event) => {
+        const count = reservations.filter(
+          (r) => r.eventTitle === event.title
+        ).length;
+        return { ...event, available: Math.max(event.capacity - count, 0) };
+      })
+    );
+
+    setStats((s) => ({ ...s, attendees: snap.size }));
+  });
+
+  return () => unsub();
+}, []);
 
   // === FEEDBACK ===
   useEffect(() => {
@@ -476,7 +496,16 @@ export default function PublicApp() {
     </a>
   </div>
 </section>
-
+{detailEvent && (
+  <EventDetailModal
+    event={detailEvent}
+    onClose={() => setDetailEvent(null)}
+    onReserve={() => {
+      setSelectedEvent(detailEvent);
+      setDetailEvent(null);
+    }}
+  />
+)}
        
 {/* === FOOTER === */}
 <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
