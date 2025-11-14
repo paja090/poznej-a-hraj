@@ -97,4 +97,7 @@ export default function EditorShell({ user, onLogout }) {
       </main>
     </div>
   );
+        </div>
+    </EditorProvider>
+  );
 }
