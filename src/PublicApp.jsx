@@ -176,8 +176,8 @@ export default function PublicApp() {
   {/* Logo + Text */}
   <div className="flex items-center gap-5">
     {/* Větší logo */}
-    <div className="h-24 w-24 flex items-center justify-center rounded-2xl p-1
-      bg-white/5 border border-white/10 shadow-[0_0_25px_rgba(236,72,153,0.35)] backdrop-blur-sm">
+   <div className="h-28 w-28 flex items-center justify-center rounded-2xl p-1
+  bg-white/5 border border-white/10 shadow-[0_0_25px_rgba(236,72,153,0.35)] backdrop-blur-sm">
       <img
         src="/logo3.png"
         alt="Logo Poznej & Hraj"
