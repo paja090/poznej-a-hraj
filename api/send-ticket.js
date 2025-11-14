@@ -139,27 +139,49 @@ function generateTicketEmailHtml({
                           📍 ${eventPlace || "bude upřesněno"}
                         </div>
 
-                        <div style="display:flex;flex-wrap:wrap;gap:8px 12px;margin-bottom:10px;">
-                          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;background:#111827;border:1px solid rgba(148,163,184,0.55);color:#e5e7eb;">
-                            👥 <strong style="font-weight:600;">${safePeople} os.</strong>
-                          </span>
-                          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;background:${
-                            isPaid
-                              ? "rgba(22,163,74,0.16)"
-                              : "rgba(234,179,8,0.16)"
-                          };border:1px solid ${
-    isPaid ? "rgba(34,197,94,0.6)" : "rgba(234,179,8,0.6)"
-  };color:${isPaid ? "#bbf7d0" : "#facc15"};">
-                            ${isPaid ? "✅ Zaplaceno" : "🟡 Čeká na platbu"}
-                          </span>
-                          ${
-                            price
-                              ? `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;background:#1d283a;border:1px solid rgba(59,130,246,0.55);color:#bfdbfe;">
-                            💳 ${price} Kč
-                          </span>`
-                              : ""
-                          }
-                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;">
+  
+  <span style="
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;
+    padding:6px 14px;border-radius:50px;
+    background:linear-gradient(145deg,#101827,#0f172a);
+    border:1px solid rgba(148,163,184,0.35);
+    color:#e5e7eb;
+  ">
+    👥 ${safePeople} osob
+  </span>
+
+  <span style="
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;
+    padding:6px 14px;border-radius:50px;
+    background:linear-gradient(145deg,rgba(22,163,74,0.25),rgba(22,163,74,0.15));
+    border:1px solid rgba(22,163,74,0.45);
+    color:#bbf7d0;
+  ">
+    ${isPaid ? "✔️ Zaplaceno" : "🟡 Nezaplaceno"}
+  </span>
+
+  ${
+    price
+      ? `
+      <span style="
+        display:inline-flex;align-items:center;gap:6px;
+        font-size:13px;font-weight:600;
+        padding:6px 14px;border-radius:50px;
+        background:linear-gradient(145deg,rgba(59,130,246,0.25),rgba(59,130,246,0.1));
+        border:1px solid rgba(59,130,246,0.45);
+        color:#cfe1ff;
+      ">
+        💳 ${price} Kč
+      </span>
+      `
+      : ""
+  }
+
+</div>
+
 
                         <div style="margin-top:6px;font-size:11px;color:rgba(148,163,184,0.9);">
                           ID rezervace: <span style="font-family:SFMono-Regular,Menlo,monospace;color:#e5e7eb;">${reservationId}</span>
