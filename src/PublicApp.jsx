@@ -207,7 +207,7 @@ useEffect(() => {
       {/* Logo (64px) */}
       <div className="h-84 w-84 flex items-center justify-center">
         <img
-          src="/logo2.jpg"
+          src="/logo7.jpg"
           alt="Logo Poznej & Hraj"
           className="object-contain w-full h-full drop-shadow-[0_0_8px_rgba(236,72,153,0.25)] brightness-110"
         />
