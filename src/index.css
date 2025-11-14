@@ -71,7 +71,7 @@ select:focus {
 
 /* dropdown položky */
 option {
-  background-color: #0f172a !important;  /* tmavý dropdown */
+  background-color: #737373 !important;  /* tmavý dropdown */
   color: #ffffff !important;
   padding: 10px;
 }
