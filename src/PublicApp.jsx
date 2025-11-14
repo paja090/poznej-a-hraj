@@ -181,7 +181,7 @@ export default function PublicApp() {
       {/* Menší logo (72px) */}
       <div className="h-18 w-18 flex items-center justify-center">
         <img
-          src="/logo3.PNG"
+          src="/logo3.png"
           alt="Logo Poznej & Hraj"
           className="object-contain w-full h-full drop-shadow-[0_0_8px_rgba(236,72,153,0.25)] brightness-110"
         />
