@@ -62,12 +62,15 @@ if (event.type === "checkout.session.completed") {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: session.customer_email,
-          name: session.customer_details?.name || "Host",
-          eventTitle: session.metadata.eventTitle,
-          reservationId,
-          peopleCount: session.metadata.peopleCount,
-        }),
+  email: session.customer_email,
+  name: session.customer_details?.name || "Host",
+  eventTitle: session.metadata.eventTitle,
+  eventDate: session.metadata.eventDate,
+  eventPlace: session.metadata.eventPlace,
+  peopleCount: session.metadata.peopleCount,
+  reservationId,
+  paymentStatus: "paid"
+}),
       });
 
       console.log("📨 Vstupenka odeslána na email:", session.customer_email);
