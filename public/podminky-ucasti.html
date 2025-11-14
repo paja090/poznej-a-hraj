@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Podmínky účasti – Poznej &amp; Hraj</title>
+  <style>
+    :root {
+      --bg: #050814;
+      --bg-card: #0b1020;
+      --border: #262b3f;
+      --accent: #8b5cf6;
+      --accent2: #00e5a8;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15), transparent 60%),
+        radial-gradient(circle at 90% 0%, rgba(0, 229, 168, 0.18), transparent 55%),
+        linear-gradient(180deg, #050814, #020617);
+      color: var(--text);
+      padding: 24px;
+    }
+    .wrapper {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .card {
+      background: radial-gradient(circle at top left, rgba(139,92,246,0.12), transparent 55%) var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      padding: 32px 24px 28px;
+    }
+    @media (min-width: 768px) {
+      .card {
+        padding: 40px 40px 32px;
+      }
+    }
+    h1 {
+      font-size: 1.9rem;
+      margin: 0 0 0.5rem;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin-top: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent2);
+    }
+    p {
+      line-height: 1.6;
+      margin: 0.35rem 0;
+      color: var(--text);
+    }
+    ul {
+      margin: 0.3rem 0 0.8rem 1.2rem;
+      padding: 0;
+      color: var(--text);
+    }
+    li {
+      margin: 0.2rem 0;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.25rem;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent2);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+    .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 1.5rem;
+    }
+    .footer {
+      margin-top: 1.75rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 20%, #f97316, transparent 50%),
+                  radial-gradient(circle at 70% 80%, #ec4899, transparent 55%),
+                  linear-gradient(135deg, #4f46e5, #0ea5e9);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #020617;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.9);
+    }
+    .logo-text-main {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .logo-text-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent2);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid rgba(148, 163, 184, 0.3);
+      margin: 1.5rem 0 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrapper">
+    <section class="card">
+      <div class="logo">
+        <div class="logo-mark">PH</div>
+        <div>
+          <div class="logo-text-main">Poznej &amp; Hraj</div>
+          <div class="logo-text-sub">Podmínky účasti na akci</div>
+        </div>
+      </div>
+
+      <div class="badge">
+        <span class="badge-dot"></span>
+        Pravidla bezpečné a férové účasti
+      </div>
+
+      <h1>Podmínky účasti na akci „Poznej &amp; Hraj“</h1>
+      <p>
+        Tyto podmínky upravují účast na společenské a zábavní akci
+        <span class="highlight">„Poznej &amp; Hraj“</span> (dále jen „Akce“).
+        Odesláním rezervace a účastí na Akci potvrzuje účastník, že se s těmito
+        podmínkami seznámil a souhlasí s nimi.
+      </p>
+
+      <h2>1. Věk účastníků</h2>
+      <p>
+        Účast na Akci je povolena pouze osobám, kterým bylo v den konání Akce
+        <strong>18 let nebo více</strong>.
+      </p>
+      <p>
+        Účastník při rezervaci pravdivě potvrzuje, že splňuje tento věkový limit.
+        Organizátor je oprávněn účastníka, u kterého vznikne důvodné podezření na
+        nedostatečný věk, z Akce vyloučit.
+      </p>
+
+      <h2>2. Bezpečnost a odpovědnost účastníka</h2>
+      <p>
+        Prostory Akce mohou obsahovat prvky, jako jsou schody, balkón, různá výšková
+        úrovně, herní stanoviště a pohyb dalších osob.
+      </p>
+      <p>
+        Účastník se Akce účastní <strong>na vlastní zodpovědnost</strong> a bere
+        na vědomí, že je povinen přizpůsobit své chování prostředí, svému zdravotnímu
+        stavu a stavu únavy či ovlivnění (např. alkoholem).
+      </p>
+      <p>Organizátor zejména nenese odpovědnost za:</p>
+      <ul>
+        <li>úrazy způsobené nepozorností účastníka,</li>
+        <li>újmy vzniklé nevhodným nebo rizikovým chováním účastníka,</li>
+        <li>úrazy a škody vzniklé náhodou v rámci běžného pohybu po prostoru Akce,</li>
+        <li>poškození či ztrátu osobních věcí účastníka.</li>
+      </ul>
+
+      <h2>3. Občerstvení, nápoje a alkohol</h2>
+      <p>
+        Účastník si může na Akci <strong>přinést vlastní jídlo a nápoje</strong>.
+      </p>
+      <p>
+        Organizátor zajišťuje v omezeném rozsahu občerstvení, zejména:
+      </p>
+      <ul>
+        <li>pivo (placené),</li>
+        <li>párky v rohlíku,</li>
+        <li>malé pohoštění (snacky),</li>
+        <li>případně vodní dýmky, pokud budou v daném termínu k dispozici.</li>
+      </ul>
+      <p>
+        Účastníci jsou povinni nakládat s alkoholem zodpovědně a nesmí svým chováním
+        ohrozit sebe ani ostatní. V případě zjevného nevhodného či agresivního chování
+        může být účastník z Akce vykázán bez nároku na náhradu.
+      </p>
+
+      <h2>4. Pravidla chování na Akci</h2>
+      <p>Účastník se zavazuje během Akce:</p>
+      <ul>
+        <li>chovat se ohleduplně k ostatním účastníkům i personálu,</li>
+        <li>respektovat pokyny organizátorů a moderátorů programu,</li>
+        <li>nepoškozovat zařízení prostor, vybavení ani majetek ostatních osob,</li>
+        <li>neohrožovat sebe ani ostatní fyzicky nebo slovně.</li>
+      </ul>
+      <p>
+        Porušení těchto zásad může vést k okamžitému vykázání účastníka z Akce,
+        a to bez nároku na vrácení vstupného či jiné kompenzace.
+      </p>
+
+      <h2>5. Herní a zábavní aktivity</h2>
+      <p>
+        Program Akce může zahrnovat hry, soutěže, kvízy, seznamovací aktivity a další
+        dobrovolné činnosti.
+      </p>
+      <p>
+        Účastník se zapojuje do aktivit dobrovolně a s vědomím, že jde o
+        společenské a zábavní programy, nikoliv profesionální či zdravotní služby.
+        Účastník je oprávněn kdykoli účast v aktivitách odmítnout nebo ukončit.
+      </p>
+
+      <h2>6. Zpracování osobních údajů (GDPR)</h2>
+      <p>
+        Organizátor v souvislosti s rezervací a účastí na Akci zpracovává osobní údaje
+        účastníků v rozsahu zejména:
+      </p>
+      <ul>
+        <li>jméno a příjmení,</li>
+        <li>e-mailová adresa,</li>
+        <li>věkové rozmezí a základní informace z rezervačního formuláře,</li>
+        <li>případná doplňující poznámka účastníka.</li>
+      </ul>
+      <p>
+        Údaje jsou zpracovávány za účelem evidence rezervací, organizace Akce,
+        nezbytné komunikace s účastníky a ve vybraných případech také pro
+        bezpečnostní a organizační účely (např. omezení kapacity).
+      </p>
+      <p>
+        Osobní údaje nejsou předávány třetím stranám, pokud to nevyžaduje právní
+        předpis nebo výslovný souhlas účastníka.
+      </p>
+
+      <h2>7. Potvrzení a souhlas účastníka</h2>
+      <p>
+        Odesláním rezervačního formuláře účastník potvrzuje, že:
+      </p>
+      <ul>
+        <li>se seznámil s těmito Podmínkami účasti, rozumí jim a souhlasí s nimi,</li>
+        <li>splňuje věkovou podmínku 18+ let,</li>
+        <li>účastní se Akce na vlastní zodpovědnost,</li>
+        <li>uvedené osobní údaje jsou pravdivé a aktuální.</li>
+      </ul>
+
+      <hr />
+
+      <div class="footer">
+        <span>Poslední aktualizace: listopad 2025</span>
+        <span>Kontakt: <a href="mailto:poznejahraj@seznam.cz">poznejahraj@seznam.cz</a></span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
