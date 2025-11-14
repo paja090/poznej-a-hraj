@@ -86,8 +86,10 @@ export default function PublicApp() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [crewMembers, setCrewMembers] = useState([]);
   const [loadingCrew, setLoadingCrew] = useState(true);
-  const [heroTags, setHeroTags] = useState([]);
+  
   const [detailEvent, setDetailEvent] = useState(null);
+  const [heroContent, setHeroContent] = useState(null);
+
 
    // === Stripe návrat ===
   useEffect(() => {
@@ -109,13 +111,7 @@ export default function PublicApp() {
     if (target) target.scrollIntoView({ behavior: "smooth" });
   };
 
-  // === HERO TAGS ===
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "heroTags"), (snapshot) => {
-      setHeroTags(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
-    return () => unsub();
-  }, []);
+  
 
   // === AKCE ===
   useEffect(() => {
@@ -169,6 +165,15 @@ useEffect(() => {
     });
     return () => unsub();
   }, []);
+// === HERO CONTENT ===
+useEffect(() => {
+  const unsub = onSnapshot(collection(db, "content"), (snapshot) => {
+    const heroDoc = snapshot.docs.find((d) => d.id === "hero");
+    if (heroDoc) setHeroContent(heroDoc.data());
+  });
+
+  return () => unsub();
+}, []);
 
   // === GALERIE ===
   useEffect(() => {
@@ -237,53 +242,73 @@ useEffect(() => {
   </div>
 </header>
        {/* === HERO === */}
-        <EditableBlock blockId="hero">
-        <section className="grid items-center gap-8 py-10 md:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-            <iframe
-              className="h-full w-full aspect-video"
-              src="https://www.youtube.com/embed/5jK8L3j4Z_4"
-              title="Promo video"
-              allowFullScreen
-            />
-          </div>
-          <div>
-            <button
-              type="button"
-              className="mb-6 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-5 py-2 text-sm font-semibold text-[#071022] shadow-lg transition hover:-translate-y-0.5"
+{!heroContent ? (
+  <div className="text-white p-10">Načítám obsah...</div>
+) : (
+  <EditableBlock blockId="hero">
+    <section className="grid items-center gap-8 py-10 md:grid-cols-2">
+      <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+        <iframe
+          className="h-full w-full aspect-video"
+          src={heroContent.videoUrl}
+          title="Promo video"
+          allowFullScreen
+        />
+      </div>
+
+      <div>
+        <button
+          type="button"
+          className="mb-6 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-5 py-2 text-sm font-semibold text-[#071022] shadow-lg transition hover:-translate-y-0.5"
+        >
+          {heroContent.ctaText}
+        </button>
+
+        <h2 className="text-4xl font-extrabold leading-tight">
+          {heroContent.headline}
+        </h2>
+
+        <p className="mt-4 text-lg text-white/80">
+          {heroContent.subheadline}
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          {heroContent.tags?.map((tag, i) => (
+            <span
+              key={i}
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-fuchsia-400/50 hover:text-white"
             >
-              Rezervuj místo 🔔 Kapacita se rychle plní
-            </button>
-            <h2 className="text-4xl font-extrabold leading-tight">
-              Místo, kde se lidé potkávají přirozeně
-            </h2>
-            <p className="mt-4 text-lg text-white/80">
-              Hry, výzvy a soutěže jsou perfektní ledoborce. Organizujeme večery, na které se chceš vracet.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {heroTags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-fuchsia-400/50 hover:text-white"
-                >
-                  {tag.label || tag.text}
-                </span>
-              ))}
-            </div>
-            <div className="mt-8 flex items-center gap-4 text-sm text-white/70">
-              <a href="https://instagram.com/poznejahraj" target="_blank" rel="noreferrer"
-                className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg">
-                📸
-              </a>
-              <a href="https://facebook.com/poznejahraj" target="_blank" rel="noreferrer"
-                className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg">
-                📘
-              </a>
-              <p className="text-sm text-white/60">Sleduj momentky a označ <strong>@poznejahraj</strong></p>
-            </div>
-          </div>
-        </section>
-</EditableBlock>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-8 flex items-center gap-4 text-sm text-white/70">
+          <a
+            href="https://instagram.com/poznejahraj"
+            target="_blank"
+            rel="noreferrer"
+            className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg"
+          >
+            📸
+          </a>
+          <a
+            href="https://facebook.com/poznejahraj"
+            target="_blank"
+            rel="noreferrer"
+            className="grid h-10 w-10 place-items-center rounded-full border border-white/20 bg-white/5 transition hover:-translate-y-1 hover:shadow-lg"
+          >
+            📘
+          </a>
+          <p className="text-sm text-white/60">
+            Sleduj momentky a označ <strong>@poznejahraj</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+  </EditableBlock>
+)}
+
         {/* === ABOUT SECTION === */}
         <EditableBlock blockId="about">
         <section id="about" className="card mt-10">
