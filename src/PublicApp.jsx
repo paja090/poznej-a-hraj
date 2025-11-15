@@ -229,13 +229,15 @@ export default function PublicApp() {
 <div
   className="pointer-events-none absolute bulb-dot"
   style={{
-    right: "-6px",         // přesně vycentrované světlo na žárovku
-    top: "63%",            // sedí na malém logu
+    right: "4px",         // přesná pozice
+    top: "62%",           // trochu níž než střed
     transform: "translateY(-50%)",
+    zIndex: 50,           // <<<<< NEJDŮLEŽITĚJŠÍ FIX
   }}
 >
-  <div className="w-8 h-8 bg-yellow-300 rounded-full blur-2xl opacity-90"></div>
+  <div className="w-10 h-10 bg-yellow-300 rounded-full blur-2xl opacity-95"></div>
 </div>
+
       </div>
     </div>
 
