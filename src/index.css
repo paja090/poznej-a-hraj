@@ -137,4 +137,23 @@ option {
 .animate-rainbow-glow {
   animation: rainbowGlow 4s ease-in-out infinite;
 }
+  @keyframes bulbGlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(255, 230, 0, 0.3))
+            drop-shadow(0 0 4px rgba(255, 240, 150, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 120, 0.8))
+            drop-shadow(0 0 15px rgba(255, 255, 150, 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 230, 0, 0.3))
+            drop-shadow(0 0 4px rgba(255, 240, 150, 0.25));
+  }
+}
+
+.animate-bulb-glow {
+  animation: bulbGlow 2.8s ease-in-out infinite;
+}
+
 
