@@ -1127,7 +1127,7 @@ const [newTag, setNewTag] = useState("");
             </section>
           )}
 
-         /* === OBSAH WEBU === */}
+         {/* === OBSAH WEBU === */}
 {activeTab === "content" && (
   <section
     className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
