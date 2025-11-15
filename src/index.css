@@ -155,5 +155,9 @@ option {
 .animate-bulb-glow {
   animation: bulbGlow 2.8s ease-in-out infinite;
 }
+  .bulb-mask {
+  mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+}
 
 
