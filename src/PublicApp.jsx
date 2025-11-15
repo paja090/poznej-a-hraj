@@ -306,7 +306,7 @@ export default function PublicApp() {
           <h3 className="text-xl font-semibold text-white">O projektu</h3>
           <p className="mt-4 text-white/70">
             {content.aboutIntro ||
-              "Poznej & Hraj vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce."}
+              "}
           </p>
           <p className="mt-4 text-white/70">
             {content.aboutBody ||
