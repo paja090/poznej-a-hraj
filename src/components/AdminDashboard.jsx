@@ -776,12 +776,21 @@ const handleAddEvent = async (e) => {
                                 : ""}
                             </p>
                           </div>
-                          <button
-                            onClick={() => handleDeleteEvent(ev.id)}
-                            className="self-start rounded-md bg-red-600 px-3 py-1 text-xs font-semibold hover:bg-red-700 md:self-auto"
-                          >
-                            🗑️ Smazat
-                          </button>
+                         <div className="flex gap-2 self-start md:self-auto">
+  <button
+    onClick={() => handleEditEvent(ev)}
+    className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold hover:bg-blue-700"
+  >
+    ✏️ Upravit
+  </button>
+
+  <button
+    onClick={() => handleDeleteEvent(ev.id)}
+    className="rounded-md bg-red-600 px-3 py-1 text-xs font-semibold hover:bg-red-700"
+  >
+    🗑️ Smazat
+  </button>
+</div>
                         </li>
                       ))}
                     </ul>
