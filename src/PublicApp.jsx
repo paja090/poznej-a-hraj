@@ -211,19 +211,21 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-       <header className="py-4">
-  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+      
+<header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
 
-    {/* Pouze logo – výrazné a čisté */}
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+
+    {/* Logo s neon pulzem */}
     <div className="flex justify-center md:justify-start w-full md:w-auto">
       <img
         src="/rebuss.png"
         alt="Reboos Logo"
-        className="h-32 w-32 object-contain drop-shadow-[0_0_20px_rgba(236,72,153,0.35)] brightness-110"
+        className="h-32 w-32 object-contain animate-neon-glow transition-transform duration-300 hover:scale-105"
       />
     </div>
 
-    {/* Navigace – beze změny */}
+    {/* Navigace */}
     <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
       <ul className="flex items-center gap-4 text-white/70">
         <li><button onClick={() => scrollToId("#events")} className="hover:text-white">Akce</button></li>
@@ -236,7 +238,12 @@ export default function PublicApp() {
     </nav>
 
   </div>
+
+  {/* Svítící spodní linka */}
+  <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
+
 </header>
+
 
         {/* === HERO === */}
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
