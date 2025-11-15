@@ -66,13 +66,28 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
         className="bg-[#0b0f19] text-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl animate-fadeIn relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Zavírací tlačítko */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-white/70 hover:text-white text-xl"
-        >
-          ✖
-        </button>
+       {/* Zavírací tlačítko */}
+<button
+  onClick={onClose}
+  className="
+    absolute 
+    top-3 
+    right-3 
+    z-50 
+    h-9 w-9 
+    flex items-center justify-center
+    rounded-full 
+    bg-black/40 
+    backdrop-blur 
+    hover:bg-black/60 
+    text-white/80 
+    hover:text-white 
+    transition
+  "
+>
+  ✖
+</button>
+
 
         {/* BANNER */}
         <div className="h-48 w-full overflow-hidden rounded-t-3xl relative">
