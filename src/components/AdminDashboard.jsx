@@ -232,15 +232,24 @@ const [newTag, setNewTag] = useState("");
       createdAt: serverTimestamp(),
     });
 
-    setNewEvent({
-      title: "",
-      date: "",
-      place: "",
-      description: "",
-      capacity: "",
-      price: "",
-    });
-  };
+   setNewEvent({
+  title: "",
+  date: "",
+  place: "",
+  description: "",
+  capacity: "",
+  price: "",
+
+  bannerUrl: "",
+  tags: [],
+  customTag: "",
+  program: [],
+  dressCode: "",
+  included: [],
+  goals: [],
+
+  galleryImages: [],
+});
 
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Opravdu smazat akci?")) {
@@ -961,6 +970,62 @@ const [newTag, setNewTag] = useState("");
         className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
       />
     </div>
+    {/* Výběr fotek do modalu */}
+<div>
+  <p className="text-xs font-semibold text-slate-300 mb-2">
+    Fotky z galerie pro tuto akci
+  </p>
+
+  {gallery.length === 0 ? (
+    <p className="text-[11px] text-slate-400">
+      Galerie je prázdná. Nahraj fotky v záložce „📸 Galerie“.
+    </p>
+  ) : (
+    <div className="grid grid-cols-3 gap-2">
+      {gallery.map((img) => (
+        <label
+          key={img.id}
+          className="relative cursor-pointer group"
+        >
+          <input
+            type="checkbox"
+            checked={newEvent.galleryImages.includes(img.url)}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setNewEvent({
+                  ...newEvent,
+                  galleryImages: [...newEvent.galleryImages, img.url],
+                });
+              } else {
+                setNewEvent({
+                  ...newEvent,
+                  galleryImages: newEvent.galleryImages.filter(
+                    (u) => u !== img.url
+                  ),
+                });
+              }
+            }}
+            className="absolute top-1 left-1 z-10 h-4 w-4"
+          />
+
+          {/* Náhled obrázku */}
+          <img
+            src={img.url}
+            alt={img.label}
+            className="h-20 w-full object-cover rounded-lg border border-white/20 group-hover:border-violet-400/50 transition"
+          />
+
+          {/* Overlay když je vybráno */}
+          {newEvent.galleryImages.includes(img.url) && (
+            <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center text-emerald-300 font-bold text-xl">
+              ✓
+            </div>
+          )}
+        </label>
+      ))}
+    </div>
+  )}
+</div>
 
     {/* Odeslat */}
     <button
