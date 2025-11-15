@@ -222,47 +222,66 @@ const [newTag, setNewTag] = useState("");
   // === HANDLERY ===
 
   // Přidání akce
-  const handleAddEvent = async (e) => {
-    e.preventDefault();
-    if (!newEvent.title || !newEvent.date || !newEvent.place) return;
-let uploadedBannerUrl = newEvent.bannerUrl;
+const handleAddEvent = async (e) => {
+  e.preventDefault();
+  if (!newEvent.title || !newEvent.date || !newEvent.place) return;
 
-// Pokud admin nahrál soubor, nahrajeme ho:
-if (newEvent.bannerFile) {
-  const path = `events/banners/${Date.now()}-${newEvent.bannerFile.name}`;
-  const ref = storageRef(storage, path);
-  await uploadBytes(ref, newEvent.bannerFile);
-  uploadedBannerUrl = await getDownloadURL(ref);
-}
-    await addDoc(collection(db, "events"), {
-      ...newEvent,
-       bannerUrl: uploadedBannerUrl,  // ⭐ použijeme URL nahraného banneru
-      capacity: Number(newEvent.capacity) || 0,
-      price: Number(newEvent.price) || 0,
-      createdAt: serverTimestamp(),
-    });
+  // ⭐ 1) Nahrajeme banner
+  let uploadedBannerUrl = newEvent.bannerUrl;
 
- setNewEvent({
-  title: "",
-  date: "",
-  place: "",
-  description: "",
-  capacity: "",
-  price: "",
+  if (newEvent.bannerFile) {
+    const path = `events/banners/${Date.now()}-${newEvent.bannerFile.name}`;
+    const ref = storageRef(storage, path);
+    await uploadBytes(ref, newEvent.bannerFile);
+    uploadedBannerUrl = await getDownloadURL(ref);
+  }
 
-  bannerUrl: "",
-  bannerFile: null,   // ⭐ MUSÍ BÝT
+  // ⭐ 2) PŘIPRAVÍME DATA BEZ bannerFile
+  const eventDataToSave = {
+    title: newEvent.title,
+    date: newEvent.date,
+    place: newEvent.place,
+    description: newEvent.description,
+    capacity: Number(newEvent.capacity) || 0,
+    price: Number(newEvent.price) || 0,
 
-  tags: [],
-  customTag: "",
-  program: [],
-  dressCode: "",
-  included: [],
-  goals: [],
+    bannerUrl: uploadedBannerUrl,
+    tags: newEvent.tags,
+    program: newEvent.program,
+    dressCode: newEvent.dressCode,
+    included: newEvent.included,
+    goals: newEvent.goals,
+    galleryImages: newEvent.galleryImages,
 
-  galleryImages: [],
-});
-    };
+    createdAt: serverTimestamp(),
+  };
+
+  // ⭐ 3) ULOŽÍME AKCI
+  await addDoc(collection(db, "events"), eventDataToSave);
+
+  // ⭐ 4) RESET FORMULÁŘE
+  setNewEvent({
+    title: "",
+    date: "",
+    place: "",
+    description: "",
+    capacity: "",
+    price: "",
+
+    bannerUrl: "",
+    bannerFile: null,
+
+    tags: [],
+    customTag: "",
+    program: [],
+    dressCode: "",
+    included: [],
+    goals: [],
+
+    galleryImages: [],
+  });
+};
+
 
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Opravdu smazat akci?")) {
