@@ -214,16 +214,31 @@ export default function PublicApp() {
       
 <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
 
-  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+ <div className="flex justify-center md:justify-start w-full md:w-auto">
+  <div className="relative inline-block">
 
-    {/* Logo s neon pulzem */}
-    <div className="flex justify-center md:justify-start w-full md:w-auto">
-     <img
-  src="/rebuss.png"
-  alt="Reboos Logo"
-  className="h-32 w-auto object-contain animate-bulb-glow bulb-mask transition-transform duration-300 hover:scale-105"
-/>
+    {/* LOGO */}
+    <img
+      src="/rebuss.png"
+      alt="Reboos Logo"
+      className="h-32 w-auto object-contain transition-transform duration-300 hover:scale-105"
+    />
+
+    {/* GLOW ŽÁROVKY */}
+    <div
+      className="pointer-events-none absolute bulb-dot"
+      style={{
+        right: "-2px",        // upraveno pro menší velikost
+        top: "58%",           // jemně posunuto pro h-32
+        transform: "translateY(-50%)",
+      }}
+    >
+      <div className="w-6 h-6 bg-yellow-200 rounded-full blur-xl opacity-80"></div>
     </div>
+
+  </div>
+</div>
+
 
     {/* Navigace */}
     <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
