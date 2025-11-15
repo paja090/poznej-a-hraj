@@ -20,10 +20,23 @@ import {
   deleteObject,
 } from "firebase/storage";
 import AdminPolls from "./AdminPolls.jsx";
-
+// ⭐ Přednastavené tagy pro akce (možnost 3C)
+const presetTags = [
+  "Soutěže",
+  "Minihry",
+  "Dýmky",
+  "Seznamovací",
+  "Party",
+  "Kvízy",
+  "Týmové hry",
+  "Volná zábava",
+  "Speciální edice",
+  "Mikulášská",
+];
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [darkMode, setDarkMode] = useState(true);
+  
 
   // === DATA STAVY ===
   const [events, setEvents] = useState([]);
@@ -58,13 +71,23 @@ const [newTag, setNewTag] = useState("");
 
   // === NOVÁ AKCE FORM ===
   const [newEvent, setNewEvent] = useState({
-    title: "",
-    date: "",
-    place: "",
-    description: "",
-    capacity: "",
-    price: "",
-  });
+  title: "",
+  date: "",
+  place: "",
+  description: "",
+  capacity: "",
+  price: "",
+
+  bannerUrl: "",          // ⭐ banner
+  tags: [],               // ⭐ vlastní i přednastavené
+  customTag: "",          // ⭐ pomocné pole pro vlastní tag
+  program: [],            // ⭐ seznam řádků „19:00 – …“
+  dressCode: "",          // ⭐ text
+  included: [],           // ⭐ v ceně vstupenky
+  goals: [],              // ⭐ cíl akce
+
+  galleryImages: [],      // ⭐ vybrané fotky z galerie
+});
 
   // === NOVÝ CREW MEMBER ===
   const [newCrewMember, setNewCrewMember] = useState({
@@ -724,86 +747,232 @@ const [newTag, setNewTag] = useState("");
                   )}
                 </div>
 
-                {/* Přidání akce */}
-                <div className={`rounded-xl border border-slate-700/60 p-3 ${subCardClasses}`}>
-                  <h3 className="mb-2 text-sm font-semibold">
-                    Přidat novou akci
-                  </h3>
-                  <form onSubmit={handleAddEvent} className="space-y-2 text-xs">
-                    <input
-                      type="text"
-                      placeholder="Název akce"
-                      value={newEvent.title}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, title: e.target.value })
-                      }
-                      required
-                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Místo konání"
-                      value={newEvent.place}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, place: e.target.value })
-                      }
-                      required
-                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                    />
-                    <input
-                      type="date"
-                      value={newEvent.date}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, date: e.target.value })
-                      }
-                      required
-                      className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Kapacita"
-                        value={newEvent.capacity}
-                        onChange={(e) =>
-                          setNewEvent({
-                            ...newEvent,
-                            capacity: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Cena (Kč)"
-                        value={newEvent.price}
-                        onChange={(e) =>
-                          setNewEvent({ ...newEvent, price: e.target.value })
-                        }
-                        className="w-full rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                      />
-                    </div>
-                    <textarea
-                      placeholder="Popis akce"
-                      value={newEvent.description}
-                      onChange={(e) =>
-                        setNewEvent({
-                          ...newEvent,
-                          description: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                    />
-                    <button
-                      type="submit"
-                      className="w-full rounded-md bg-emerald-600 py-2 text-xs font-semibold hover:bg-emerald-700"
-                    >
-                      ➕ Přidat akci
-                    </button>
-                  </form>
-                </div>
+               {/* Přidat novou akci */}
+<div className={`rounded-xl border border-slate-700/60 p-3 ${subCardClasses}`}>
+  <h3 className="mb-3 text-sm font-semibold">
+    Přidat novou akci
+  </h3>
+
+  <form onSubmit={handleAddEvent} className="space-y-3 text-xs">
+
+    {/* Název */}
+    <input
+      type="text"
+      placeholder="Název akce"
+      value={newEvent.title}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, title: e.target.value })
+      }
+      required
+      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+    />
+
+    {/* Místo */}
+    <input
+      type="text"
+      placeholder="Místo konání"
+      value={newEvent.place}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, place: e.target.value })
+      }
+      required
+      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+    />
+
+    {/* Datum */}
+    <input
+      type="date"
+      value={newEvent.date}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, date: e.target.value })
+      }
+      required
+      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+    />
+
+    {/* Kapacita + cena */}
+    <div className="grid grid-cols-2 gap-2">
+      <input
+        type="number"
+        min="0"
+        placeholder="Kapacita"
+        value={newEvent.capacity}
+        onChange={(e) =>
+          setNewEvent({ ...newEvent, capacity: e.target.value })
+        }
+        className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+      />
+
+      <input
+        type="number"
+        min="0"
+        placeholder="Cena (Kč)"
+        value={newEvent.price}
+        onChange={(e) =>
+          setNewEvent({ ...newEvent, price: e.target.value })
+        }
+        className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+      />
+    </div>
+
+    {/* Popis */}
+    <textarea
+      placeholder="Popis události"
+      rows={3}
+      value={newEvent.description}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, description: e.target.value })
+      }
+      className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+    />
+
+    {/* Banner URL */}
+    <input
+      type="text"
+      placeholder="URL banneru (obrázek akce)"
+      value={newEvent.bannerUrl}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, bannerUrl: e.target.value })
+      }
+      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+    />
+
+    {/* Tagy – preset + vlastní */}
+    <div className="space-y-1 mt-2">
+      <p className="text-xs font-semibold text-slate-300">Tagy akce</p>
+      <div className="grid grid-cols-2 gap-1">
+        {presetTags.map((tag) => (
+          <label key={tag} className="flex items-center gap-1 text-[11px]">
+            <input
+              type="checkbox"
+              checked={newEvent.tags.includes(tag)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setNewEvent({ ...newEvent, tags: [...newEvent.tags, tag] });
+                } else {
+                  setNewEvent({
+                    ...newEvent,
+                    tags: newEvent.tags.filter((t) => t !== tag),
+                  });
+                }
+              }}
+            />
+            {tag}
+          </label>
+        ))}
+      </div>
+
+      {/* vlastní tag */}
+      <div className="flex gap-2 mt-2">
+        <input
+          type="text"
+          placeholder="Vlastní tag"
+          value={newEvent.customTag || ""}
+          onChange={(e) =>
+            setNewEvent({ ...newEvent, customTag: e.target.value })
+          }
+          className="flex-1 rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            if (newEvent.customTag?.trim()) {
+              setNewEvent({
+                ...newEvent,
+                tags: [...newEvent.tags, newEvent.customTag.trim()],
+                customTag: "",
+              });
+            }
+          }}
+          className="px-3 py-2 bg-emerald-600 rounded-md text-xs font-semibold"
+        >
+          Přidat
+        </button>
+      </div>
+    </div>
+
+    {/* Program večera */}
+    <div>
+      <p className="text-xs font-semibold text-slate-300">Program večera</p>
+      <textarea
+        placeholder={`Např:\n19:00 – Welcome drink\n19:30 – Seznamovací hry\n20:30 – Andělé vs. Čerti`}
+        rows={4}
+        value={newEvent.program.join("\n")}
+        onChange={(e) =>
+          setNewEvent({
+            ...newEvent,
+            program: e.target.value
+              .split("\n")
+              .map((l) => l.trim())
+              .filter((l) => l),
+          })
+        }
+        className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
+      />
+    </div>
+
+    {/* Dress code */}
+    <input
+      type="text"
+      placeholder="Dress code"
+      value={newEvent.dressCode}
+      onChange={(e) =>
+        setNewEvent({ ...newEvent, dressCode: e.target.value })
+      }
+      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
+    />
+
+    {/* V ceně vstupenky */}
+    <div>
+      <p className="text-xs font-semibold text-slate-300">V ceně vstupenky</p>
+      <textarea
+        placeholder="Např:\nWelcome drink\nVstup do soutěží\nPřístup do chill zóny"
+        rows={3}
+        value={newEvent.included.join("\n")}
+        onChange={(e) =>
+          setNewEvent({
+            ...newEvent,
+            included: e.target.value
+              .split("\n")
+              .map((l) => l.trim())
+              .filter((l) => l),
+          })
+        }
+        className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
+      />
+    </div>
+
+    {/* Cíl akce */}
+    <div>
+      <p className="text-xs font-semibold text-slate-300">Cíl akce</p>
+      <textarea
+        placeholder="Cíle akce (každý řádek jedna položka)"
+        rows={3}
+        value={newEvent.goals.join("\n")}
+        onChange={(e) =>
+          setNewEvent({
+            ...newEvent,
+            goals: e.target.value
+              .split("\n")
+              .map((l) => l.trim())
+              .filter((l) => l),
+          })
+        }
+        className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 text-xs"
+      />
+    </div>
+
+    {/* Odeslat */}
+    <button
+      type="submit"
+      className="w-full rounded-md bg-emerald-600 py-2 text-xs font-semibold hover:bg-emerald-700"
+    >
+      ➕ Přidat akci
+    </button>
+  </form>
+</div>
+
+
               </div>
             </section>
           )}
