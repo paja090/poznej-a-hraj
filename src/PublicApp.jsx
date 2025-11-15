@@ -302,9 +302,9 @@ return (
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
 </header>
         {/* === HERO === */}
-<section className="grid items-center gap-8 py-10 md:grid-cols-2">
+<section className="grid items-center gap-10 py-14 md:grid-cols-2">
 
-  {/* VIDEO BLOK */}
+  {/* VIDEO */}
   <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
     <iframe
       className="h-full w-full aspect-video"
@@ -314,20 +314,27 @@ return (
     />
   </div>
 
-  {/* TEXTOVÁ ČÁST */}
-  <div>
-    {/* Nadpis */}
+  {/* TEXTOVÁ SEKCE */}
+  <div className="space-y-5">
+
+    {/* ZVONEČEK – GARANCE */}
+    <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-4 py-2 text-sm text-fuchsia-200 shadow-[0_0_15px_rgba(236,72,153,0.35)]">
+      <span className="text-lg">🔔</span>
+      <span className="font-semibold">Garance spokojenosti</span>
+    </div>
+
+    {/* NADPIS */}
     <h2 className="text-4xl font-extrabold leading-tight">
       {content.heroTitle}
     </h2>
 
-    {/* Podnadpis */}
-    <p className="mt-4 text-lg text-white/80">
+    {/* PODNADPIS */}
+    <p className="text-lg text-white/80">
       {content.heroSubtitle}
     </p>
 
     {/* TAGY */}
-    <div className="flex flex-wrap gap-2 mt-4">
+    <div className="flex flex-wrap gap-2 mt-2">
       {Array.isArray(content.tags) &&
         content.tags.map((tag, i) => (
           <span
@@ -342,62 +349,72 @@ return (
     {/* CTA */}
     <button
       onClick={() => scrollToId("#events")}
-      className="mt-6 rounded-xl bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-5 py-3 text-base font-semibold text-[#071022] shadow-lg hover:scale-[1.03] transition"
+      className="mt-3 rounded-xl bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-6 py-3 text-base font-semibold text-[#071022] shadow-lg hover:scale-[1.03] transition"
     >
       {content.ctaText}
     </button>
 
-    {/* GARANCE */}
-    <p className="mt-3 text-sm text-white/60">
+    {/* GARANČNÍ TEXT */}
+    <p className="text-sm text-white/70 mt-1">
       {content.guaranteeText}
     </p>
 
-    {/* SOCIÁLNÍ IKONY */}
-    <div className="flex gap-4 mt-6">
-      {/* Instagram */}
-      <a
-        href="https://instagram.com/poznejahraj"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:border-fuchsia-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
-      >
-        <svg
-          className="h-5 w-5 text-white/80 group-hover:text-fuchsia-400 transition"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          viewBox="0 0 24 24"
-        >
-          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
-        </svg>
-      </a>
+    {/* SOCIÁLNÍ IKONY + TEXT */}
+    <div className="mt-6 space-y-3">
 
-      {/* Facebook */}
-      <a
-        href="https://www.facebook.com/profile.php?id=61583460909894"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:border-violet-400 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]"
-      >
-        <svg
-          className="h-5 w-5 text-white/80 group-hover:text-violet-400 transition"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          viewBox="0 0 24 24"
+      <div className="flex gap-4">
+        {/* Instagram */}
+        <a
+          href="https://instagram.com/poznejahraj"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition hover:border-fuchsia-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9.197 21V12H6v-3.5h3.197V6.174C9.197 3.004 10.982 2 13.694 2c1.239 0 2.303.09 2.614.132v3.033h-1.796c-1.41 0-1.682.668-1.682 1.649V8.5H16L15.5 12h-2.67v9H9.197z"
-          />
-        </svg>
-      </a>
+          <svg
+            className="h-5 w-5 text-white/80 group-hover:text-fuchsia-400 transition"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            viewBox="0 0 24 24"
+          >
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+          </svg>
+        </a>
+
+        {/* Facebook */}
+        <a
+          href="https://www.facebook.com/profile.php?id=61583460909894"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition hover:border-violet-400 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+        >
+          <svg
+            className="h-5 w-5 text-white/80 group-hover:text-violet-400 transition"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9.197 21V12H6v-3.5h3.197V6.174C9.197 3.004 10.982 2 13.694 2c1.239 0 2.303.09 2.614.132v3.033h-1.796c-1.41 0-1.682.668-1.682 1.649V8.5H16L15.5 12h-2.67v9H9.197z"
+            />
+          </svg>
+        </a>
+      </div>
+
+      {/* TEXT POD IKONAMI */}
+      <p className="text-xs text-white/60">
+        📸 Zapoj se do hry a označ nás — <strong>#poznejahraj</strong>
+      </p>
+
     </div>
   </div>
 </section>
+
 
 
      
