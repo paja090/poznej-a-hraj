@@ -35,6 +35,7 @@
     @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-4 py-1 font-medium text-white/75;
   }
 }
+
 .admin-tile {
   display: flex;
   align-items: center;
@@ -47,15 +48,16 @@
   text-align: center;
   transition: 0.2s;
 }
+
 .admin-tile:hover {
   background: rgba(139, 92, 246, 0.35);
   transform: translateY(-2px);
 }
- /* === SJEDNOCENÝ FIX pro selecty v modalu rezervace === */
 
+/* === FIX pro selecty === */
 select {
-  appearance: none;                      /* schová defaultní systémovou šipku */
-  background-color: rgba(255,255,255,0.07) !important; /* stejné pozadí jako inputy */
+  appearance: none;
+  background-color: rgba(255,255,255,0.07) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255,255,255,0.2) !important;
   border-radius: 8px !important;
@@ -69,43 +71,13 @@ select:focus {
   box-shadow: 0 0 0 1px var(--a2);
 }
 
-/* dropdown položky */
 option {
-  background-color: #737373 !important;  /* tmavý dropdown */
+  background-color: #737373 !important;
   color: #ffffff !important;
   padding: 10px;
 }
-  @keyframes rainbowGlow {
-  0% {
-    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
-            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
-            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
-  }
-  25% {
-    filter: drop-shadow(0 0 6px rgba(255, 128, 0, 0.55))
-            drop-shadow(0 0 14px rgba(255, 255, 0, 0.45))
-            drop-shadow(0 0 22px rgba(0, 255, 0, 0.35));
-  }
-  50% {
-    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.55))
-            drop-shadow(0 0 14px rgba(0, 255, 255, 0.45))
-            drop-shadow(0 0 22px rgba(0, 128, 255, 0.35));
-  }
-  75% {
-    filter: drop-shadow(0 0 6px rgba(0, 128, 255, 0.55))
-            drop-shadow(0 0 14px rgba(128, 0, 255, 0.45))
-            drop-shadow(0 0 22px rgba(255, 0, 255, 0.35));
-  }
-  100% {
-    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
-            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
-            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
-  }
-}
 
-.animate-rainbow-glow {
-  animation: rainbowGlow 4s ease-in-out infinite;
-}
+/* === Rainbow Glow (ponechán pro budoucí použití) === */
 @keyframes rainbowGlow {
   0% {
     filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
@@ -137,44 +109,14 @@ option {
 .animate-rainbow-glow {
   animation: rainbowGlow 4s ease-in-out infinite;
 }
-  @keyframes bulbGlow {
-  0% {
-    filter: drop-shadow(0 0 2px rgba(255, 230, 0, 0.3))
-            drop-shadow(0 0 4px rgba(255, 240, 150, 0.25));
-  }
-  50% {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 120, 0.8))
-            drop-shadow(0 0 15px rgba(255, 255, 150, 0.6));
-  }
-  100% {
-    filter: drop-shadow(0 0 2px rgba(255, 230, 0, 0.3))
-            drop-shadow(0 0 4px rgba(255, 240, 150, 0.25));
-  }
-}
 
-.animate-bulb-glow {
-  animation: bulbGlow 2.8s ease-in-out infinite;
-}
-  .bulb-mask {
-  mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-}
+/* === Yellow Light Bulb Glow (NEJDŮLEŽITĚJŠÍ PRO TVOJI ŽÁROVKU) === */
 @keyframes bulbDotGlow {
-  0% { opacity: 0.15; transform: scale(0.9); }
-  50% { opacity: 0.95; transform: scale(1.35); }
-  100% { opacity: 0.15; transform: scale(0.9); }
+  0% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0.25; transform: scale(0.8); }
 }
 
 .bulb-dot {
-  animation: bulbDotGlow 2.7s ease-in-out infinite;
+  animation: bulbDotGlow 2.2s ease-in-out infinite;
 }
-  @keyframes bulbDotGlow {
-  0% { opacity: 0.15; transform: scale(0.9); }
-  50% { opacity: 0.95; transform: scale(1.35); }
-  100% { opacity: 0.15; transform: scale(0.9); }
-}
-
-.bulb-dot {
-  animation: bulbDotGlow 2.7s ease-in-out infinite;
-}
-
