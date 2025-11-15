@@ -75,3 +75,66 @@ option {
   color: #ffffff !important;
   padding: 10px;
 }
+  @keyframes rainbowGlow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
+            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
+  }
+  25% {
+    filter: drop-shadow(0 0 6px rgba(255, 128, 0, 0.55))
+            drop-shadow(0 0 14px rgba(255, 255, 0, 0.45))
+            drop-shadow(0 0 22px rgba(0, 255, 0, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.55))
+            drop-shadow(0 0 14px rgba(0, 255, 255, 0.45))
+            drop-shadow(0 0 22px rgba(0, 128, 255, 0.35));
+  }
+  75% {
+    filter: drop-shadow(0 0 6px rgba(0, 128, 255, 0.55))
+            drop-shadow(0 0 14px rgba(128, 0, 255, 0.45))
+            drop-shadow(0 0 22px rgba(255, 0, 255, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
+            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
+  }
+}
+
+.animate-rainbow-glow {
+  animation: rainbowGlow 4s ease-in-out infinite;
+}
+@keyframes rainbowGlow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
+            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
+  }
+  25% {
+    filter: drop-shadow(0 0 6px rgba(255, 128, 0, 0.55))
+            drop-shadow(0 0 14px rgba(255, 255, 0, 0.45))
+            drop-shadow(0 0 22px rgba(0, 255, 0, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.55))
+            drop-shadow(0 0 14px rgba(0, 255, 255, 0.45))
+            drop-shadow(0 0 22px rgba(0, 128, 255, 0.35));
+  }
+  75% {
+    filter: drop-shadow(0 0 6px rgba(0, 128, 255, 0.55))
+            drop-shadow(0 0 14px rgba(128, 0, 255, 0.45))
+            drop-shadow(0 0 22px rgba(255, 0, 255, 0.35));
+  }
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 102, 0.5))
+            drop-shadow(0 0 12px rgba(255, 0, 0, 0.4))
+            drop-shadow(0 0 20px rgba(255, 128, 0, 0.3));
+  }
+}
+
+.animate-rainbow-glow {
+  animation: rainbowGlow 4s ease-in-out infinite;
+}
+
