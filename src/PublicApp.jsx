@@ -295,26 +295,73 @@ return (
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
 </header>
         {/* === HERO === */}
-        <section className="grid items-center gap-8 py-10 md:grid-cols-2">
-          <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-            <iframe
-              className="h-full w-full aspect-video"
-              src="https://www.youtube.com/embed/5jK8L3j4Z_4"
-              title="Promo video"
-              allowFullScreen
-            />
-          </div>
+<section className="grid items-center gap-8 py-10 md:grid-cols-2">
+  {/* Video */}
+  <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+    <iframe
+      className="h-full w-full aspect-video"
+      src="https://www.youtube.com/embed/5jK8L3j4Z_4"
+      title="Promo video"
+      allowFullScreen
+    />
+  </div>
 
-          <div>
-            <h2 className="text-4xl font-extrabold leading-tight">
-              {content.heroTitle || "Místo, kde se lidé potkávají přirozeně"}
-            </h2>
+  {/* Textový blok */}
+  <div>
+    <h2 className="text-4xl font-extrabold leading-tight">
+      {content.heroTitle}
+    </h2>
 
-            <p className="mt-4 text-lg text-white/80">
-              {content.heroSubtitle || "Večery plné her, kvízů a nových přátel."}
-            </p>
-          </div>
-        </section>
+    <p className="mt-4 text-lg text-white/80">
+      {content.heroSubtitle}
+    </p>
+
+    {/* TAGY */}
+    <div className="flex flex-wrap gap-2 mt-4">
+      {Array.isArray(content.tags) &&
+        content.tags.map((tag, i) => (
+          <span
+            key={i}
+            className="px-3 py-1 rounded-full text-xs border border-white/20 bg-white/5 text-white/70"
+          >
+            {tag}
+          </span>
+        ))}
+    </div>
+
+    {/* CTA */}
+    <button
+      onClick={() => scrollToId("#events")}
+      className="mt-6 rounded-xl bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 px-5 py-3 text-base font-semibold text-[#071022] shadow-lg hover:scale-[1.03] transition"
+    >
+      {content.ctaText}
+    </button>
+
+    {/* GARANCE */}
+    <p className="mt-3 text-sm text-white/60">
+      {content.guaranteeText}
+    </p>
+
+    {/* IKONY SOCIAL */}
+    <div className="flex gap-4 mt-6">
+      <a
+        href="https://instagram.com/poznejahraj"
+        target="_blank"
+        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 hover:border-fuchsia-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.3)] transition"
+      >
+        <img src="/ig.svg" alt="Instagram" className="h-5 w-5" />
+      </a>
+
+      <a
+        href="https://facebook.com/poznejahraj"
+        target="_blank"
+        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 hover:border-violet-400 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition"
+      >
+        <img src="/fb.svg" alt="Facebook" className="h-5 w-5" />
+      </a>
+    </div>
+  </div>
+</section>
 
      
         {/* === ABOUT === */}
