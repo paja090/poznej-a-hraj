@@ -229,15 +229,18 @@ export default function PublicApp() {
 <div
   className="pointer-events-none absolute bulb-dot"
   style={{
-    right: "4px",         // přesná pozice
-    top: "62%",           // trochu níž než střed
+    right: "0px",         // ještě přesněji na hraně
+    top: "60%",           // optimalizováno
     transform: "translateY(-50%)",
-    zIndex: 50,           // <<<<< NEJDŮLEŽITĚJŠÍ FIX
+    zIndex: 50,
   }}
 >
-  <div className="w-10 h-10 bg-yellow-300 rounded-full blur-2xl opacity-95"></div>
-</div>
+  {/* Silné jádro světla */}
+  <div className="w-4 h-4 bg-yellow-300 rounded-full blur-sm opacity-100"></div>
 
+  {/* Jemnější druhý glow okolo */}
+  <div className="absolute inset-0 w-10 h-10 bg-yellow-200 rounded-full blur-xl opacity-80 -z-10"></div>
+</div>
       </div>
     </div>
 
