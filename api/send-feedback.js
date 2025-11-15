@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import admin from "firebase-admin";
-
+import { getVocative } from "../utils/vocative.js";
 // === Inicializace Firebase Admin ===
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
