@@ -85,12 +85,15 @@ export default function PublicApp() {
 
   const [reviews, setReviews] = useState([]);
 
-  const [content, setContent] = useState({
-    heroTitle: "",
-    heroSubtitle: "",
-    aboutIntro: "",
-    aboutBody: "",
-  });
+ const [content, setContent] = useState({
+  heroTitle: "",
+  heroSubtitle: "",
+  ctaText: "Rezervuj si své místo",
+  guaranteeText: "Vracíme peníze, pokud se ti akce nebude líbit.",
+  aboutIntro: "",
+  aboutBody: "",
+  tags: [],
+});
 
   // === Stripe návrat ===
   useEffect(() => {
@@ -116,12 +119,16 @@ export default function PublicApp() {
     const unsub = onSnapshot(doc(db, "settings", "publicContent"), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        setContent({
-          heroTitle: data.heroTitle || "",
-          heroSubtitle: data.heroSubtitle || "",
-          aboutIntro: data.aboutIntro || "",
-          aboutBody: data.aboutBody || "",
-        });
+       setContent({
+  heroTitle: data.heroTitle || "",
+  heroSubtitle: data.heroSubtitle || "",
+  ctaText: data.ctaText || "Rezervuj si své místo",
+  guaranteeText: data.guaranteeText || "Vracíme peníze, pokud se ti akce nebude líbit.",
+  aboutIntro: data.aboutIntro || "",
+  aboutBody: data.aboutBody || "",
+  tags: data.tags || [],
+});
+
       }
     });
     return () => unsub();
