@@ -22,6 +22,7 @@ export default function FeedbackForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setSuccess(false);
 
     if (!form.email || !form.message) {
       setError('Vyplň prosím e-mail i zprávu.');
@@ -29,36 +30,31 @@ export default function FeedbackForm() {
     }
 
     setLoading(true);
+
     try {
-      // 1️⃣ Uložení do Firestore
+      // 1️⃣ Uložit do Firestore (už máš hotové)
       await sendFeedback(form, file);
 
-      // 2️⃣ Odeslání do Formspree
-      const formData = new FormData();
-      formData.append('name', form.name);
-      formData.append('email', form.email);
-      formData.append('message', form.message);
-      if (file) formData.append('attachment', file);
-
-      const response = await fetch('https://formspree.io/f/xovyawqv', {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formData,
+      // 2️⃣ Odeslat e-mail přes náš backend
+      const resp = await fetch("/api/send-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Chyba Formspree: ${response.status}`);
+      if (!resp.ok) {
+        throw new Error("Chyba při odesílání e-mailu.");
       }
 
-      console.log('✅ Odesláno do Formspree');
+      // hotovo 🎉
       setSuccess(true);
       setForm(initialForm);
       setFile(null);
       event.target.reset();
+
     } catch (err) {
-      console.error('❌ Chyba při odesílání:', err);
-      setError(err.message || 'Odeslání se nezdařilo. Zkus to prosím znovu.');
+      console.error(err);
+      setError(err.message || "Odeslání se nezdařilo.");
     } finally {
       setLoading(false);
     }
@@ -78,6 +74,7 @@ export default function FeedbackForm() {
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
           />
         </label>
+
         <label className="flex flex-col gap-2 text-sm text-white/70">
           E-mail
           <input
@@ -118,10 +115,11 @@ export default function FeedbackForm() {
       <div className="flex flex-col gap-3 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
         <span>
           Raději e-mail? Napiš na{' '}
-          <a className="text-a2 underline" href="mailto:poznejahraj@seznam.cz">
-            poznejahraj@seznam.cz
+          <a className="text-a2 underline" href="mailto:poznejahraj@gmail.com">
+            poznejahraj@gmail.com
           </a>
         </span>
+
         <button
           type="submit"
           disabled={loading}
@@ -132,13 +130,15 @@ export default function FeedbackForm() {
       </div>
 
       {error && <p className="text-sm text-red-300">{error}</p>}
+
       {success && (
         <p className="rounded-xl border border-a2/40 bg-a2/10 px-4 py-3 text-sm text-a2">
-          Děkujeme za zpětnou vazbu! ✉️
+          Děkujeme za zpětnou vazbu! ✉️ Brzy se ti ozveme.
         </p>
       )}
     </form>
   );
 }
+
 
 
