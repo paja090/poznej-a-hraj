@@ -205,9 +205,11 @@ export default function PublicApp() {
 
   // === RENDER ===
   
-   return (
+  
+return (
   <div className="min-h-screen font-rubik text-white relative">
-    {/* --- BACKGROUND IMAGE (funguje na PC + MOBIL) --- */}
+
+    {/* --- BACKGROUND IMAGE (PC + MOBIL) --- */}
     <div className="fixed inset-0 -z-20">
       <img
         src="/pozadi.png"
@@ -216,13 +218,16 @@ export default function PublicApp() {
       />
     </div>
 
-    {/* --- OVERLAY (zvýší čitelnost textů) --- */}
+    {/* --- OVERLAY (čitelnost textu) --- */}
     <div className="fixed inset-0 -z-10 bg-black/55 backdrop-blur-sm"></div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-24">
-        {/* === HLAVIČKA === */}
+    {/* --- OBSAH STRÁNKY --- */}
+    <div className="mx-auto max-w-6xl px-4 pb-24">
+
+      {/* === HLAVIČKA === */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
-  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+
 
     {/* Logo with glow */}
     <div className="flex justify-center md:justify-start w-full md:w-auto">
