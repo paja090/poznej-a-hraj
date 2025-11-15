@@ -36,9 +36,12 @@ const presetTags = [
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [darkMode, setDarkMode] = useState(true);
+  // ⭐ EDITACE AKCE
+  const [editingEvent, setEditingEvent] = useState(null);
   
 
   // === DATA STAVY ===
+
   const [events, setEvents] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [feedbackCount, setFeedbackCount] = useState(0);
@@ -222,6 +225,7 @@ const [newTag, setNewTag] = useState("");
   // === HANDLERY ===
 
   // Přidání akce
+ 
 const handleAddEvent = async (e) => {
   e.preventDefault();
   if (!newEvent.title || !newEvent.date || !newEvent.place) return;
@@ -355,6 +359,16 @@ const handleAddEvent = async (e) => {
     a.click();
     URL.revokeObjectURL(url);
   };
+  // Otevřít modal pro úpravu
+const handleEditEvent = (event) => {
+  setEditingEvent({ ...event });
+};
+
+// Zavřít modal
+const closeEditModal = () => {
+  setEditingEvent(null);
+};
+
 
   // Uložení contentu
   const handleSaveContent = async (e) => {
@@ -1759,6 +1773,265 @@ const handleAddEvent = async (e) => {
               </div>
             </section>
           )}
+         {editingEvent && (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-xl">
+
+      {/* Zavírací křížek */}
+      <button
+        onClick={closeEditModal}
+        className="absolute top-3 right-3 z-50 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white transition"
+      >
+        ✖
+      </button>
+
+      <h2 className="text-xl font-bold mb-4">✏️ Upravit akci</h2>
+
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+
+          // ⭐ Upload banneru pokud je nový
+          let newBannerUrl = editingEvent.bannerUrl;
+
+          if (editingEvent.bannerFile) {
+            const path = `events/banners/${Date.now()}-${editingEvent.bannerFile.name}`;
+            const ref = storageRef(storage, path);
+            await uploadBytes(ref, editingEvent.bannerFile);
+            newBannerUrl = await getDownloadURL(ref);
+          }
+
+          // ⭐ Uložíme do Firestore
+          await updateDoc(doc(db, "events", editingEvent.id), {
+            title: editingEvent.title,
+            date: editingEvent.date,
+            place: editingEvent.place,
+            description: editingEvent.description,
+            capacity: Number(editingEvent.capacity) || 0,
+            price: Number(editingEvent.price) || 0,
+
+            bannerUrl: newBannerUrl,
+            tags: editingEvent.tags || [],
+            program: editingEvent.program || [],
+            dressCode: editingEvent.dressCode || "",
+            included: editingEvent.included || [],
+            goals: editingEvent.goals || [],
+            galleryImages: editingEvent.galleryImages || [],
+
+            updatedAt: serverTimestamp(),
+          });
+
+          closeEditModal();
+        }}
+        className="space-y-4 text-sm"
+      >
+
+        {/* Banner náhled + upload */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold">Banner</p>
+
+          {editingEvent.bannerUrl ? (
+            <img
+              src={editingEvent.bannerUrl}
+              className="w-full h-40 object-cover rounded-lg border border-white/20"
+            />
+          ) : (
+            <div className="w-full h-40 bg-white/10 rounded-lg border border-white/10 grid place-items-center text-white/40 text-xs">
+              Náhled banneru
+            </div>
+          )}
+
+          <label className="flex cursor-pointer items-center gap-2 text-xs">
+            <span className="rounded-md bg-slate-700 px-3 py-2 hover:bg-slate-600">
+              📤 Nahrát nový banner
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setEditingEvent((s) => ({
+                    ...s,
+                    bannerFile: file,
+                  }));
+                }
+              }}
+            />
+          </label>
+        </div>
+
+        {/* Titulek */}
+        <input
+          type="text"
+          value={editingEvent.title}
+          onChange={(e) =>
+            setEditingEvent({ ...editingEvent, title: e.target.value })
+          }
+          className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+        />
+
+        {/* Místo + datum */}
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="date"
+            value={editingEvent.date}
+            onChange={(e) =>
+              setEditingEvent({ ...editingEvent, date: e.target.value })
+            }
+            className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+          />
+
+          <input
+            type="text"
+            value={editingEvent.place}
+            onChange={(e) =>
+              setEditingEvent({ ...editingEvent, place: e.target.value })
+            }
+            className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+          />
+        </div>
+{/* Kapacita + cena */}
+<div className="grid grid-cols-2 gap-2">
+  <input
+    type="number"
+    min="0"
+    value={editingEvent.capacity}
+    onChange={(e) =>
+      setEditingEvent({ ...editingEvent, capacity: e.target.value })
+    }
+    className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+    placeholder="Kapacita"
+  />
+
+  <input
+    type="number"
+    min="0"
+    value={editingEvent.price}
+    onChange={(e) =>
+      setEditingEvent({ ...editingEvent, price: e.target.value })
+    }
+    className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+    placeholder="Cena (Kč)"
+  />
+</div>
+        {/* Popis */}
+        <textarea
+          rows={3}
+          value={editingEvent.description}
+          onChange={(e) =>
+            setEditingEvent({ ...editingEvent, description: e.target.value })
+          }
+          className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+        />
+
+        {/* Tagy */}
+        <div>
+          <p className="text-xs font-semibold mb-1">Tagy</p>
+          <div className="grid grid-cols-2 gap-2">
+            {presetTags.map((tag) => (
+              <label key={tag} className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={editingEvent.tags?.includes(tag)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setEditingEvent({
+                        ...editingEvent,
+                        tags: [...editingEvent.tags, tag],
+                      });
+                    } else {
+                      setEditingEvent({
+                        ...editingEvent,
+                        tags: editingEvent.tags.filter((t) => t !== tag),
+                      });
+                    }
+                  }}
+                />
+                {tag}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Program */}
+        <div>
+          <p className="text-xs font-semibold mb-1">Program večera</p>
+          <textarea
+            rows={4}
+            value={editingEvent.program?.join("\n") || ""}
+            onChange={(e) =>
+              setEditingEvent({
+                ...editingEvent,
+                program: e.target.value.split("\n").filter((l) => l.trim()),
+              })
+            }
+            className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+          />
+        </div>
+
+        {/* Dress code */}
+        <input
+          type="text"
+          value={editingEvent.dressCode || ""}
+          onChange={(e) =>
+            setEditingEvent({
+              ...editingEvent,
+              dressCode: e.target.value,
+            })
+          }
+          className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+        />
+
+        {/* V ceně */}
+        <div>
+          <p className="text-xs font-semibold mb-1">V ceně vstupenky</p>
+          <textarea
+            rows={3}
+            value={editingEvent.included?.join("\n") || ""}
+            onChange={(e) =>
+              setEditingEvent({
+                ...editingEvent,
+                included: e.target.value
+                  .split("\n")
+                  .filter((l) => l.trim()),
+              })
+            }
+            className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+          />
+        </div>
+
+        {/* Cíle */}
+        <div>
+          <p className="text-xs font-semibold mb-1">Cíl akce</p>
+          <textarea
+            rows={3}
+            value={editingEvent.goals?.join("\n") || ""}
+            onChange={(e) =>
+              setEditingEvent({
+                ...editingEvent,
+                goals: e.target.value
+                  .split("\n")
+                  .filter((l) => l.trim()),
+              })
+            }
+            className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
+          />
+        </div>
+
+        {/* Odeslat */}
+        <button
+          type="submit"
+          className="w-full rounded-md bg-emerald-600 py-2 text-sm font-semibold hover:bg-emerald-700"
+        >
+          💾 Uložit změny
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+ 
         </main>
       </div>
     </div>
