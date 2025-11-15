@@ -229,31 +229,32 @@ export default function PublicApp() {
 <div
   className="pointer-events-none absolute bulb-dot"
   style={{
-    right: "28px",
-    top: "51%",              // +2% NAHORU
+    right: "28px",          // TEČKA zůstává perfektní ✔
+    top: "51%",             // TEČKA zůstává perfektní ✔
     transform: "translateY(-50%)",
     zIndex: 50,
   }}
 >
-  {/* Střed vlákna */}
+  {/* tečka vlákna */}
   <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[0.5px] opacity-100"></div>
 
-  {/* Kužel světla nahoru */}
+  {/* kužel světla */}
   <div
     className="absolute"
     style={{
-      bottom: "9px",          // +2 px NAHORU
-      left: "-4px",
-      width: "24px",
-      height: "90px",
+      bottom: "12px",        // ↑ začíná výš (aby neprosvěcoval baňku)
+      left: "0px",           // → posun doprava, aby seděl na tečce
+      width: "22px",         // užší kužel = realističtější
+      height: "95px",        // delší světlo nahoru
       background:
-        "linear-gradient(to top, rgba(255,244,160,0.95), rgba(255,244,160,0) 90%)",
+        "linear-gradient(to top, rgba(255,244,160,0.9), rgba(255,244,160,0) 88%)",
       filter: "blur(6px)",
-      opacity: 0.9,
+      opacity: 0.92,
       pointerEvents: "none",
     }}
   ></div>
 </div>
+
 
 
 
