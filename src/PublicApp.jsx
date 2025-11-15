@@ -229,25 +229,25 @@ export default function PublicApp() {
 <div
   className="pointer-events-none absolute bulb-dot"
   style={{
-    right: "12px",           // světlo posunuto doleva
-    top: "54%",              // světlo posunuto výš
+    right: "18px",         // posunuto více doleva
+    top: "54%",            // jemně výš
     transform: "translateY(-50%)",
     zIndex: 50,
   }}
 >
-  {/* střed světla */}
-  <div className="w-4 h-4 bg-yellow-300 rounded-full blur-[1px] opacity-100"></div>
+  {/* malý jasný střed světla */}
+  <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[1px] opacity-100"></div>
 
-  {/* světlo směrem nahoru */}
+  {/* kužel světla nahoru – úzký, přesný */}
   <div
     className="absolute"
     style={{
-      bottom: "18px",        // KUŽEL NAHORU → světlo vychází nahoru
-      left: "-12px",
-      width: "45px",
-      height: "90px",
-      background: "linear-gradient(to top, rgba(255,244,160,0.85), rgba(255,244,160,0) 90%)",
-      filter: "blur(10px)",
+      bottom: "8px",        // začne těsně nad žárovkou
+      left: "-4px",
+      width: "28px",        // úzký kužel
+      height: "70px",       // výška kužele
+      background: "linear-gradient(to top, rgba(255,244,160,0.9), rgba(255,244,160,0) 85%)",
+      filter: "blur(6px)",   // ostřejší světlo
       opacity: 0.9,
       pointerEvents: "none",
     }}
