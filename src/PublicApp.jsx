@@ -232,54 +232,51 @@ return (
     <div className="mx-auto max-w-6xl px-4 pb-24">
 
       {/* === HLAVIČKA === */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
 
+    {/* LOGO + TEXT */}
+    <div className="flex items-center gap-4 justify-center md:justify-start w-full md:w-auto">
 
-    {/* Logo with glow */}
-   <div className="flex items-center gap-4 justify-center md:justify-start w-full md:w-auto">
-  <div className="relative inline-block">
+      <div className="relative inline-block">
 
-    {/* LOGO */}
-    <img
-      src="/rebuss.png"
-      alt="Reboos Logo"
-      className="h-28 w-auto object-contain transition-transform duration-300 hover:scale-105"
-    />
+        {/* LOGO */}
+        <img
+          src="/rebuss.png"
+          alt="Reboos Logo"
+          className="h-28 w-auto object-contain transition-transform duration-300 hover:scale-105"
+        />
 
-    {/* BULB GLOW */}
-    <div
-      className="pointer-events-none absolute bulb-dot"
-      style={{
-        right: "28px",
-        top: "51%",
-        transform: "translateY(-50%)",
-        zIndex: 50,
-      }}
-    >
-      <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[0.5px] opacity-100"></div>
-      <div
-        className="absolute"
-        style={{
-          bottom: "12px",
-          left: "0px",
-          width: "22px",
-          height: "95px",
-          background: "linear-gradient(to top, rgba(255,244,160,0.9), rgba(255,244,160,0) 88%)",
-          filter: "blur(6px)",
-          opacity: 0.92,
-        }}
-      ></div>
-    </div>
-
-  </div>
-
-  {/* 🔥 TEXT VEDLE LOGA */}
-  <span className="text-3xl font-extrabold text-white tracking-wide drop-shadow-[0_0_15px_rgba(236,72,153,0.45)]">
-    Poznej &amp; Hraj
-  </span>
-</div>
+        {/* BULB GLOW */}
+        <div
+          className="pointer-events-none absolute bulb-dot"
+          style={{
+            right: "28px",
+            top: "51%",
+            transform: "translateY(-50%)",
+            zIndex: 50,
+          }}
+        >
+          <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[0.5px] opacity-100"></div>
+          <div
+            className="absolute"
+            style={{
+              bottom: "12px",
+              left: "0px",
+              width: "22px",
+              height: "95px",
+              background: "linear-gradient(to top, rgba(255,244,160,0.9), rgba(255,244,160,0) 88%)",
+              filter: "blur(6px)",
+              opacity: 0.92,
+            }}
+          ></div>
+        </div>
       </div>
+
+      {/* TEXT */}
+      <span className="text-3xl font-extrabold text-white tracking-wide drop-shadow-[0_0_15px_rgba(236,72,153,0.45)]">
+        Poznej &amp; Hraj
+      </span>
     </div>
 
     {/* Navigation */}
@@ -299,6 +296,7 @@ return (
   {/* Spodní svítící linka */}
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
 </header>
+
         {/* === HERO === */}
 <section className="grid items-center gap-10 py-14 md:grid-cols-2">
 
