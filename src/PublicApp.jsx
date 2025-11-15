@@ -279,12 +279,6 @@ return (
     Poznej &amp; Hraj
   </span>
 </div>
-
-
-
-
-
-
       </div>
     </div>
 
