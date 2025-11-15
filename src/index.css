@@ -11,9 +11,16 @@
     --bg: #071022;
   }
 
-  body {
-    @apply bg-poznej font-rubik text-white antialiased;
-  }
+ body {
+  @apply font-rubik text-white antialiased;
+  background-image: url('/pozadi.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #05060a;
+}
+
 }
 
 @layer components {
@@ -120,11 +127,4 @@ option {
 .bulb-dot {
   animation: bulbDotGlow 2.2s ease-in-out infinite;
 }
-  body {
-  background-image: url('/pozadi.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed; /* efektní parallax efekt */
-  background-color: #05060a; /* velmi tmavý fallback */
-}
+  
