@@ -120,3 +120,11 @@ option {
 .bulb-dot {
   animation: bulbDotGlow 2.2s ease-in-out infinite;
 }
+  body {
+  background-image: url('/pozadi.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* efektní parallax efekt */
+  background-color: #05060a; /* velmi tmavý fallback */
+}
