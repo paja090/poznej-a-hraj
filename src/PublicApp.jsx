@@ -253,8 +253,6 @@ export default function PublicApp() {
     }}
   ></div>
 </div>
-
-</div>
       </div>
     </div>
 
