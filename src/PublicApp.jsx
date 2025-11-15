@@ -230,19 +230,19 @@ export default function PublicApp() {
   className="pointer-events-none absolute bulb-dot"
   style={{
     right: "28px",
-    top: "53%",              // <<< posunuto o 2 % nahoru
+    top: "51%",              // +2% NAHORU
     transform: "translateY(-50%)",
     zIndex: 50,
   }}
 >
-  {/* Střed vlákna žárovky */}
+  {/* Střed vlákna */}
   <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[0.5px] opacity-100"></div>
 
   {/* Kužel světla nahoru */}
   <div
     className="absolute"
     style={{
-      bottom: "7px",         // <<< posunuto o 2 px nahoru
+      bottom: "9px",          // +2 px NAHORU
       left: "-4px",
       width: "24px",
       height: "90px",
@@ -254,6 +254,7 @@ export default function PublicApp() {
     }}
   ></div>
 </div>
+
 
 
 
