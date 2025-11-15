@@ -319,7 +319,14 @@ return (
 
     {/* ZVONEČEK – GARANCE */}
     <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/40 bg-fuchsia-500/10 px-4 py-2 text-sm text-fuchsia-200 shadow-[0_0_15px_rgba(236,72,153,0.35)]">
-      <span className="text-lg">🔔</span>
+      <span
+  className="text-lg inline-block"
+  style={{
+    animation: "bellPulse 2.8s infinite",
+  }}
+>
+  🔔
+</span>
       <span className="font-semibold">Garance spokojenosti</span>
     </div>
 
