@@ -221,7 +221,7 @@ export default function PublicApp() {
      <img
   src="/rebuss.png"
   alt="Reboos Logo"
-  className="h-64 w-64 object-contain animate-rainbow-glow transition-transform duration-300 hover:scale-105"
+  className="h-64 w-32 object-contain animate-rainbow-glow transition-transform duration-300 hover:scale-105"
 />
     </div>
 
