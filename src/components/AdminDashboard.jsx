@@ -33,13 +33,17 @@ export default function AdminDashboard({ user, onLogout }) {
   const [gallery, setGallery] = useState([]);
   const [crew, setCrew] = useState([]);
   const [content, setContent] = useState({
-    heroTitle: "Místo, kde se lidé potkávají přirozeně",
-    heroSubtitle: "Večery plné her, kvízů a nových přátel.",
-    aboutIntro:
-      "Poznej & Hraj vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce.",
-    aboutBody:
-      "Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.",
-  });
+  heroTitle: "Místo, kde se lidé potkávají přirozeně",
+  heroSubtitle: "Večery plné her, kvízů a nových přátel.",
+  ctaText: "Rezervuj si své místo",
+  guaranteeText: "Vracíme peníze, pokud se ti akce nebude líbit.",
+  aboutIntro:
+    "Poznej & Hraj vzniklo z touhy spojovat lidi jinak — ne přes aplikace, ale skrze zážitky, hry a skutečné emoce.",
+  aboutBody:
+    "Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný.",
+  tags: ["kvízy", "zábava", "noví lidé"],
+});
+const [newTag, setNewTag] = useState("");
   const [profile, setProfile] = useState({
     displayName: "",
     role: "",
@@ -889,85 +893,174 @@ export default function AdminDashboard({ user, onLogout }) {
             </section>
           )}
 
-          {/* === OBSAH WEBU === */}
-          {activeTab === "content" && (
-            <section
-              className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+         /* === OBSAH WEBU === */}
+{activeTab === "content" && (
+  <section
+    className={`rounded-2xl border border-slate-700/60 p-5 shadow-md ${cardClasses}`}
+  >
+    <h2 className="mb-4 text-lg font-semibold">Texty na webu</h2>
+
+    <form onSubmit={handleSaveContent} className="grid gap-4 md:grid-cols-2">
+      {/* HERO – nadpis */}
+      <label className="flex flex-col gap-2 text-xs">
+        Hero – nadpis
+        <input
+          type="text"
+          value={content.heroTitle}
+          onChange={(e) =>
+            setContent({ ...content, heroTitle: e.target.value })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* HERO – podnadpis */}
+      <label className="flex flex-col gap-2 text-xs">
+        Hero – podnadpis
+        <input
+          type="text"
+          value={content.heroSubtitle}
+          onChange={(e) =>
+            setContent({ ...content, heroSubtitle: e.target.value })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* CTA TEXT */}
+      <label className="flex flex-col gap-2 text-xs">
+        CTA tlačítko (text)
+        <input
+          type="text"
+          value={content.ctaText}
+          onChange={(e) =>
+            setContent({ ...content, ctaText: e.target.value })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* GARANČNÍ TEXT */}
+      <label className="flex flex-col gap-2 text-xs">
+        Garanční text pod tlačítkem
+        <input
+          type="text"
+          value={content.guaranteeText}
+          onChange={(e) =>
+            setContent({ ...content, guaranteeText: e.target.value })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* O PROJEKTU – ÚVOD */}
+      <label className="flex flex-col gap-2 text-xs md:col-span-2">
+        O projektu – úvod
+        <textarea
+          rows={3}
+          value={content.aboutIntro}
+          onChange={(e) =>
+            setContent({
+              ...content,
+              aboutIntro: e.target.value,
+            })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* O PROJEKTU – TEXT */}
+      <label className="flex flex-col gap-2 text-xs md:col-span-2">
+        O projektu – text
+        <textarea
+          rows={4}
+          value={content.aboutBody}
+          onChange={(e) =>
+            setContent({
+              ...content,
+              aboutBody: e.target.value,
+            })
+          }
+          className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+        />
+      </label>
+
+      {/* TAGY */}
+      <div className="md:col-span-2 flex flex-col gap-2 text-xs">
+        <p className="font-semibold text-slate-200">Tagy v hero sekci</p>
+
+        {/* existující tagy */}
+        <div className="flex flex-wrap gap-2">
+          {(content.tags || []).map((tag, idx) => (
+            <span
+              key={idx}
+              className="flex items-center gap-2 rounded-full bg-slate-900/60 px-3 py-1 text-[11px] text-slate-100 ring-1 ring-slate-600/70"
             >
-              <h2 className="mb-4 text-lg font-semibold">Texty na webu</h2>
-              <form
-                onSubmit={handleSaveContent}
-                className="grid gap-4 md:grid-cols-2"
+              {tag}
+              <button
+                type="button"
+                onClick={() =>
+                  setContent({
+                    ...content,
+                    tags: content.tags.filter((_, i) => i !== idx),
+                  })
+                }
+                className="text-slate-400 hover:text-red-400"
               >
-                <label className="flex flex-col gap-2 text-xs">
-                  Hero – nadpis
-                  <input
-                    type="text"
-                    value={content.heroTitle}
-                    onChange={(e) =>
-                      setContent({ ...content, heroTitle: e.target.value })
-                    }
-                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-xs">
-                  Hero – podnadpis
-                  <input
-                    type="text"
-                    value={content.heroSubtitle}
-                    onChange={(e) =>
-                      setContent({
-                        ...content,
-                        heroSubtitle: e.target.value,
-                      })
-                    }
-                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-xs md:col-span-2">
-                  O projektu – úvod
-                  <textarea
-                    rows={3}
-                    value={content.aboutIntro}
-                    onChange={(e) =>
-                      setContent({
-                        ...content,
-                        aboutIntro: e.target.value,
-                      })
-                    }
-                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-xs md:col-span-2">
-                  O projektu – text
-                  <textarea
-                    rows={4}
-                    value={content.aboutBody}
-                    onChange={(e) =>
-                      setContent({
-                        ...content,
-                        aboutBody: e.target.value,
-                      })
-                    }
-                    className="rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
-                  />
-                </label>
-                <div className="md:col-span-2 flex items-center justify-between gap-3 text-xs text-slate-400">
-                  <span>
-                    Tyto texty můžeš na public stránce načítat z
-                    Firestore kolekce <code>settings/publicContent</code>.
-                  </span>
-                  <button
-                    type="submit"
-                    disabled={savingContent}
-                    className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold hover:bg-emerald-700 disabled:opacity-60"
-                  >
-                    {savingContent ? "Ukládám…" : "💾 Uložit texty"}
-                  </button>
-                </div>
-              </form>
-            </section>
+                ✕
+              </button>
+            </span>
+          ))}
+          {(!content.tags || content.tags.length === 0) && (
+            <span className="text-[11px] text-slate-400">
+              Zatím žádné tagy – přidej první níže.
+            </span>
           )}
+        </div>
+
+        {/* přidání nového tagu */}
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            placeholder="Nový tag (např. kvízy)"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            className="flex-1 rounded-md bg-slate-900/40 px-3 py-2 text-xs outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const t = newTag.trim();
+              if (!t) return;
+              const tags = Array.isArray(content.tags) ? content.tags : [];
+              setContent({ ...content, tags: [...tags, t] });
+              setNewTag("");
+            }}
+            className="rounded-md bg-violet-600 px-4 py-2 text-xs font-semibold hover:bg-violet-700"
+          >
+            ➕ Přidat tag
+          </button>
+        </div>
+      </div>
+
+      {/* SPODNÍ ŘÁDEK – INFO + ULOŽIT */}
+      <div className="md:col-span-2 flex flex-col gap-3 text-xs text-slate-400 md:flex-row md:items-center md:justify-between">
+        <span>
+          Tyto texty a tagy se načítají na public stránce z Firestore kolekce{" "}
+          <code>settings/publicContent</code>.
+        </span>
+        <button
+          type="submit"
+          disabled={savingContent}
+          className="rounded-md bg-emerald-600 px-4 py-2 text-xs font-semibold hover:bg-emerald-700 disabled:opacity-60"
+        >
+          {savingContent ? "Ukládám…" : "💾 Uložit texty"}
+        </button>
+      </div>
+    </form>
+  </section>
+)}
+
 
           {/* === GALERIE === */}
           {activeTab === "gallery" && (
