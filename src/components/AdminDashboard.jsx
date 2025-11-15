@@ -250,6 +250,7 @@ const [newTag, setNewTag] = useState("");
 
   galleryImages: [],
 });
+    };
 
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Opravdu smazat akci?")) {
