@@ -212,33 +212,15 @@ export default function PublicApp() {
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
        <header className="py-4">
-  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
 
-    {/* Logo + význam */}
-    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-
-      {/* VÝRAZNÉ VELKÉ LOGO */}
-      <div className="h-32 w-32 flex items-center justify-center">
-        <img
-          src="/rebuss.png"
-          alt="Reboos Logo"
-          className="h-full w-full object-contain drop-shadow-[0_0_20px_rgba(236,72,153,0.35)] brightness-110"
-        />
-      </div>
-
-      {/* Krátké vysvětlení loga */}
-      <div className="max-w-xs leading-snug">
-        <p className="text-sm text-white/80">
-          <span className="font-semibold text-white">Reboos</span>  
-          je koncept spojování lidí — název vychází ze slova <strong>rébus</strong>  
-          a dvojité <strong>O</strong> symbolizuje propojení dvou lidí.
-        </p>
-
-        <p className="mt-2 text-xs text-white/60">
-          Originální zábavné večery plné her, výzev a nových známostí.
-        </p>
-      </div>
-
+    {/* Pouze logo – výrazné a čisté */}
+    <div className="flex justify-center md:justify-start w-full md:w-auto">
+      <img
+        src="/rebuss.png"
+        alt="Reboos Logo"
+        className="h-32 w-32 object-contain drop-shadow-[0_0_20px_rgba(236,72,153,0.35)] brightness-110"
+      />
     </div>
 
     {/* Navigace – beze změny */}
@@ -255,7 +237,6 @@ export default function PublicApp() {
 
   </div>
 </header>
-
 
         {/* === HERO === */}
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
