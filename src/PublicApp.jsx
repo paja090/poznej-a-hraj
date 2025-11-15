@@ -306,16 +306,15 @@ export default function PublicApp() {
 <section id="about" className="card mt-10">
   <h3 className="text-xl font-semibold text-white">O projektu</h3>
 
-  <p className="mt-4 text-white/70">
-    {content.aboutIntro ||
-      "Poznej & Hraj vzniklo z touhy spojovat lidi jinak — skrze hry, výzvy a zábavné aktivity."}
-  </p>
+  {content.aboutIntro && (
+    <p className="mt-4 text-white/70">{content.aboutIntro}</p>
+  )}
 
-  <p className="mt-4 text-white/70">
-    {content.aboutBody ||
-      "Každý večer má svůj příběh, atmosféru a moderátory, kteří pomáhají, aby se každý cítil vítaný."}
-  </p>
+  {content.aboutBody && (
+    <p className="mt-4 text-white/70">{content.aboutBody}</p>
+  )}
 </section>
+
 
 
         {/* === STATISTIKY === */}
