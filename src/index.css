@@ -20,6 +20,14 @@
   background-attachment: fixed;
   background-color: #05060a;
 }
+  /* Fix – aby se pozadí zobrazovalo na mobilech */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+}
 
 }
 
