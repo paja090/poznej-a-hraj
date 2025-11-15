@@ -33,7 +33,7 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs text-white/70">
+      ="flex flex-wrap gap-2 text-xs text-white/70">
         {event.date && <span className="pill">📅 {event.date}</span>}
         {event.place && <span className="pill">📍 {event.place}</span>}
         {"capacity" in event && <span className="pill">Kapacita: {event.capacity}</span>}
@@ -204,10 +204,22 @@ export default function PublicApp() {
   }, []);
 
   // === RENDER ===
-  return (
-   <div className="min-h-screen font-rubik text-white relative">
-      {/* Background gradient */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-black/55 backdrop-blur-sm" />
+  
+   return (
+  <div className="min-h-screen font-rubik text-white relative">
+
+    {/* --- BACKGROUND IMAGE (funguje na PC + MOBIL) --- */}
+    <div className="fixed inset-0 -z-20">
+      <img
+        src="/pozadi.png"
+        alt="background"
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+    {/* --- OVERLAY (zvýší čitelnost textů) --- */}
+    <div className="fixed inset-0 -z-10 bg-black/55 backdrop-blur-sm"></div>
+
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
