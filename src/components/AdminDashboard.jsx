@@ -33,6 +33,7 @@ const presetTags = [
   "Speciální edice",
   "Mikulášská",
 ];
+import AdminBudget from "./AdminBudget.jsx";
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [darkMode, setDarkMode] = useState(true);
@@ -599,6 +600,12 @@ const closeEditModal = () => {
             onClick={() => setActiveTab("overview")}
             label="📊 Přehled"
           />
+          <TabButton
+  active={activeTab === "budget"}
+  onClick={() => setActiveTab("budget")}
+  label="💰 Rozpočet"
+/>
+
           <TabButton
             active={activeTab === "events"}
             onClick={() => setActiveTab("events")}
@@ -1197,7 +1204,10 @@ const closeEditModal = () => {
               )}
             </section>
           )}
-
+{/* 🔥 TADY PŘIDÁVÁŠ NOVOU SEKCI */}
+  {activeTab === "budget" && (
+    <AdminBudget darkMode={darkMode} events={events} />
+  )}
           {/* === ANKETY === */}
           {activeTab === "polls" && (
             <section
