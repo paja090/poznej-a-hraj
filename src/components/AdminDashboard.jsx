@@ -78,15 +78,16 @@ const [newTag, setNewTag] = useState("");
   capacity: "",
   price: "",
 
-  bannerUrl: "",          // ⭐ banner
-  tags: [],               // ⭐ vlastní i přednastavené
-  customTag: "",          // ⭐ pomocné pole pro vlastní tag
-  program: [],            // ⭐ seznam řádků „19:00 – …“
-  dressCode: "",          // ⭐ text
-  included: [],           // ⭐ v ceně vstupenky
-  goals: [],              // ⭐ cíl akce
+  bannerUrl: "",
+  bannerFile: null,       // ⭐ nový prvek
 
-  galleryImages: [],      // ⭐ vybrané fotky z galerie
+  tags: [],
+  customTag: "",
+  program: [],
+  dressCode: "",
+  included: [],
+  goals: [],
+  galleryImages: [],
 });
 
   // === NOVÝ CREW MEMBER ===
@@ -224,15 +225,24 @@ const [newTag, setNewTag] = useState("");
   const handleAddEvent = async (e) => {
     e.preventDefault();
     if (!newEvent.title || !newEvent.date || !newEvent.place) return;
+let uploadedBannerUrl = newEvent.bannerUrl;
 
+// Pokud admin nahrál soubor, nahrajeme ho:
+if (newEvent.bannerFile) {
+  const path = `events/banners/${Date.now()}-${newEvent.bannerFile.name}`;
+  const ref = storageRef(storage, path);
+  await uploadBytes(ref, newEvent.bannerFile);
+  uploadedBannerUrl = await getDownloadURL(ref);
+}
     await addDoc(collection(db, "events"), {
       ...newEvent,
+       bannerUrl: uploadedBannerUrl,  // ⭐ použijeme URL nahraného banneru
       capacity: Number(newEvent.capacity) || 0,
       price: Number(newEvent.price) || 0,
       createdAt: serverTimestamp(),
     });
 
-   setNewEvent({
+ setNewEvent({
   title: "",
   date: "",
   place: "",
@@ -241,6 +251,8 @@ const [newTag, setNewTag] = useState("");
   price: "",
 
   bannerUrl: "",
+  bannerFile: null,   // ⭐ MUSÍ BÝT
+
   tags: [],
   customTag: "",
   program: [],
@@ -836,16 +848,41 @@ const [newTag, setNewTag] = useState("");
       className="w-full resize-none rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
     />
 
-    {/* Banner URL */}
-    <input
-      type="text"
-      placeholder="URL banneru (obrázek akce)"
-      value={newEvent.bannerUrl}
-      onChange={(e) =>
-        setNewEvent({ ...newEvent, bannerUrl: e.target.value })
-      }
-      className="w-full rounded-md bg-slate-900/40 px-3 py-2 outline-none ring-1 ring-slate-600/60 focus:ring-violet-500"
+   {/* Banner akce */}
+<div className="space-y-2">
+  <p className="text-xs font-semibold text-slate-300">Banner akce</p>
+
+  {/* Náhled banneru */}
+  {newEvent.bannerUrl ? (
+    <img
+      src={newEvent.bannerUrl}
+      alt="Banner"
+      className="w-full h-32 object-cover rounded-md border border-white/20"
     />
+  ) : (
+    <div className="w-full h-32 bg-white/10 rounded-md border border-white/10 grid place-items-center text-white/40 text-xs">
+      Náhled banneru
+    </div>
+  )}
+
+  {/* Upload button */}
+  <label className="flex cursor-pointer items-center gap-2 text-xs">
+    <span className="rounded-md bg-slate-700 px-3 py-2 hover:bg-slate-600">
+      📤 Nahrát banner
+    </span>
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          setNewEvent({ ...newEvent, bannerFile: file });
+        }
+      }}
+    />
+  </label>
+</div>
 
     {/* Tagy – preset + vlastní */}
     <div className="space-y-1 mt-2">
