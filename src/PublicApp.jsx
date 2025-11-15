@@ -218,25 +218,24 @@ export default function PublicApp() {
     <div className="flex justify-center md:justify-start w-full md:w-auto">
       <div className="relative inline-block">
 
-        {/* LOGO */}
-        <img
-          src="/rebuss.png"
-          alt="Reboos Logo"
-          className="h-32 w-auto object-contain transition-transform duration-300 hover:scale-105"
-        />
+      {/* LOGO */}
+<img
+  src="/rebuss.png"
+  alt="Reboos Logo"
+  className="h-32 w-auto object-contain transition-transform duration-300 hover:scale-105"
+/>
 
-        {/* GLOW – exact bulb position */}
-        <div
-          className="pointer-events-none absolute bulb-dot"
-          style={{
-            right: "-2px",
-            top: "58%",
-            transform: "translateY(-50%)",
-          }}
-        >
-          <div className="w-6 h-6 bg-yellow-200 rounded-full blur-xl opacity-80"></div>
-        </div>
-
+{/* BULB GLOW */}
+<div
+  className="pointer-events-none absolute bulb-dot"
+  style={{
+    right: "-6px",         // přesně vycentrované světlo na žárovku
+    top: "63%",            // sedí na malém logu
+    transform: "translateY(-50%)",
+  }}
+>
+  <div className="w-8 h-8 bg-yellow-300 rounded-full blur-2xl opacity-90"></div>
+</div>
       </div>
     </div>
 
