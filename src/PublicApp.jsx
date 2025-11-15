@@ -217,7 +217,7 @@ export default function PublicApp() {
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 flex items-center justify-center">
                 <img
-                  src="/rebus.png"
+                  src="/rebuss.png"
                   alt="Logo Poznej & Hraj"
                   className="h-full w-full object-contain drop-shadow-[0_0_8px_rgba(236,72,153,0.25)] brightness-110"
                 />
