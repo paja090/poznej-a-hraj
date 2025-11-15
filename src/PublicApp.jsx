@@ -205,10 +205,9 @@ export default function PublicApp() {
 
   // === RENDER ===
   return (
-    <div className="min-h-screen bg-[#05060a] font-rubik text-white">
+   <div className="min-h-screen font-rubik text-white relative">
       {/* Background gradient */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(124,58,237,0.25),transparent_60%),radial-gradient(40%_40%_at_80%_20%,rgba(236,72,153,0.15),transparent_60%)]" />
-
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-black/55 backdrop-blur-sm" />
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
