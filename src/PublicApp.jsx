@@ -296,7 +296,8 @@ return (
 </header>
         {/* === HERO === */}
 <section className="grid items-center gap-8 py-10 md:grid-cols-2">
-  {/* Video */}
+
+  {/* VIDEO BLOK */}
   <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
     <iframe
       className="h-full w-full aspect-video"
@@ -306,12 +307,14 @@ return (
     />
   </div>
 
-  {/* Textový blok */}
+  {/* TEXTOVÁ ČÁST */}
   <div>
+    {/* Nadpis */}
     <h2 className="text-4xl font-extrabold leading-tight">
       {content.heroTitle}
     </h2>
 
+    {/* Podnadpis */}
     <p className="mt-4 text-lg text-white/80">
       {content.heroSubtitle}
     </p>
@@ -342,26 +345,53 @@ return (
       {content.guaranteeText}
     </p>
 
-    {/* IKONY SOCIAL */}
+    {/* SOCIÁLNÍ IKONY */}
     <div className="flex gap-4 mt-6">
+      {/* Instagram */}
       <a
         href="https://instagram.com/poznejahraj"
         target="_blank"
-        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 hover:border-fuchsia-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.3)] transition"
+        rel="noopener noreferrer"
+        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:border-fuchsia-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
       >
-        <img src="/ig.svg" alt="Instagram" className="h-5 w-5" />
+        <svg
+          className="h-5 w-5 text-white/80 group-hover:text-fuchsia-400 transition"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          viewBox="0 0 24 24"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+        </svg>
       </a>
 
+      {/* Facebook */}
       <a
-        href="https://facebook.com/poznejahraj"
+        href="https://www.facebook.com/profile.php?id=61583460909894"
         target="_blank"
-        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 hover:border-violet-400 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition"
+        rel="noopener noreferrer"
+        className="group grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 transition-all hover:border-violet-400 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]"
       >
-        <img src="/fb.svg" alt="Facebook" className="h-5 w-5" />
+        <svg
+          className="h-5 w-5 text-white/80 group-hover:text-violet-400 transition"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9.197 21V12H6v-3.5h3.197V6.174C9.197 3.004 10.982 2 13.694 2c1.239 0 2.303.09 2.614.132v3.033h-1.796c-1.41 0-1.682.668-1.682 1.649V8.5H16L15.5 12h-2.67v9H9.197z"
+          />
+        </svg>
       </a>
     </div>
   </div>
 </section>
+
 
      
         {/* === ABOUT === */}
