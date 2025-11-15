@@ -159,5 +159,13 @@ option {
   mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
   -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
 }
+@keyframes bulbDotGlow {
+  0% { opacity: 0.15; transform: scale(0.9); }
+  50% { opacity: 0.95; transform: scale(1.35); }
+  100% { opacity: 0.15; transform: scale(0.9); }
+}
 
+.bulb-dot {
+  animation: bulbDotGlow 2.7s ease-in-out infinite;
+}
 
