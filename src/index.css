@@ -168,4 +168,13 @@ option {
 .bulb-dot {
   animation: bulbDotGlow 2.7s ease-in-out infinite;
 }
+  @keyframes bulbDotGlow {
+  0% { opacity: 0.15; transform: scale(0.9); }
+  50% { opacity: 0.95; transform: scale(1.35); }
+  100% { opacity: 0.15; transform: scale(0.9); }
+}
+
+.bulb-dot {
+  animation: bulbDotGlow 2.7s ease-in-out infinite;
+}
 
