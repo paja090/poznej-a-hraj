@@ -1,0 +1,30 @@
+// Výjimky pro český vocativ – ručně zkontrolované tvary
+export const vocativeExceptions = {
+  "pavel": "Pavle",
+  "marek": "Marku",
+  "honza": "Honzo",
+  "jan": "Jane",
+  "dan": "Dane",
+  "roman": "Romane",
+  "lukáš": "Lukáši",
+  "michal": "Michale",
+  "ondřej": "Ondřeji",
+  "bořek": "Bořku",
+  "václav": "Václave",
+  "radek": "Radku",
+  "vojtěch": "Vojtěchu",
+  "matěj": "Matěji",
+  "adam": "Adame",
+
+  // ženy
+  "lucie": "Lucie",
+  "marie": "Marie",
+  "tereza": "Terezo",
+  "sofia": "Sofio",
+  "soňa": "Soňo",
+  "nikola": "Nikolo",
+  "dominika": "Dominiko",
+  "veronika": "Veroniko",
+  "jana": "Jano",
+  "hana": "Hano",
+};
