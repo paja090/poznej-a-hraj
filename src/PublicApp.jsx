@@ -218,11 +218,11 @@ export default function PublicApp() {
 
     {/* Logo s neon pulzem */}
     <div className="flex justify-center md:justify-start w-full md:w-auto">
-      <img
-        src="/rebuss.png"
-        alt="Reboos Logo"
-        className="h-32 w-32 object-contain animate-neon-glow transition-transform duration-300 hover:scale-105"
-      />
+     <img
+  src="/rebuss.png"
+  alt="Reboos Logo"
+  className="h-32 w-32 object-contain animate-rainbow-glow transition-transform duration-300 hover:scale-105"
+/>
     </div>
 
     {/* Navigace */}
