@@ -211,36 +211,36 @@ export default function PublicApp() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24">
         {/* === HLAVIČKA === */}
-      
-<header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
 
- <div className="flex justify-center md:justify-start w-full md:w-auto">
-  <div className="relative inline-block">
+    {/* Logo with glow */}
+    <div className="flex justify-center md:justify-start w-full md:w-auto">
+      <div className="relative inline-block">
 
-    {/* LOGO */}
-    <img
-      src="/rebuss.png"
-      alt="Reboos Logo"
-      className="h-32 w-auto object-contain transition-transform duration-300 hover:scale-105"
-    />
+        {/* LOGO */}
+        <img
+          src="/rebuss.png"
+          alt="Reboos Logo"
+          className="h-32 w-auto object-contain transition-transform duration-300 hover:scale-105"
+        />
 
-    {/* GLOW ŽÁROVKY */}
-    <div
-      className="pointer-events-none absolute bulb-dot"
-      style={{
-        right: "-2px",        // upraveno pro menší velikost
-        top: "58%",           // jemně posunuto pro h-32
-        transform: "translateY(-50%)",
-      }}
-    >
-      <div className="w-6 h-6 bg-yellow-200 rounded-full blur-xl opacity-80"></div>
+        {/* GLOW – exact bulb position */}
+        <div
+          className="pointer-events-none absolute bulb-dot"
+          style={{
+            right: "-2px",
+            top: "58%",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <div className="w-6 h-6 bg-yellow-200 rounded-full blur-xl opacity-80"></div>
+        </div>
+
+      </div>
     </div>
 
-  </div>
-</div>
-
-
-    {/* Navigace */}
+    {/* Navigation */}
     <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
       <ul className="flex items-center gap-4 text-white/70">
         <li><button onClick={() => scrollToId("#events")} className="hover:text-white">Akce</button></li>
@@ -254,12 +254,9 @@ export default function PublicApp() {
 
   </div>
 
-  {/* Svítící spodní linka */}
+  {/* Spodní svítící linka */}
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
-
 </header>
-
-
         {/* === HERO === */}
         <section className="grid items-center gap-8 py-10 md:grid-cols-2">
           <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
