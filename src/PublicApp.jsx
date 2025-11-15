@@ -33,7 +33,7 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
         </span>
       </div>
 
-      ="flex flex-wrap gap-2 text-xs text-white/70">
+      <div className="flex flex-wrap gap-2 text-xs text-white/70">
         {event.date && <span className="pill">📅 {event.date}</span>}
         {event.place && <span className="pill">📍 {event.place}</span>}
         {"capacity" in event && <span className="pill">Kapacita: {event.capacity}</span>}
