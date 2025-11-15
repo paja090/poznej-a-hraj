@@ -207,7 +207,6 @@ export default function PublicApp() {
   
    return (
   <div className="min-h-screen font-rubik text-white relative">
-
     {/* --- BACKGROUND IMAGE (funguje na PC + MOBIL) --- */}
     <div className="fixed inset-0 -z-20">
       <img
