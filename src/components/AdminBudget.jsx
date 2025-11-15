@@ -53,7 +53,7 @@ export default function AdminBudget({ darkMode, events }) {
     }
 
     const unsubs = events.map((ev) => {
-      const metaRef = doc(db, "events", ev.id, "budget_meta");
+      const metaRef = doc(db, "events", ev.id, "budget", "meta");
       return onSnapshot(metaRef, (snap) => {
         setMetaMap((prev) => ({
           ...prev,
@@ -152,7 +152,7 @@ export default function AdminBudget({ darkMode, events }) {
   useEffect(() => {
     if (!selectedEventId) return;
 
-    const metaRef = doc(db, "events", selectedEventId, "budget_meta");
+    const metaRef = doc(db, "events", selectedEventId, "budget", "meta");
     setDoc(
       metaRef,
       {
