@@ -259,7 +259,57 @@ export default async function handler(req, res) {
     const base = BASE.endsWith("/") ? BASE.slice(0, -1) : BASE;
 
     const ticketUrl = `${base}/#/ticket?id=${encodeURIComponent(
-      r
+      reservationId
+    )}`;
+
+    // QR
+    const qrDataUrl = await QRCode.toDataURL(ticketUrl, {
+      margin: 1,
+      width: 400,
+    });
+
+    // HTML
+    const html = generateTicketHtml({
+      name,
+      eventTitle,
+      eventDate,
+      eventPlace,
+      peopleCount,
+      reservationId,
+      price,
+      paymentStatus,
+      qrDataUrl,
+      ticketUrl,
+    });
+
+    // === ODESLÁNÍ EMAILU ===
+    await transporter.sendMail({
+      from: `"Poznej & Hraj" <${process.env.GMAIL_USER || "poznejahraj@gmail.com"}>`,
+      to: email,
+      subject: `Tvá vstupenka – ${eventTitle}`,
+      html,
+      attachments: [
+        {
+          filename: "qr.png",
+          content: qrDataUrl.split("base64,")[1],
+          encoding: "base64",
+          cid: "qrimage",
+        },
+        {
+          filename: "rebuss.png",
+          path: "./public/rebuss.png",
+          cid: "rebuslogo",
+        },
+      ],
+    });
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("❌ send-ticket error:", err);
+    res.status(500).json({ error: "Failed to send ticket" });
+  }
+}
+
 
 
 
