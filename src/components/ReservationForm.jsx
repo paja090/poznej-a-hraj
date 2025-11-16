@@ -226,7 +226,7 @@ export default function ReservationForm({ event, onClose }) {
 
             <textarea
               name="message"
-              placeholder="Co očekáváš od akce?"
+              placeholder="Co očekáváš od Rébus akce?"
               value={formData.message}
               onChange={handleChange}
               rows="3"
