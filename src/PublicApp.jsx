@@ -236,6 +236,10 @@ return (
   <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 py-3">
 
     {/* LOGO + TEXT */}
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20">
+  <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 py-3">
+
+    {/* LOGO + TEXT */}
     <div className="flex items-center gap-2 md:gap-4">
       <img 
         src="/rebuss.png"
@@ -253,6 +257,41 @@ return (
         Poznej & Hraj
       </span>
     </div>
+
+    {/* MOBILE MENU ICON */}
+    <button 
+      className="md:hidden text-white/80 text-3xl"
+      onClick={() => setMobileMenu((v) => !v)}
+    >
+      ☰
+    </button>
+
+    {/* DESKTOP MENU */}
+    <nav className="hidden md:flex items-center gap-6 text-white/70 text-sm">
+      <button onClick={() => scrollToId('#events')} className="hover:text-white">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="hover:text-white">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="hover:text-white">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="hover:text-white">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="hover:text-white">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="hover:text-white">Kontakt</button>
+    </nav>
+  </div>
+
+  {/* MOBILE MENU DROPDOWN */}
+  {mobileMenu && (
+    <div className="md:hidden w-full max-w-[300px] mx-auto mt-2 rounded-xl bg-black/80 backdrop-blur-lg border border-white/10 py-2 space-y-2 text-left px-4">
+      <button onClick={() => scrollToId('#events')} className="block text-white/90 py-1">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="block text-white/90 py-1">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="block text-white/90 py-1">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="block text-white/90 py-1">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="block text-white/90 py-1">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="block text-white/90 py-1 mb-1">Kontakt</button>
+    </div>
+  )}
+
+  {/* SPODNÍ NEON LINKA */}
+  <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_12px_rgba(236,72,153,0.65)]"></div>
+</header>
 
     {/* MOBILE MENU ICON */}
     <button 
