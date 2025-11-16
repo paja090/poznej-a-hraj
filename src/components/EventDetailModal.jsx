@@ -25,26 +25,21 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Slideshow fotek
-  const images = Array.isArray(event.galleryImages)
-    ? event.galleryImages
-    : [];
-
+  // Fotky – slideshow
+  const images = Array.isArray(event.galleryImages) ? event.galleryImages : [];
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
   React.useEffect(() => {
     if (!images.length) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
-    }, 3000); // 3s autoplay
+    }, 3000);
     return () => clearInterval(interval);
   }, [images.length]);
 
   const goPrev = () => {
     if (!images.length) return;
-    setCurrentIndex((prev) =>
-      prev === 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const goNext = () => {
@@ -66,28 +61,13 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
         className="bg-[#0b0f19] text-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 shadow-2xl animate-fadeIn relative"
         onClick={(e) => e.stopPropagation()}
       >
-       {/* Zavírací tlačítko */}
-<button
-  onClick={onClose}
-  className="
-    absolute 
-    top-3 
-    right-3 
-    z-50 
-    h-9 w-9 
-    flex items-center justify-center
-    rounded-full 
-    bg-black/40 
-    backdrop-blur 
-    hover:bg-black/60 
-    text-white/80 
-    hover:text-white 
-    transition
-  "
->
-  ✖
-</button>
-
+        {/* Zavírací tlačítko */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-50 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur hover:bg-black/60 text-white/80 hover:text-white transition"
+        >
+          ✖
+        </button>
 
         {/* BANNER */}
         <div className="h-48 w-full overflow-hidden rounded-t-3xl relative">
@@ -103,7 +83,7 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
             </div>
           )}
 
-          {/* Štítek (Nadcházející / Archiv) */}
+          {/* Štítek */}
           <span className="absolute top-4 left-4 rounded-full border border-white/25 bg-black/50 px-4 py-1 text-xs font-semibold uppercase tracking-wide">
             {event.date && new Date(event.date) > new Date()
               ? "Nadcházející"
@@ -115,29 +95,24 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
           {/* Název */}
           <h2 className="text-2xl font-bold">{event.title}</h2>
 
-          {/* Tagy s ikonami */}
+          {/* Tagy */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {tags.map((tag, i) => {
-                const icon = TAG_ICON_MAP[tag] || "#";
-                return (
-                  <span
-                    key={`${tag}-${i}`}
-                    className="text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/15 flex items-center gap-1"
-                  >
-                    <span>{icon}</span>
-                    <span>{tag}</span>
-                  </span>
-                );
-              })}
+              {tags.map((tag, i) => (
+                <span
+                  key={`${tag}-${i}`}
+                  className="text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/15 flex items-center gap-1"
+                >
+                  <span>{TAG_ICON_MAP[tag] || "#"}</span>
+                  <span>{tag}</span>
+                </span>
+              ))}
             </div>
           )}
 
           {/* Popis */}
           {event.description && (
-            <p className="text-white/70 leading-relaxed">
-              {event.description}
-            </p>
+            <p className="text-white/70 leading-relaxed">{event.description}</p>
           )}
 
           {/* Info blok */}
@@ -166,40 +141,45 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
               <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
                 👥 Zbývá míst:
                 <br />
-                <span className="font-semibold text-a2">
-                  {event.available}
-                </span>
+                <span className="font-semibold text-a2">{event.available}</span>
               </div>
             )}
           </div>
 
-          {/* Program večera – TIMELINE */}
+          {/* ⭐ PROGRAM VEČERA — opravený, bez duplikací ⭐ */}
           {programItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                📌 Program večera
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">📌 Program večera</h3>
               <div className="space-y-3">
+
                 {programItems.map((item, index) => {
-                  const parts = item.split("–");
-                  const time = parts[0]?.trim() || "";
-                  const text = parts.slice(1).join("–").trim() || parts[0];
+                  const hasTime = item.includes("–");
+
+                  let time = "";
+                  let text = item;
+
+                  if (hasTime) {
+                    const parts = item.split("–");
+                    time = parts[0].trim();
+                    text = parts.slice(1).join("–").trim();
+                  }
 
                   return (
                     <div
                       key={`${item}-${index}`}
                       className="flex items-start gap-3 text-sm"
                     >
-                      {/* Timeline "čára" + tečka */}
+                      {/* Timeline */}
                       <div className="flex flex-col items-center mt-1">
                         <div className="h-2 w-2 rounded-full bg-a2" />
                         {index < programItems.length - 1 && (
                           <div className="w-px flex-1 bg-white/15 mt-1" />
                         )}
                       </div>
-                      {/* Text programu */}
+
+                      {/* Text */}
                       <div>
-                        {time && (
+                        {hasTime && (
                           <p className="text-xs font-mono text-white/60">
                             {time}
                           </p>
@@ -209,6 +189,7 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
                     </div>
                   );
                 })}
+
               </div>
             </div>
           )}
@@ -221,12 +202,10 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
             </div>
           )}
 
-          {/* V ceně vstupenky */}
+          {/* V ceně */}
           {includedItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">
-                🎁 V ceně vstupenky
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">🎁 V ceně vstupenky</h3>
               <ul className="space-y-1 text-white/70 text-sm">
                 {includedItems.map((item, i) => (
                   <li key={`${item}-${i}`}>• {item}</li>
@@ -247,20 +226,15 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
             </div>
           )}
 
-          {/* Fotky – SLIDE SLIDESHOW */}
+          {/* Fotky */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">
-              📸 Fotky z našich večerů
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">📸 Fotky z našich večerů</h3>
 
             {images.length > 0 ? (
               <div className="relative w-full h-40 rounded-xl overflow-hidden border border-white/10">
-                {/* Slider */}
                 <div
                   className="flex h-full transition-transform duration-500 ease-out"
-                  style={{
-                    transform: `translateX(-${currentIndex * 100}%)`,
-                  }}
+                  style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                 >
                   {images.map((img, i) => (
                     <div
@@ -276,7 +250,6 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
                   ))}
                 </div>
 
-                {/* Šipky */}
                 {images.length > 1 && (
                   <>
                     <button
@@ -295,24 +268,6 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
                     </button>
                   </>
                 )}
-
-                {/* Dots */}
-                {images.length > 1 && (
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                    {images.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setCurrentIndex(i)}
-                        className={`h-1.5 w-4 rounded-full ${
-                          i === currentIndex
-                            ? "bg-white"
-                            : "bg-white/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
@@ -328,7 +283,7 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
             )}
           </div>
 
-          {/* Mapa místa */}
+          {/* Mapa */}
           <div>
             <h3 className="text-lg font-semibold mb-2">🗺️ Mapa místa</h3>
             <div className="rounded-xl overflow-hidden border border-white/10">
@@ -343,7 +298,7 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
             </div>
           </div>
 
-          {/* CTA – Rezervovat */}
+          {/* CTA */}
           <button
             onClick={onReserve}
             className="w-full bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 py-3 rounded-xl text-lg font-semibold text-[#071022] shadow-lg hover:scale-[1.02] transition"
@@ -355,4 +310,3 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
     </div>
   );
 }
-
