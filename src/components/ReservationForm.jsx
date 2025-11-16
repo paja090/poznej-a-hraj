@@ -54,17 +54,19 @@ export default function ReservationForm({ event, onClose }) {
       if (!formspreeResponse.ok) throw new Error("Formspree error");
 
       // 2️⃣ Uložit do Firestore
-      const docRef = await addDoc(collection(db, "reservations"), {
-        ...formData,
-        peopleCount: Number(formData.peopleCount),
-        eventTitle: event.title,
-        price: event.price ?? null,
-        paymentStatus: "pending",
-        gdprConsent: formData.gdpr,
-        safetyConsent: formData.safety,
-        age18plus: formData.age18plus,
-        createdAt: serverTimestamp(),
-      });
+const docRef = await addDoc(collection(db, "reservations"), {
+  ...formData,
+  peopleCount: Number(formData.peopleCount),
+  eventTitle: event.title,
+  eventId: event.id,              // ⭐⭐⭐ ZÁSADNÍ NOVÉ POLE
+  price: event.price ?? null,
+  paymentStatus: "pending",
+  gdprConsent: formData.gdpr,
+  safetyConsent: formData.safety,
+  age18plus: formData.age18plus,
+  createdAt: serverTimestamp(),
+});
+
 
       // 3️⃣ Uložit data pro Stripe
       setReservationData({
