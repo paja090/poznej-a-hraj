@@ -232,69 +232,65 @@ return (
     <div className="mx-auto max-w-6xl px-4 pb-24">
 
       {/* === HLAVIČKA === */}
-    <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#05060a]/70 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
-  <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3 max-w-6xl mx-auto">
+   <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
+  <div className="flex items-center justify-between px-4 md:px-8 py-4 max-w-7xl mx-auto">
 
     {/* LOGO + TEXT */}
-    <div className="flex items-center gap-4 justify-center md:justify-start w-full md:w-auto">
+    <div className="flex items-center gap-4 min-w-0">
+      <img 
+        src="/rebuss.png"
+        alt="Reboos Logo"
+        className="h-24 md:h-28 object-contain transition-transform duration-300 hover:scale-105"
+      />
 
-      <div className="relative inline-block">
-
-        {/* LOGO */}
-        <img
-          src="/rebuss.png"
-          alt="Reboos Logo"
-          className="h-28 w-auto object-contain transition-transform duration-300 hover:scale-105"
-        />
-
-        {/* BULB GLOW */}
-        <div
-          className="pointer-events-none absolute bulb-dot"
-          style={{
-            right: "28px",
-            top: "51%",
-            transform: "translateY(-50%)",
-            zIndex: 50,
-          }}
-        >
-          <div className="w-3 h-3 bg-yellow-300 rounded-full blur-[0.5px] opacity-100"></div>
-          <div
-            className="absolute"
-            style={{
-              bottom: "12px",
-              left: "0px",
-              width: "22px",
-              height: "95px",
-              background: "linear-gradient(to top, rgba(255,244,160,0.9), rgba(255,244,160,0) 88%)",
-              filter: "blur(6px)",
-              opacity: 0.92,
-            }}
-          ></div>
-        </div>
-      </div>
-
-      {/* TEXT */}
-      <span className="text-3xl font-extrabold text-white tracking-wide drop-shadow-[0_0_15px_rgba(236,72,153,0.45)]">
-        Poznej &amp; Hraj
-      </span>
+      <h1 className="
+        text-2xl md:text-3xl font-semibold 
+        text-transparent bg-clip-text
+        bg-gradient-to-r from-fuchsia-400 to-cyan-300
+        drop-shadow-[0_0_12px_rgba(236,72,153,0.55)]
+        whitespace-nowrap
+      ">
+        Poznej & Hraj
+      </h1>
     </div>
 
-    {/* Navigation */}
-    <nav className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm shadow-md backdrop-blur">
-      <ul className="flex items-center gap-4 text-white/70">
-        <li><button onClick={() => scrollToId("#events")} className="hover:text-white">Akce</button></li>
-        <li><button onClick={() => scrollToId("#stats")} className="hover:text-white">Statistiky</button></li>
-        <li><button onClick={() => scrollToId("#poll")} className="hover:text-white">Anketa</button></li>
-        <li><button onClick={() => scrollToId("#crew")} className="hover:text-white">Tým</button></li>
-        <li><button onClick={() => scrollToId("#reviews")} className="hover:text-white">Recenze</button></li>
-        <li><button onClick={() => scrollToId("#feedback")} className="hover:text-white">Kontakt</button></li>
-      </ul>
+    {/* NAVIGACE */}
+    <nav className="
+      hidden md:flex items-center gap-6 
+      text-white/70 text-sm font-medium
+    ">
+      <button onClick={() => scrollToId('#events')} className="hover:text-white transition">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="hover:text-white transition">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="hover:text-white transition">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="hover:text-white transition">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="hover:text-white transition">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="hover:text-white transition">Kontakt</button>
     </nav>
+
+    {/* MOBILE MENU ICON */}
+    <button 
+      className="md:hidden text-white/80 text-3xl"
+      onClick={() => setMobileMenu((v) => !v)}
+    >
+      ☰
+    </button>
 
   </div>
 
-  {/* Spodní svítící linka */}
-  <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_15px_rgba(236,72,153,0.8)]"></div>
+  {/* MOBILE MENU */}
+  {mobileMenu && (
+    <div className="md:hidden bg-black/80 border-t border-fuchsia-500/20 backdrop-blur-xl px-6 py-4 space-y-3">
+      <button onClick={() => scrollToId('#events')} className="block w-full text-left text-white/80">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="block w-full text-left text-white/80">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="block w-full text-left text-white/80">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="block w-full text-left text-white/80">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="block w-full text-left text-white/80">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="block w-full text-left text-white/80">Kontakt</button>
+    </div>
+  )}
+
+  {/* SPODNÍ SVÍTÍCÍ LINKA – ZACHOVÁNA */}
+  <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_12px_rgba(236,72,153,0.65)]"></div>
 </header>
 
         {/* === HERO === */}
