@@ -6,9 +6,7 @@ import admin from "firebase-admin";
 // === Firebase Admin inicializace (server) ===
 if (!admin.apps.length) {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    console.warn(
-      "⚠️ Chybí FIREBASE_SERVICE_ACCOUNT – načtení rezervace z Firestore nebude fungovat."
-    );
+    console.warn("⚠️ Chybí FIREBASE_SERVICE_ACCOUNT – načtení rezervace z Firestore nebude fungovat.");
   } else {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     admin.initializeApp({
@@ -18,10 +16,10 @@ if (!admin.apps.length) {
 }
 const db = admin.apps.length ? admin.firestore() : null;
 
-// === Nodemailer – Gmail SMTP ===
+// === Nodemailer SMTP ===
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465, // můžeš změnit na 587 + secure: false
+  port: 465,
   secure: true,
   auth: {
     user: process.env.GMAIL_USER || "poznejahraj@gmail.com",
@@ -29,16 +27,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// === Helper: načtení rezervace z Firestore, pokud je potřeba ===
-async function loadReservationFromFirestore(reservationId) {
+// === Načtení rezervace ===
+async function loadReservation(reservationId) {
   if (!db) return null;
   const snap = await db.collection("reservations").doc(reservationId).get();
-  if (!snap.exists) return null;
-  return { id: snap.id, ...snap.data() };
+  return snap.exists ? { id: snap.id, ...snap.data() } : null;
 }
 
-// === Helper: generování HTML e-mailu ===
-function generateTicketEmailHtml({
+// === HTML vstupenky ===
+function generateTicketHtml({
   name,
   eventTitle,
   eventDate,
@@ -49,274 +46,182 @@ function generateTicketEmailHtml({
   paymentStatus,
   qrDataUrl,
   ticketUrl,
-  assetBaseUrl,
 }) {
   const isPaid = ["paid", "succeeded", "zaplaceno", "paid_out"].includes(
     String(paymentStatus || "").toLowerCase()
   );
 
   const safePeople = peopleCount || 1;
-  const safeBase =
-    assetBaseUrl && assetBaseUrl.length
-      ? assetBaseUrl
-      : "https://poznej-a-hraj.vercel.app";
-  const logoUrl = `${safeBase}/rebuss.png`;
 
-  return `<!doctype html>
+  return `
+<!doctype html>
 <html lang="cs">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Vstupenka – Poznej &amp; Hraj</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body style="margin:0;padding:0;background:#050816;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#fff;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:radial-gradient(circle at top left,#8b5cf6 0,#050816 55%);padding:24px 0;">
-      <tr>
-        <td align="center">
-          <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:linear-gradient(145deg,#050816,#0b1020);border-radius:24px;border:1px solid rgba(255,255,255,0.12);overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,0.65);">
-            <!-- Header -->
-            <tr>
-              <td style="padding:24px 28px 16px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td style="vertical-align:middle;">
-                      <div style="display:inline-block;padding:10px 16px;border-radius:999px;background:linear-gradient(135deg,#8b5cf6,#ec4899);font-size:14px;font-weight:800;color:#050816;text-transform:uppercase;letter-spacing:0.12em;">
-                        Poznej &amp; Hraj
-                      </div>
-                      <div style="margin-top:10px;font-size:18px;font-weight:600;color:#f9fafb;">
-                        Tvoje digitální vstupenka je připravena ✨
-                      </div>
-                      <div style="margin-top:4px;font-size:13px;color:rgba(249,250,251,0.7);">
-                        Stačí ukázat QR kód u vstupu na akci.
-                      </div>
-                    </td>
-                    <td align="right" style="vertical-align:middle;">
-                      <div style="
-                        width:68px;
-                        height:68px;
-                        border-radius:18px;
-                        background:rgba(15,23,42,0.95);
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        border:1px solid rgba(148,163,184,0.55);
-                        overflow:hidden;
-                      ">
-                        <img 
-                          src="${logoUrl}" 
-                          alt="Rebus logo" 
-                          style="max-width:60px;max-height:60px;display:block;"
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
+<head>
+<meta charset="UTF-8"/>
+<title>Vstupenka – Poznej & Hraj</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
 
-            <!-- QR + info (barevná verze) -->
-            <tr>
-              <td style="padding:24px 20px 8px 20px;">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <!-- QR -->
-                    <td width="46%" align="center" style="padding:12px;">
-                      <div style="background:radial-gradient(circle at top,#8b5cf6 0,transparent 60%);border-radius:24px;padding:16px;border:1px solid rgba(255,255,255,0.12);">
-                        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(249,250,251,0.65);margin-bottom:8px;">
-                          QR vstupenka
-                        </div>
-                        <div style="background:#fff;border-radius:18px;padding:10px;display:inline-block;">
-                          <img src="${qrDataUrl}" alt="QR kód vstupenky" width="210" height="210" style="display:block;border-radius:12px;" />
-                        </div>
-                        <div style="margin-top:10px;font-size:11px;color:rgba(249,250,251,0.7);">
-                          U vstupu prosím ukaž tento QR kód na mobilu nebo vytištěný.
-                        </div>
-                      </div>
-                    </td>
+<body style="margin:0;padding:0;background:#050816;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#fff;">
 
-                    <!-- Textové info -->
-                    <td width="54%" style="padding:12px;">
-                      <div style="background:rgba(15,23,42,0.9);border-radius:24px;padding:18px 18px;border:1px solid rgba(148,163,184,0.35);">
-                        <div style="font-size:13px;color:rgba(148,163,184,0.9);margin-bottom:4px;">
-                          Jméno účastníka
-                        </div>
-                        <div style="font-size:16px;font-weight:600;color:#f9fafb;margin-bottom:12px;">
-                          ${name || "Host Poznej & Hraj"}
-                        </div>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:24px 0;background:radial-gradient(circle at top left,#8b5cf6 0,#050816 60%);">
+<tr><td align="center">
 
-                        <div style="font-size:13px;color:rgba(148,163,184,0.9);margin-bottom:4px;">
-                          Název akce
-                        </div>
-                        <div style="font-size:15px;font-weight:600;color:#e5e7eb;margin-bottom:12px;">
-                          ${eventTitle || "Poznej & Hraj večer"}
-                        </div>
+<table width="600" style="max-width:600px;width:100%;background:#0b1020;border-radius:24px;border:1px solid rgba(255,255,255,0.12);overflow:hidden;">
 
-                        <div style="font-size:13px;color:rgba(148,163,184,0.9);margin-bottom:4px;">
-                          Datum &amp; místo
-                        </div>
-                        <div style="font-size:13px;color:#e5e7eb;margin-bottom:12px;line-height:1.5;">
-                          📅 ${eventDate || "bude upřesněno"}<br/>
-                          📍 ${eventPlace || "bude upřesněno"}
-                        </div>
+<!-- HEADER -->
+<tr><td style="padding:24px 28px;border-bottom:1px solid rgba(255,255,255,0.08);">
 
-                        <div style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;">
-                          <span style="
-                            display:inline-flex;align-items:center;gap:6px;
-                            font-size:13px;font-weight:600;
-                            padding:6px 14px;border-radius:50px;
-                            background:linear-gradient(145deg,#101827,#0f172a);
-                            border:1px solid rgba(148,163,184,0.35);
-                            color:#e5e7eb;
-                          ">
-                            👥 ${safePeople} osob
-                          </span>
+  <table width="100%">
+    <tr>
 
-                          <span style="
-                            display:inline-flex;align-items:center;gap:6px;
-                            font-size:13px;font-weight:600;
-                            padding:6px 14px;border-radius:50px;
-                            background:linear-gradient(145deg,rgba(22,163,74,0.25),rgba(22,163,74,0.15));
-                            border:1px solid rgba(22,163,74,0.45);
-                            color:#bbf7d0;
-                          ">
-                            ${isPaid ? "✔️ Zaplaceno" : "🟡 Nezaplaceno"}
-                          </span>
+      <!-- Logo -->
+      <td style="vertical-align:middle;">
+        <img src="cid:rebuslogo" alt="Rebus Logo" 
+          style="height:48px;object-fit:contain;display:block;margin-bottom:8px;">
+        <div style="font-size:18px;font-weight:600;color:#fafafa;margin-top:6px;">
+          Tvoje digitální vstupenka je připravena ✨
+        </div>
+        <div style="font-size:13px;color:rgba(249,250,251,0.65);">
+          Stačí ukázat QR kód u vstupu na akci.
+        </div>
+      </td>
 
-                          ${
-                            price
-                              ? `
-                          <span style="
-                            display:inline-flex;align-items:center;gap:6px;
-                            font-size:13px;font-weight:600;
-                            padding:6px 14px;border-radius:50px;
-                            background:linear-gradient(145deg,rgba(59,130,246,0.25),rgba(59,130,246,0.1));
-                            border:1px solid rgba(59,130,246,0.45);
-                            color:#cfe1ff;
-                          ">
-                            💳 ${price} Kč
-                          </span>
-                          `
-                              : ""
-                          }
-                        </div>
+      <td align="right" style="vertical-align:middle;">
+        <div style="
+          width:50px;height:50px;border-radius:14px;
+          background:radial-gradient(circle at 30% 0%,#ec4899,transparent 60%),
+                      radial-gradient(circle at 70% 120%,#8b5cf6,transparent 60%);
+          display:flex;align-items:center;justify-content:center;
+          font-weight:800;font-size:18px;color:#050816;">
+          PH
+        </div>
+      </td>
 
-                        <div style="margin-top:6px;font-size:11px;color:rgba(148,163,184,0.9);">
-                          ID rezervace: <span style="font-family:SFMono-Regular,Menlo,monospace;color:#e5e7eb;">${reservationId}</span>
-                        </div>
+    </tr>
+  </table>
 
-                        <a href="${ticketUrl}" style="margin-top:14px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#22c55e;text-decoration:none;">
-                          📲 Otevřít vstupenku v prohlížeči
-                        </a>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
+</td></tr>
 
-            <!-- Tisková verze – černobílá kartička -->
-            <tr>
-              <td style="padding:8px 24px 16px 24px;">
-                <div style="
-                  border-radius:16px;
-                  background:#ffffff;
-                  color:#000000;
-                  padding:16px 18px;
-                  border:1px dashed #111827;
-                ">
-                  <div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
-                    <span>🖨️ Tisková verze vstupenky</span>
-                    <img 
-                      src="${logoUrl}" 
-                      alt="Rebus logo" 
-                      style="max-height:32px;display:block;"
-                    />
-                  </div>
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                      <td width="40%" align="center" style="padding-right:12px;">
-                        <div style="border:1px solid #000;padding:8px;border-radius:8px;display:inline-block;">
-                          <img 
-                            src="${qrDataUrl}" 
-                            alt="QR kód vstupenky" 
-                            width="180" 
-                            height="180" 
-                            style="display:block;"
-                          />
-                        </div>
-                      </td>
-                      <td width="60%" style="font-size:12px;line-height:1.6;">
-                        <div><strong>Jméno:</strong> ${name || "Host Poznej & Hraj"}</div>
-                        <div><strong>Akce:</strong> ${eventTitle || "Poznej & Hraj večer"}</div>
-                        <div><strong>Datum:</strong> ${eventDate || "bude upřesněno"}</div>
-                        <div><strong>Místo:</strong> ${eventPlace || "bude upřesněno"}</div>
-                        <div><strong>Počet osob:</strong> ${safePeople}</div>
-                        <div><strong>Stav platby:</strong> ${
-                          isPaid ? "ZAPLACENO" : "NEZAPLACENO"
-                        }</div>
-                        ${
-                          price
-                            ? `<div><strong>Cena:</strong> ${price} Kč</div>`
-                            : ""
-                        }
-                        <div style="margin-top:6px;font-size:11px;">
-                          <strong>ID rezervace:</strong> ${reservationId}
-                        </div>
-                        <div style="margin-top:10px;font-size:10px;line-height:1.4;">
-                          Tuto část můžeš vytisknout a přinést s sebou na akci. QR kód obsahuje odkaz na tvoji konkrétní rezervaci.
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                </div>
-              </td>
-            </tr>
+<!-- QR + INFO -->
+<tr><td style="padding:24px">
 
-            <!-- Podmínky -->
-            <tr>
-              <td style="padding:8px 24px 24px 24px;">
-                <div style="border-radius:20px;background:rgba(15,23,42,0.9);padding:16px 18px;border:1px solid rgba(148,163,184,0.4);">
-                  <div style="font-size:13px;font-weight:600;color:#f9fafb;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-                    🛡️ Bezpečnostní a organizační podmínky
-                  </div>
-                  <ul style="padding-left:18px;margin:0;font-size:12px;color:rgba(209,213,219,0.9);line-height:1.6;">
-                    <li>Vstupenka je <strong>nepřenosná</strong> a je vázaná na jméno účastníka.</li>
-                    <li>QR kód je <strong>jednorázový</strong> a platný pouze pro tuto akci a termín.</li>
-                    <li>Pokus o kopírování nebo opakované použití QR kódu může vést ke <strong>zneplatnění vstupenky</strong>.</li>
-                    <li>Na místě se prosím řiďte <strong>pokyny organizátorů</strong> a personálu.</li>
-                    <li>Organizátor nenese odpovědnost za věci odložené mimo vyhrazené prostory a akce se účastníte na vlastní odpovědnost.</li>
-                    <li>Vstupenku ani přístupový odkaz <strong>nesdílejte třetím osobám</strong>, které nejsou účastníky akce.</li>
-                  </ul>
-                  <div style="margin-top:10px;font-size:11px;color:rgba(148,163,184,0.9);line-height:1.5;">
-                    <strong>GDPR:</strong> Pro vystavení vstupenky zpracováváme pouze nezbytné kontaktní údaje (jméno, e-mail, údaje o rezervaci).
-                    Platební údaje <strong>nezpracováváme ani neukládáme</strong> – platba probíhá bezpečně přes Stripe.
-                  </div>
-                </div>
-                <div style="font-size:11px;color:rgba(148,163,184,0.7);margin-top:10px;text-align:center;">
-                  Pokud něco nesedí, napiš nám prosím na
-                  <a href="mailto:poznejahraj@seznam.cz" style="color:#a855f7;text-decoration:none;"> poznejahraj@seznam.cz</a>.
-                </div>
-              </td>
-            </tr>
+  <table width="100%">
+    <tr>
 
-            <!-- Footer -->
-            <tr>
-              <td style="padding:10px 24px 18px 24px;text-align:center;font-size:11px;color:rgba(148,163,184,0.7);">
-                © ${new Date().getFullYear()} Poznej &amp; Hraj – těšíme se na tebe!
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
+      <!-- QR KÓD -->
+      <td width="45%" align="center">
+        <div style="padding:16px;border:1px solid rgba(255,255,255,0.12);border-radius:22px;">
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:8px;">
+            QR vstupenka
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:10px;">
+            <img src="cid:qrimage" width="210" height="210" style="display:block;">
+          </div>
+        </div>
+      </td>
+
+      <!-- TEXTY -->
+      <td width="55%" style="padding-left:20px;">
+        <div style="background:#101827;border-radius:20px;padding:18px;border:1px solid rgba(148,163,184,0.35);">
+
+          <div style="font-size:13px;color:#9ca3af;">Jméno účastníka</div>
+          <div style="font-size:16px;font-weight:600;color:#f9fafb;margin-bottom:10px;">
+            ${name || "Host Poznej & Hraj"}
+          </div>
+
+          <div style="font-size:13px;color:#9ca3af;">Název akce</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:10px;">
+            ${eventTitle}
+          </div>
+
+          <div style="font-size:13px;color:#9ca3af;">Datum & místo</div>
+          <div style="font-size:13px;margin-bottom:12px;">
+            📅 ${eventDate}<br>
+            📍 ${eventPlace}
+          </div>
+
+          <!-- Ikonky -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+            <span style="padding:6px 12px;border-radius:40px;background:#1e293b;color:#e5e7eb;">
+              👥 ${safePeople} osob
+            </span>
+
+            <span style="padding:6px 12px;border-radius:40px;
+              background:${isPaid ? "#064e3b" : "#7c2d12"};
+              color:${isPaid ? "#bbf7d0" : "#fdba74"};">
+              ${isPaid ? "✔️ Zaplaceno" : "🟡 Nezaplaceno"}
+            </span>
+
+            ${
+              price
+                ? `<span style="padding:6px 12px;border-radius:40px;background:#1e3a8a;color:#bfdbfe;">
+                    💳 ${price} Kč
+                   </span>`
+                : ""
+            }
+          </div>
+
+          <div style="font-size:11px;color:#9ca3af;">ID rezervace: ${reservationId}</div>
+
+          <!-- Odkaz na tiskovou verzi -->
+          <a href="${ticketUrl}&print=1"
+            style="margin-top:14px;display:inline-block;color:#22c55e;text-decoration:none;font-size:13px;">
+            📄 Otevřít vstupenku (verze pro tisk)
+          </a>
+
+        </div>
+      </td>
+
+    </tr>
+  </table>
+
+</td></tr>
+
+<!-- PODMÍNKY -->
+<tr><td style="padding:24px">
+
+  <div style="background:#101827;padding:16px;border-radius:18px;border:1px solid rgba(148,163,184,0.4);">
+    <div style="font-size:13px;font-weight:600;">🛡️ Bezpečnostní & organizační podmínky</div>
+    <ul style="font-size:12px;line-height:1.6;margin:10px 0 0 18px;color:#d1d5db;">
+      <li>Vstupenka může být <strong>předána jiné osobě</strong>, pokud nebyla naskenována.</li>
+      <li>QR kód je <strong>jednorázový</strong>; jakákoli kopie nebo duplikát bude označen jako NEPLATNÝ.</li>
+      <li>Organizátor nenese odpovědnost za ztrátu nebo zneužití QR kódu.</li>
+      <li>Řiďte se pokyny organizátorů a personálu.</li>
+    </ul>
+
+    <p style="margin-top:10px;font-size:11px;color:#9ca3af;">
+      <strong>GDPR:</strong> Zpracováváme pouze nezbytné údaje pro vystavení vstupenky.
+      Platební údaje neukládáme.
+    </p>
+
+    <p style="margin-top:10px;font-size:11px;color:#9ca3af;text-align:center;">
+      Máš otázky? Napiš nám: 
+      <a href="mailto:poznejahraj@gmail.com" style="color:#a855f7;text-decoration:none;">
+        poznejahraj@gmail.com
+      </a>
+    </p>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#6b7280;margin-top:10px;">
+    © ${new Date().getFullYear()} Poznej & Hraj
+  </p>
+
+</td></tr>
+
+</table>
+
+</td></tr>
+</table>
+
+</body>
+</html>
+`;
 }
 
-// === Hlavní handler: POST /api/send-ticket ===
+// === API handler ===
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -324,108 +229,38 @@ export default async function handler(req, res) {
     const {
       reservationId,
       eventDate,
-      eventTime, // zatím nepoužíváš, ale můžeš do budoucna
       eventPlace,
       price,
       paymentStatus,
-      override, // volitelné: { name, email, peopleCount, eventTitle, ... } z webhooks
+      override,
     } = req.body || {};
 
     if (!reservationId) {
-      return res.status(400).json({ error: "Chybí reservationId." });
+      return res.status(400).json({ error: "Missing reservationId" });
     }
 
-    // 1) Zkus načíst z Firestore (pokud není override)
-    let reservation = null;
-    if (!override) {
-      reservation = await loadReservationFromFirestore(reservationId);
-    } else {
-      reservation = { ...override, id: reservationId };
-    }
-
+    let reservation = override || (await loadReservation(reservationId));
     if (!reservation) {
-      return res.status(404).json({
-        error:
-          "Rezervace nenalezena ve Firestore, zkontroluj reservationId.",
-      });
+      return res.status(404).json({ error: "Reservation not found" });
     }
 
     const { name, email, peopleCount, eventTitle } = reservation;
 
     if (!email) {
-      return res
-        .status(400)
-        .json({ error: "Rezervace nemá e-mail účastníka." });
+      return res.status(400).json({ error: "Reservation has no email" });
     }
 
-    // === URL základ pro ticket a assets ===
-    const rawBase =
+    // === URL vstupenky ===
+    const BASE =
       process.env.PUBLIC_TICKET_BASE_URL ||
       process.env.DOMAIN ||
       "https://poznej-a-hraj.vercel.app";
 
-    const normalizedBase = rawBase.endsWith("/")
-      ? rawBase.slice(0, -1)
-      : rawBase;
+    const base = BASE.endsWith("/") ? BASE.slice(0, -1) : BASE;
 
-    // === URL na ticket stránku (HashRouter → #/ticket) ===
-    const ticketUrl = `${normalizedBase}/#/ticket?id=${encodeURIComponent(
-      reservationId
-    )}`;
+    const ticketUrl = `${base}/#/ticket?id=${encodeURIComponent(
+      r
 
-    // 2) Vygeneruj QR kód (data URL, base64)
-    const qrDataUrl = await QRCode.toDataURL(ticketUrl, {
-      margin: 1,
-      width: 400,
-    });
-
-    // 3) HTML mail
-    const htmlBase = generateTicketEmailHtml({
-      name,
-      eventTitle,
-      eventDate: eventDate || reservation.eventDate,
-      eventPlace: eventPlace || reservation.eventPlace,
-      peopleCount,
-      reservationId,
-      price: price || reservation.price,
-      paymentStatus: paymentStatus || reservation.paymentStatus,
-      qrDataUrl,
-      ticketUrl,
-      assetBaseUrl: normalizedBase,
-    });
-
-    // nahradíme všechny inline <img ... alt="QR kód vstupenky" ...> za cid verzi
-    const htmlWithCid = htmlBase.replace(
-      /<img[^>]*alt="QR kód vstupenky"[^>]*>/g,
-      '<img src="cid:qrimage" alt="QR kód vstupenky" width="210" height="210" style="display:block;border-radius:12px;" />'
-    );
-
-    // 4) Odeslání e-mailu
-    await transporter.sendMail({
-      from: `"Poznej & Hraj" <${
-        process.env.GMAIL_USER || "poznejahraj@gmail.com"
-      }>`,
-      to: email,
-      subject: `Tvá vstupenka – ${eventTitle || "Poznej & Hraj"}`,
-      html: htmlWithCid,
-      attachments: [
-        {
-          filename: "qr.png",
-          content: qrDataUrl.split("base64,")[1],
-          encoding: "base64",
-          cid: "qrimage",
-        },
-      ],
-    });
-
-    return res.status(200).json({ ok: true, sentTo: email, ticketUrl });
-  } catch (err) {
-    console.error("❌ send-ticket error:", err);
-    return res
-      .status(500)
-      .json({ error: "Nepodařilo se odeslat vstupenku." });
-  }
-}
 
 
 
