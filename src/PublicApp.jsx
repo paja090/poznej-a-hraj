@@ -65,7 +65,7 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
 export default function PublicApp() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [detailEvent, setDetailEvent] = useState(null);
-
+const [mobileMenu, setMobileMenu] = useState(false);
   const [upcoming, setUpcoming] = useState([]);
   const [past, setPast] = useState([]);
 
