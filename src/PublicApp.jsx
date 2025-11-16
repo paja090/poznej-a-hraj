@@ -232,33 +232,32 @@ return (
     <div className="mx-auto max-w-6xl px-4 pb-24">
 
       {/* === HLAVIČKA === */}
-   <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
-  <div className="flex items-center justify-between px-4 md:px-8 py-4 max-w-7xl mx-auto">
+  <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
+
+  {/* HLAVNÍ BAR */}
+  <div className="flex items-center justify-between px-3 md:px-8 py-3 md:py-4 max-w-7xl mx-auto">
 
     {/* LOGO + TEXT */}
-    <div className="flex items-center gap-4 min-w-0">
+    <div className="flex items-center gap-3 md:gap-4 min-w-0">
       <img 
         src="/rebuss.png"
         alt="Reboos Logo"
-        className="h-24 md:h-28 object-contain transition-transform duration-300 hover:scale-105"
+        className="h-16 md:h-28 object-contain transition-transform duration-300 hover:scale-105"
       />
 
       <h1 className="
-        text-2xl md:text-3xl font-semibold 
+        text-xl md:text-3xl font-semibold 
         text-transparent bg-clip-text
         bg-gradient-to-r from-fuchsia-400 to-cyan-300
-        drop-shadow-[0_0_12px_rgba(236,72,153,0.55)]
+        drop-shadow-[0_0_8px_rgba(236,72,153,0.45)]
         whitespace-nowrap
       ">
         Poznej & Hraj
       </h1>
     </div>
 
-    {/* NAVIGACE */}
-    <nav className="
-      hidden md:flex items-center gap-6 
-      text-white/70 text-sm font-medium
-    ">
+    {/* DESKTOP NAV */}
+    <nav className="hidden md:flex items-center gap-6 text-white/70 text-sm font-medium">
       <button onClick={() => scrollToId('#events')} className="hover:text-white transition">Akce</button>
       <button onClick={() => scrollToId('#stats')} className="hover:text-white transition">Statistiky</button>
       <button onClick={() => scrollToId('#poll')} className="hover:text-white transition">Anketa</button>
@@ -270,28 +269,30 @@ return (
     {/* MOBILE MENU ICON */}
     <button 
       className="md:hidden text-white/80 text-3xl"
-      onClick={() => setMobileMenu((v) => !v)}
+      onClick={() => setMobileMenu(v => !v)}
+      aria-label="Menu"
     >
       ☰
     </button>
 
   </div>
 
-  {/* MOBILE MENU */}
+  {/* MOBILE MENU DROPDOWN */}
   {mobileMenu && (
     <div className="md:hidden bg-black/80 border-t border-fuchsia-500/20 backdrop-blur-xl px-6 py-4 space-y-3">
-      <button onClick={() => scrollToId('#events')} className="block w-full text-left text-white/80">Akce</button>
-      <button onClick={() => scrollToId('#stats')} className="block w-full text-left text-white/80">Statistiky</button>
-      <button onClick={() => scrollToId('#poll')} className="block w-full text-left text-white/80">Anketa</button>
-      <button onClick={() => scrollToId('#crew')} className="block w-full text-left text-white/80">Tým</button>
-      <button onClick={() => scrollToId('#reviews')} className="block w-full text-left text-white/80">Recenze</button>
-      <button onClick={() => scrollToId('#feedback')} className="block w-full text-left text-white/80">Kontakt</button>
+      <button onClick={() => { scrollToId('#events'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Akce</button>
+      <button onClick={() => { scrollToId('#stats'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Statistiky</button>
+      <button onClick={() => { scrollToId('#poll'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Anketa</button>
+      <button onClick={() => { scrollToId('#crew'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Tým</button>
+      <button onClick={() => { scrollToId('#reviews'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Recenze</button>
+      <button onClick={() => { scrollToId('#feedback'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Kontakt</button>
     </div>
   )}
 
-  {/* SPODNÍ SVÍTÍCÍ LINKA – ZACHOVÁNA */}
+  {/* NEONOVÁ SPODNÍ LINKA – ZACHOVANÁ */}
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_12px_rgba(236,72,153,0.65)]"></div>
 </header>
+
 
         {/* === HERO === */}
 <section className="grid items-center gap-10 py-14 md:grid-cols-2">
