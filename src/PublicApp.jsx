@@ -232,64 +232,60 @@ return (
     <div className="mx-auto max-w-6xl px-4 pb-24">
 
       {/* === HLAVIČKA === */}
-  <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20 shadow-[0_0_25px_rgba(236,72,153,0.25)]">
-
-  {/* HLAVNÍ BAR */}
-  <div className="flex items-center justify-between px-3 md:px-8 py-3 md:py-4 max-w-7xl mx-auto">
+  <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/40 border-b border-fuchsia-500/20">
+  <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 py-3">
 
     {/* LOGO + TEXT */}
-    <div className="flex items-center gap-3 md:gap-4 min-w-0">
+    <div className="flex items-center gap-2 md:gap-4">
       <img 
         src="/rebuss.png"
         alt="Reboos Logo"
-        className="h-16 md:h-28 object-contain transition-transform duration-300 hover:scale-105"
+        className="h-14 w-auto md:h-28 object-contain transition-transform duration-300 hover:scale-105"
       />
 
-      <h1 className="
-        text-xl md:text-3xl font-semibold 
+      <span className="
+        text-lg md:text-3xl font-semibold 
         text-transparent bg-clip-text
         bg-gradient-to-r from-fuchsia-400 to-cyan-300
-        drop-shadow-[0_0_8px_rgba(236,72,153,0.45)]
+        drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]
         whitespace-nowrap
       ">
         Poznej & Hraj
-      </h1>
+      </span>
     </div>
-
-    {/* DESKTOP NAV */}
-    <nav className="hidden md:flex items-center gap-6 text-white/70 text-sm font-medium">
-      <button onClick={() => scrollToId('#events')} className="hover:text-white transition">Akce</button>
-      <button onClick={() => scrollToId('#stats')} className="hover:text-white transition">Statistiky</button>
-      <button onClick={() => scrollToId('#poll')} className="hover:text-white transition">Anketa</button>
-      <button onClick={() => scrollToId('#crew')} className="hover:text-white transition">Tým</button>
-      <button onClick={() => scrollToId('#reviews')} className="hover:text-white transition">Recenze</button>
-      <button onClick={() => scrollToId('#feedback')} className="hover:text-white transition">Kontakt</button>
-    </nav>
 
     {/* MOBILE MENU ICON */}
     <button 
       className="md:hidden text-white/80 text-3xl"
-      onClick={() => setMobileMenu(v => !v)}
-      aria-label="Menu"
+      onClick={() => setMobileMenu((v) => !v)}
     >
       ☰
     </button>
 
+    {/* DESKTOP MENU */}
+    <nav className="hidden md:flex items-center gap-6 text-white/70 text-sm">
+      <button onClick={() => scrollToId('#events')} className="hover:text-white">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="hover:text-white">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="hover:text-white">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="hover:text-white">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="hover:text-white">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="hover:text-white">Kontakt</button>
+    </nav>
   </div>
 
   {/* MOBILE MENU DROPDOWN */}
   {mobileMenu && (
-    <div className="md:hidden bg-black/80 border-t border-fuchsia-500/20 backdrop-blur-xl px-6 py-4 space-y-3">
-      <button onClick={() => { scrollToId('#events'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Akce</button>
-      <button onClick={() => { scrollToId('#stats'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Statistiky</button>
-      <button onClick={() => { scrollToId('#poll'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Anketa</button>
-      <button onClick={() => { scrollToId('#crew'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Tým</button>
-      <button onClick={() => { scrollToId('#reviews'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Recenze</button>
-      <button onClick={() => { scrollToId('#feedback'); setMobileMenu(false); }} className="block w-full text-left text-white/80">Kontakt</button>
+    <div className="md:hidden w-full max-w-[300px] mx-auto mt-2 rounded-xl bg-black/80 backdrop-blur-lg border border-white/10 py-2 space-y-2 text-left px-4">
+      <button onClick={() => scrollToId('#events')} className="block text-white/90 py-1">Akce</button>
+      <button onClick={() => scrollToId('#stats')} className="block text-white/90 py-1">Statistiky</button>
+      <button onClick={() => scrollToId('#poll')} className="block text-white/90 py-1">Anketa</button>
+      <button onClick={() => scrollToId('#crew')} className="block text-white/90 py-1">Tým</button>
+      <button onClick={() => scrollToId('#reviews')} className="block text-white/90 py-1">Recenze</button>
+      <button onClick={() => scrollToId('#feedback')} className="block text-white/90 py-1 mb-1">Kontakt</button>
     </div>
   )}
 
-  {/* NEONOVÁ SPODNÍ LINKA – ZACHOVANÁ */}
+  {/* SPODNÍ NEON LINKA */}
   <div className="h-[2px] w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 opacity-60 shadow-[0_0_12px_rgba(236,72,153,0.65)]"></div>
 </header>
 
