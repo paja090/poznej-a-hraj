@@ -27,7 +27,7 @@ export default function ReservationForm({ event, onClose }) {
     });
   };
 
-  // 💾 Uložení rezervace
+  // 💾 Uložení rezervace do Firestore + odeslání e-mailu
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
@@ -39,6 +39,7 @@ export default function ReservationForm({ event, onClose }) {
     }
 
     try {
+      // 🔥 ULOŽENÍ DO FIRESTORE
       const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
         peopleCount: Number(formData.peopleCount),
@@ -52,10 +53,23 @@ export default function ReservationForm({ event, onClose }) {
         createdAt: serverTimestamp(),
       });
 
-      setReservationData({
+      const reservationPayload = {
         id: docRef.id,
         event,
         ...formData,
+      };
+
+      setReservationData(reservationPayload);
+
+      // 📩 ODESLÁNÍ POTVRZOVACÍHO EMAILU (NEZÁVISLE NA PLATBĚ)
+      await fetch("/api/send-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          eventTitle: event.title,
+        }),
       });
 
       setStatus("success");
@@ -65,7 +79,7 @@ export default function ReservationForm({ event, onClose }) {
     }
   };
 
-  // 💳 Stripe session
+  // 💳 Stripe session – vytvoření checkoutu
   const handleStripePayment = async () => {
     if (!reservationData) return;
 
@@ -112,6 +126,7 @@ export default function ReservationForm({ event, onClose }) {
           />
         </div>
 
+        {/* Zavírací tlačítko */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/70 hover:text-white"
@@ -131,8 +146,7 @@ export default function ReservationForm({ event, onClose }) {
             </p>
             <p className="text-white/70 text-sm">
               Místo je pro tebe <strong>rezervované 30 minut</strong>.
-              Pokud do té doby nedokončíš platbu, rezervace se automaticky uvolní
-              pro další zájemce.
+              Pokud do té doby nedokončíš platbu, rezervace se automaticky uvolní.
             </p>
 
             {event.price ? (
@@ -156,7 +170,7 @@ export default function ReservationForm({ event, onClose }) {
             </button>
           </div>
         ) : (
-          // Formulář
+          // 📝 FORMULÁŘ
           <form onSubmit={handleSubmit} className="space-y-3">
 
             <input
@@ -307,6 +321,7 @@ export default function ReservationForm({ event, onClose }) {
     </div>
   );
 }
+
 
 
 
