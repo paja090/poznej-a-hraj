@@ -101,14 +101,24 @@ export default function ReservationForm({ event, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-white/70 hover:text-white"
-        >
-          ✖
-        </button>
+  <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
+
+  {/* LOGO */}
+  <div className="w-full flex justify-center mb-4 mt-2">
+    <img
+      src="/rebuss.png"
+      alt="Rebuss Logo"
+      className="h-14 md:h-20 object-contain drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]"
+    />
+  </div>
+
+  <button
+    onClick={onClose}
+    className="absolute top-3 right-3 text-white/70 hover:text-white"
+  >
+    ✖
+  </button>
+
 
         <h2 className="text-xl font-bold mb-4 text-center">
           Rezervace: {event.title}
