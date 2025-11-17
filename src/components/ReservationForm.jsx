@@ -28,7 +28,7 @@ export default function ReservationForm({ event, onClose }) {
   };
 
   // --------------------------------------------------------
-  // 📌 ODESLÁNÍ REZERVACE + POSLÁNÍ POTVRZOVACÍHO EMAILU
+  // 📌 ODESLÁNÍ REZERVACE + POTVRZOVACÍ EMAIL
   // --------------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ export default function ReservationForm({ event, onClose }) {
     }
 
     try {
-      // 🔥 1) ULOŽENÍ REZERVACE DO FIRESTORE
+      // 🔥 1) Firestore
       const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
         peopleCount: Number(formData.peopleCount),
@@ -63,7 +63,7 @@ export default function ReservationForm({ event, onClose }) {
 
       setReservationData(reservationPayload);
 
-      // 🔥 2) ODESLÁNÍ POTVRZOVACÍHO EMAILU (NEZÁVISLE NA PLATBĚ)
+      // 🔥 2) Potvrzovací email
       await fetch("/api/send-reservation-confirmation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,7 +106,6 @@ export default function ReservationForm({ event, onClose }) {
       });
 
       const data = await resp.json();
-
       if (!resp.ok || !data.url) {
         alert("Nepodařilo se připravit platební bránu.");
         return;
@@ -120,12 +119,23 @@ export default function ReservationForm({ event, onClose }) {
   };
 
   // --------------------------------------------------------
-  // UI / MODAL
+  // UI
   // --------------------------------------------------------
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
-
+    <div
+      className="
+        fixed inset-0 bg-black/70 backdrop-blur-sm 
+        flex items-center justify-center z-50 p-4
+        overflow-y-auto
+      "
+    >
+      <div
+        className="
+          bg-white/10 border border-white/20 rounded-2xl p-6 
+          w-full max-w-md shadow-2xl text-white relative
+          max-h-[90vh] overflow-y-auto overscroll-contain
+        "
+      >
         {/* LOGO */}
         <div className="w-full flex justify-center mb-4 mt-2">
           <img
@@ -147,7 +157,7 @@ export default function ReservationForm({ event, onClose }) {
           Rezervace: {event.title}
         </h2>
 
-        {/* 🟢 ÚSPĚŠNÁ REZERVACE */}
+        {/* Úspěch */}
         {status === "success" && reservationData ? (
           <div className="text-center space-y-4">
             <p className="text-green-400 font-medium">
@@ -179,7 +189,7 @@ export default function ReservationForm({ event, onClose }) {
             </button>
           </div>
         ) : (
-          // 📝 FORMULÁŘ
+          // FORMULÁŘ
           <form onSubmit={handleSubmit} className="space-y-3">
 
             <input
@@ -330,6 +340,7 @@ export default function ReservationForm({ event, onClose }) {
     </div>
   );
 }
+
 
 
 
