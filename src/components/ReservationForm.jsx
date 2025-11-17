@@ -128,9 +128,7 @@ const docRef = await addDoc(collection(db, "reservations"), {
         {/* 🟢 Úspěch */}
         {status === "success" && reservationData ? (
           <div className="text-center space-y-4">
-            <p className="text-green-400 font-medium">
-              ✅ Rezervace byla úspěšně odeslána!
-            </p>
+           <p className="text-green-400 font-medium"> ✅ Rezervace byla úspěšně odeslána! </p> <p className="text-white/70 text-sm"> Místo je pro tebe <strong>rezervované 30 minut</strong>. Pokud do té doby nedokončíš platbu, rezervace se automaticky uvolní pro další zájemce. </p>
 
             {event.price ? (
               <button
