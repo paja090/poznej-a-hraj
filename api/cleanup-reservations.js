@@ -1,6 +1,7 @@
 // /api/cleanup-reservations.js
 import nodemailer from "nodemailer";
 import admin from "firebase-admin";
+import { getVocative } from "../utils/vocative.js";
 
 // =========================================
 //  1) FIREBASE ADMIN INITIALIZACE
@@ -49,14 +50,30 @@ function isReservationPaid(data) {
   return ["paid", "succeeded", "zaplaceno", "paid_out"].includes(s);
 }
 
+// ---------- EMAIL S VAROVÁNÍM ----------
 async function sendWarningEmail(data) {
   if (!data.email) return;
 
+  const baseName = data.name?.trim() || "host";
+  const vocative = getVocative(baseName);
+
   const subject = `⚠️ Rezervace čeká na platbu – ${data.eventTitle}`;
   const html = `
-    <p>Ahoj ${data.name || "hoste"},</p>
-    <p>Máš rezervaci na <strong>${data.eventTitle}</strong>, ale zatím nebyla zaplacena.</p>
-    <p>Rezervace vyprší přibližně za 5 minut.</p>
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;color:#0f172a;">
+      <p>Ahoj ${vocative},</p>
+      <p>
+        máš vytvořenou rezervaci na akci <strong>${data.eventTitle}</strong>, 
+        ale zatím k ní neproběhla platba.
+      </p>
+      <p>
+        Rezervace je platná ještě přibližně <strong>5 minut</strong>. 
+        Pokud platbu neodešleš, místo se automaticky uvolní pro další zájemce.
+      </p>
+      <p style="margin-top:20px;font-size:13px;color:#6b7280;">
+        Díky a těšíme se na setkání,<br/>
+        tým Poznej &amp; Hraj
+      </p>
+    </div>
   `;
 
   await transporter.sendMail({
@@ -83,7 +100,7 @@ async function runCleanup() {
 
   const result = { warned: 0, expired: 0 };
 
-  // 4A — varování
+  // ---------- 4A — varování ----------
   const warnSnap = await reservationsRef
     .where("paymentStatus", "==", "pending")
     .get();
@@ -99,7 +116,7 @@ async function runCleanup() {
     if (isReservationPaid(d)) continue;
     if (d.warningSent) continue;
 
-    if (createdMs <= expireLimit) continue;
+    if (createdMs <= expireLimit) continue; // už je to po 30 minutách
     if (createdMs <= warnLimit) {
       try {
         await sendWarningEmail(d);
@@ -114,7 +131,7 @@ async function runCleanup() {
     }
   }
 
-  // 4B — expirování
+  // ---------- 4B — expirování ----------
   const expSnap = await reservationsRef
     .where("paymentStatus", "==", "pending")
     .get();
@@ -133,6 +150,7 @@ async function runCleanup() {
       try {
         await db.collection("reservationsArchive").doc(docSnap.id).set({
           ...d,
+          originalReservationId: docSnap.id,
           expiredAt: admin.firestore.FieldValue.serverTimestamp(),
           expiredReason: "unpaid_timeout",
         });
@@ -160,4 +178,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Cleanup selhal" });
   }
 }
+
 
