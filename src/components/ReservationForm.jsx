@@ -27,7 +27,9 @@ export default function ReservationForm({ event, onClose }) {
     });
   };
 
-  // 💾 Uložení rezervace do Firestore + odeslání e-mailu
+  // --------------------------------------------------------
+  // 📌 ODESLÁNÍ REZERVACE + POSLÁNÍ POTVRZOVACÍHO EMAILU
+  // --------------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
@@ -39,7 +41,7 @@ export default function ReservationForm({ event, onClose }) {
     }
 
     try {
-      // 🔥 ULOŽENÍ DO FIRESTORE
+      // 🔥 1) ULOŽENÍ REZERVACE DO FIRESTORE
       const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
         peopleCount: Number(formData.peopleCount),
@@ -47,10 +49,10 @@ export default function ReservationForm({ event, onClose }) {
         eventId: event.id,
         price: event.price ?? null,
         paymentStatus: "pending",
+        createdAt: serverTimestamp(),
         gdprConsent: formData.gdpr,
         safetyConsent: formData.safety,
         age18plus: formData.age18plus,
-        createdAt: serverTimestamp(),
       });
 
       const reservationPayload = {
@@ -61,14 +63,16 @@ export default function ReservationForm({ event, onClose }) {
 
       setReservationData(reservationPayload);
 
-      // 📩 ODESLÁNÍ POTVRZOVACÍHO EMAILU (NEZÁVISLE NA PLATBĚ)
-      await fetch("/api/send-feedback", {
+      // 🔥 2) ODESLÁNÍ POTVRZOVACÍHO EMAILU (NEZÁVISLE NA PLATBĚ)
+      await fetch("/api/send-reservation-confirmation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          reservationId: docRef.id,
           name: formData.name,
           email: formData.email,
           eventTitle: event.title,
+          peopleCount: formData.peopleCount,
         }),
       });
 
@@ -79,7 +83,9 @@ export default function ReservationForm({ event, onClose }) {
     }
   };
 
-  // 💳 Stripe session – vytvoření checkoutu
+  // --------------------------------------------------------
+  // 💳 STRIPE PLATBA
+  // --------------------------------------------------------
   const handleStripePayment = async () => {
     if (!reservationData) return;
 
@@ -113,6 +119,9 @@ export default function ReservationForm({ event, onClose }) {
     }
   };
 
+  // --------------------------------------------------------
+  // UI / MODAL
+  // --------------------------------------------------------
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
@@ -126,7 +135,7 @@ export default function ReservationForm({ event, onClose }) {
           />
         </div>
 
-        {/* Zavírací tlačítko */}
+        {/* Zavřít */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/70 hover:text-white"
@@ -138,7 +147,7 @@ export default function ReservationForm({ event, onClose }) {
           Rezervace: {event.title}
         </h2>
 
-        {/* 🟢 ÚSPĚCH */}
+        {/* 🟢 ÚSPĚŠNÁ REZERVACE */}
         {status === "success" && reservationData ? (
           <div className="text-center space-y-4">
             <p className="text-green-400 font-medium">
