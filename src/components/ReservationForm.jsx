@@ -19,7 +19,6 @@ export default function ReservationForm({ event, onClose }) {
   const [status, setStatus] = useState("idle");
   const [reservationData, setReservationData] = useState(null);
 
-  // 🧩 univerzální změna formuláře
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -28,12 +27,11 @@ export default function ReservationForm({ event, onClose }) {
     });
   };
 
-  // 🧾 odeslání dat do Formspree + Firestore
+  // 🧾 Odeslání rezervace + uložením do Firestore
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
 
-    // POVINNÉ SOUHLASY
     if (!formData.gdpr || !formData.safety || !formData.age18plus) {
       alert("Pro pokračování musíš potvrdit všechny tři souhlasy.");
       setStatus("idle");
@@ -41,34 +39,20 @@ export default function ReservationForm({ event, onClose }) {
     }
 
     try {
-      // 1️⃣ Odeslat do Formspree
-      const formspreeResponse = await fetch("https://formspree.io/f/xovyawqv", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          eventTitle: event.title,
-        }),
+      // 🔥 Uložit přímo do Firestore
+      const docRef = await addDoc(collection(db, "reservations"), {
+        ...formData,
+        peopleCount: Number(formData.peopleCount),
+        eventTitle: event.title,
+        eventId: event.id,
+        price: event.price ?? null,
+        paymentStatus: "pending",
+        gdprConsent: formData.gdpr,
+        safetyConsent: formData.safety,
+        age18plus: formData.age18plus,
+        createdAt: serverTimestamp(),
       });
 
-      if (!formspreeResponse.ok) throw new Error("Formspree error");
-
-      // 2️⃣ Uložit do Firestore
-const docRef = await addDoc(collection(db, "reservations"), {
-  ...formData,
-  peopleCount: Number(formData.peopleCount),
-  eventTitle: event.title,
-  eventId: event.id,              // ⭐⭐⭐ ZÁSADNÍ NOVÉ POLE
-  price: event.price ?? null,
-  paymentStatus: "pending",
-  gdprConsent: formData.gdpr,
-  safetyConsent: formData.safety,
-  age18plus: formData.age18plus,
-  createdAt: serverTimestamp(),
-});
-
-
-      // 3️⃣ Uložit data pro Stripe
       setReservationData({
         id: docRef.id,
         event,
@@ -82,50 +66,43 @@ const docRef = await addDoc(collection(db, "reservations"), {
     }
   };
 
- // 🔧 Stripe platba – vytvoří session, uloží URL do rezervace a pošle e-mail
-const handleStripePayment = async () => {
-  if (!reservationData) return;
+  // 💳 Stripe session – vytvoření checkoutu
+  const handleStripePayment = async () => {
+    if (!reservationData) return;
 
-  try {
-    const resp = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reservationId: reservationData.id,
-        eventTitle: event.title,
-        eventDate: event.date,
-        eventPlace: event.place,
-        price: event.price,
-        email: reservationData.email,
-        name: reservationData.name,
-        peopleCount: reservationData.peopleCount || 1,
-      }),
-    });
+    try {
+      const resp = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId: reservationData.id,
+          eventTitle: event.title,
+          eventDate: event.date,
+          eventPlace: event.place,
+          price: event.price,
+          peopleCount: reservationData.peopleCount || 1,
+          email: reservationData.email,
+          name: reservationData.name, // ⭐ KLÍČOVÉ
+        }),
+      });
 
-    const data = await resp.json();
+      const data = await resp.json();
 
-    if (!resp.ok || !data.url) {
-      console.error("Stripe error:", data);
-      alert("Nepodařilo se připravit platební bránu. Zkus to prosím znovu.");
-      return;
+      if (!resp.ok || !data.url) {
+        alert("Nepodařilo se připravit platební bránu.");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error("Stripe error:", err);
+      alert("Chyba při přípravě platby.");
     }
-
-    // 🔁 Kdybychom chtěli URL mít i v Reactu:
-    // setReservationData((prev) => ({ ...prev, stripeCheckoutUrl: data.url }));
-
-    // 🔥 Přesměrování do Stripe
-    window.location.href = data.url;
-  } catch (err) {
-    console.error("Chyba při přípravě platby:", err);
-    alert("Chyba při přípravě platby. Zkus to prosím znovu.");
-  }
-};
-
+  };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
-
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/70 hover:text-white"
@@ -137,10 +114,17 @@ const handleStripePayment = async () => {
           Rezervace: {event.title}
         </h2>
 
-        {/* 🟢 Úspěch */}
+        {/* 🟢 ÚSPĚCH */}
         {status === "success" && reservationData ? (
           <div className="text-center space-y-4">
-           <p className="text-green-400 font-medium"> ✅ Rezervace byla úspěšně odeslána! </p> <p className="text-white/70 text-sm"> Místo je pro tebe <strong>rezervované 30 minut</strong>. Pokud do té doby nedokončíš platbu, rezervace se automaticky uvolní pro další zájemce. </p>
+            <p className="text-green-400 font-medium">
+              ✅ Rezervace byla úspěšně odeslána!
+            </p>
+            <p className="text-white/70 text-sm">
+              Místo je pro tebe <strong>rezervované 30 minut</strong>.
+              Pokud do té doby nedokončíš platbu, rezervace se automaticky 
+              uvolní pro další zájemce.
+            </p>
 
             {event.price ? (
               <button
@@ -163,9 +147,8 @@ const handleStripePayment = async () => {
             </button>
           </div>
         ) : (
-          /* 🔄 Formulář */
+          // 📝 FORMULÁŘ
           <form onSubmit={handleSubmit} className="space-y-3">
-
             <input
               type="text"
               name="name"
@@ -245,9 +228,8 @@ const handleStripePayment = async () => {
               className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             />
 
-            {/* 🔥 POVINNÉ SOUHLASY */}
+            {/* 🟡 POVINNÉ SOUHLASY */}
             <div className="space-y-2 text-sm text-white/80">
-
               <label className="flex items-start gap-2">
                 <input
                   type="checkbox"
@@ -270,7 +252,8 @@ const handleStripePayment = async () => {
                   className="mt-1"
                 />
                 <span>
-                  Účastním se akce na vlastní zodpovědnost. Organizátor nenese odpovědnost za úrazy vzniklé nepozorností nebo náhodou.
+                  Účastním se akce na vlastní odpovědnost. 
+                  Organizátor nenese odpovědnost za úrazy.
                 </span>
               </label>
 
@@ -285,26 +268,31 @@ const handleStripePayment = async () => {
                 />
                 <span>Potvrzuji, že mi je 18 let nebo více.</span>
               </label>
-            <p className="text-xs text-white/40">  <a
-    href="/podminky-ucasti.html"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="underline"
-  >
-    Podmínky účasti </a>
-</p>
-        </div>
+
+              <p className="text-xs text-white/40">
+                <a
+                  href="/podminky-ucasti.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Podmínky účasti
+                </a>
+              </p>
+            </div>
 
             <button
               type="submit"
               disabled={status === "sending"}
               className="w-full bg-gradient-to-r from-a1 to-a2 text-[#071022] py-2 rounded-lg font-semibold shadow-md"
             >
-              {status === "sending" ? "Odesílám..." : "Odeslat rezervaci"}
+              {status === "sending" ? "Odesílám…" : "Odeslat rezervaci"}
             </button>
 
             {status === "error" && (
-              <p className="text-red-400 text-center">❌ Chyba při odesílání.</p>
+              <p className="text-red-400 text-center">
+                ❌ Chyba při odesílání.
+              </p>
             )}
           </form>
         )}
@@ -312,5 +300,6 @@ const handleStripePayment = async () => {
     </div>
   );
 }
+
 
 
