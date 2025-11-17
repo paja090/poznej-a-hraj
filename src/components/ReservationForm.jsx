@@ -82,33 +82,45 @@ const docRef = await addDoc(collection(db, "reservations"), {
     }
   };
 
-  // 🔧 Stripe platba
-  const handleStripePayment = async () => {
-    if (!reservationData) return;
+ // 🔧 Stripe platba – vytvoří session, uloží URL do rezervace a pošle e-mail
+const handleStripePayment = async () => {
+  if (!reservationData) return;
 
-    try {
-      const resp = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationId: reservationData.id,
-          eventTitle: event.title,
-          eventDate: event.date,
-          eventPlace: event.place,
-          price: event.price,
-          peopleCount: reservationData.peopleCount || 1,
-          email: reservationData.email,
-        }),
-      });
+  try {
+    const resp = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reservationId: reservationData.id,
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventPlace: event.place,
+        price: event.price,
+        email: reservationData.email,
+        name: reservationData.name,
+        peopleCount: reservationData.peopleCount || 1,
+      }),
+    });
 
-      const data = await resp.json();
-      if (data.url) window.location.href = data.url;
-      else alert("Nepodařilo se spustit platební bránu.");
-    } catch (err) {
-      console.error(err);
-      alert("Chyba při přípravě platby.");
+    const data = await resp.json();
+
+    if (!resp.ok || !data.url) {
+      console.error("Stripe error:", data);
+      alert("Nepodařilo se připravit platební bránu. Zkus to prosím znovu.");
+      return;
     }
-  };
+
+    // 🔁 Kdybychom chtěli URL mít i v Reactu:
+    // setReservationData((prev) => ({ ...prev, stripeCheckoutUrl: data.url }));
+
+    // 🔥 Přesměrování do Stripe
+    window.location.href = data.url;
+  } catch (err) {
+    console.error("Chyba při přípravě platby:", err);
+    alert("Chyba při přípravě platby. Zkus to prosím znovu.");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
