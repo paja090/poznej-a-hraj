@@ -27,7 +27,7 @@ export default function ReservationForm({ event, onClose }) {
     });
   };
 
-  // 🧾 Odeslání rezervace + uložením do Firestore
+  // 💾 Uložení rezervace
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
@@ -39,7 +39,6 @@ export default function ReservationForm({ event, onClose }) {
     }
 
     try {
-      // 🔥 Uložit přímo do Firestore
       const docRef = await addDoc(collection(db, "reservations"), {
         ...formData,
         peopleCount: Number(formData.peopleCount),
@@ -66,7 +65,7 @@ export default function ReservationForm({ event, onClose }) {
     }
   };
 
-  // 💳 Stripe session – vytvoření checkoutu
+  // 💳 Stripe session
   const handleStripePayment = async () => {
     if (!reservationData) return;
 
@@ -82,7 +81,7 @@ export default function ReservationForm({ event, onClose }) {
           price: event.price,
           peopleCount: reservationData.peopleCount || 1,
           email: reservationData.email,
-          name: reservationData.name, // ⭐ KLÍČOVÉ
+          name: reservationData.name,
         }),
       });
 
@@ -101,24 +100,24 @@ export default function ReservationForm({ event, onClose }) {
   };
 
   return (
-  <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/10 border border-white/20 rounded-2xl p-6 w-full max-w-md shadow-2xl text-white relative">
 
-  {/* LOGO */}
-  <div className="w-full flex justify-center mb-4 mt-2">
-    <img
-      src="/rebuss.png"
-      alt="Rebuss Logo"
-      className="h-14 md:h-20 object-contain drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]"
-    />
-  </div>
+        {/* LOGO */}
+        <div className="w-full flex justify-center mb-4 mt-2">
+          <img
+            src="/rebuss.png"
+            alt="Rebuss Logo"
+            className="h-14 md:h-20 object-contain drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]"
+          />
+        </div>
 
-  <button
-    onClick={onClose}
-    className="absolute top-3 right-3 text-white/70 hover:text-white"
-  >
-    ✖
-  </button>
-
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-white/70 hover:text-white"
+        >
+          ✖
+        </button>
 
         <h2 className="text-xl font-bold mb-4 text-center">
           Rezervace: {event.title}
@@ -132,8 +131,8 @@ export default function ReservationForm({ event, onClose }) {
             </p>
             <p className="text-white/70 text-sm">
               Místo je pro tebe <strong>rezervované 30 minut</strong>.
-              Pokud do té doby nedokončíš platbu, rezervace se automaticky 
-              uvolní pro další zájemce.
+              Pokud do té doby nedokončíš platbu, rezervace se automaticky uvolní
+              pro další zájemce.
             </p>
 
             {event.price ? (
@@ -157,8 +156,9 @@ export default function ReservationForm({ event, onClose }) {
             </button>
           </div>
         ) : (
-          // 📝 FORMULÁŘ
+          // Formulář
           <form onSubmit={handleSubmit} className="space-y-3">
+
             <input
               type="text"
               name="name"
@@ -238,7 +238,7 @@ export default function ReservationForm({ event, onClose }) {
               className="w-full p-2 rounded-lg bg-white/10 border border-white/20"
             />
 
-            {/* 🟡 POVINNÉ SOUHLASY */}
+            {/* Souhlasy */}
             <div className="space-y-2 text-sm text-white/80">
               <label className="flex items-start gap-2">
                 <input
@@ -261,10 +261,7 @@ export default function ReservationForm({ event, onClose }) {
                   required
                   className="mt-1"
                 />
-                <span>
-                  Účastním se akce na vlastní odpovědnost. 
-                  Organizátor nenese odpovědnost za úrazy.
-                </span>
+                <span>Účastním se akce na vlastní odpovědnost.</span>
               </label>
 
               <label className="flex items-start gap-2">
