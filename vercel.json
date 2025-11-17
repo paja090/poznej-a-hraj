@@ -1,14 +1,7 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
-  ],
-  "crons": [
-    {
-      "path": "/api/cleanup-reservations",
-      "schedule": "*/5 * * * *"
-    }
   ]
 }
-
 
 
