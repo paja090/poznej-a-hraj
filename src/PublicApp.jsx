@@ -297,14 +297,18 @@ return (
 <section className="grid items-center gap-10 py-14 md:grid-cols-2">
 
   {/* VIDEO */}
-  <div className="overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-    <iframe
-      className="h-full w-full aspect-video"
-      src="https://www.youtube.com/embed/5jK8L3j4Z_4"
-      title="Promo video"
-      allowFullScreen
-    />
-  </div>
+ <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+  <video
+    src="/promo.mp4"
+    className="h-full w-full aspect-video object-cover"
+    autoPlay
+    muted
+    loop
+    playsInline
+  ></video>
+
+  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+</div>
 
   {/* TEXTOVÁ SEKCE */}
   <div className="space-y-5">
