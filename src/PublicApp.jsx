@@ -607,7 +607,54 @@ return (
         {selectedEvent && (
           <ReservationForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />
         )}
+{/* === FAQ === */}
+<section id="faq" className="mt-16 space-y-6">
+  <h3 className="text-xl font-semibold">Často kladené dotazy</h3>
+  
+  <div className="grid gap-4 md:grid-cols-2">
 
+    {/* Q1 */}
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
+      <p className="font-semibold text-white">Musím přijít sám/sama?</p>
+      <p className="mt-1 text-sm text-white/70">
+        Ne. Můžeš přijít jak solo, tak s kamarádem nebo skupinou. Hry propojují všechny.
+      </p>
+    </div>
+
+    {/* Q2 */}
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
+      <p className="font-semibold text-white">Co když jsem introvert?</p>
+      <p className="mt-1 text-sm text-white/70">
+        Perfektní — máme hry, které rozbijí ledy a nemusíš se nutit do ničeho nepříjemného.
+      </p>
+    </div>
+
+    {/* Q3 */}
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
+      <p className="font-semibold text-white">Jak probíhá večer?</p>
+      <p className="mt-1 text-sm text-white/70">
+        Mix her, týmových výzev, soutěží, icebreakerů a volné zábavy. Program je navržený tak, aby byl přirozený a plynulý.
+      </p>
+    </div>
+
+    {/* Q4 */}
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
+      <p className="font-semibold text-white">Kolik je účastníků?</p>
+      <p className="mt-1 text-sm text-white/70">
+        Zpravidla 20–30 lidí podle akce.
+      </p>
+    </div>
+
+    {/* Q5 */}
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
+      <p className="font-semibold text-white">Jak funguje rezervace?</p>
+      <p className="mt-1 text-sm text-white/70">
+        Vybereš akci, odešleš krátký formulář a zaplatíš online přes Stripe. Na e-mail ti přijde digitální vstupenka s QR kódem.
+      </p>
+    </div>
+
+  </div>
+</section>
         {/* === SOCIAL CTA === */}
         <section id="social" className="mt-16 text-center">
           <h3 className="text-2xl font-bold text-white">Sleduj nás</h3>
@@ -673,54 +720,7 @@ return (
             }}
           />
         )}
-{/* === FAQ === */}
-<section id="faq" className="mt-16 space-y-6">
-  <h3 className="text-xl font-semibold">Často kladené dotazy</h3>
-  
-  <div className="grid gap-4 md:grid-cols-2">
 
-    {/* Q1 */}
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
-      <p className="font-semibold text-white">Musím přijít sám/sama?</p>
-      <p className="mt-1 text-sm text-white/70">
-        Ne. Můžeš přijít jak solo, tak s kamarádem nebo skupinou. Hry propojují všechny.
-      </p>
-    </div>
-
-    {/* Q2 */}
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
-      <p className="font-semibold text-white">Co když jsem introvert?</p>
-      <p className="mt-1 text-sm text-white/70">
-        Perfektní — máme hry, které rozbijí ledy a nemusíš se nutit do ničeho nepříjemného.
-      </p>
-    </div>
-
-    {/* Q3 */}
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
-      <p className="font-semibold text-white">Jak probíhá večer?</p>
-      <p className="mt-1 text-sm text-white/70">
-        Mix her, týmových výzev, soutěží, icebreakerů a volné zábavy. Program je navržený tak, aby byl přirozený a plynulý.
-      </p>
-    </div>
-
-    {/* Q4 */}
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
-      <p className="font-semibold text-white">Kolik je účastníků?</p>
-      <p className="mt-1 text-sm text-white/70">
-        Zpravidla 20–30 lidí podle akce.
-      </p>
-    </div>
-
-    {/* Q5 */}
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/40 transition">
-      <p className="font-semibold text-white">Jak funguje rezervace?</p>
-      <p className="mt-1 text-sm text-white/70">
-        Vybereš akci, odešleš krátký formulář a zaplatíš online přes Stripe. Na e-mail ti přijde digitální vstupenka s QR kódem.
-      </p>
-    </div>
-
-  </div>
-</section>
         {/* FOOTER */}
         <footer className="mt-16 border-t border-white/10 py-8 text-center text-sm text-white/60">
           © {new Date().getFullYear()} Poznej &amp; Hraj · Těšíme se na další společnou hru!
