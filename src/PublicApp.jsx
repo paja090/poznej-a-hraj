@@ -433,6 +433,72 @@ return (
     <p className="mt-4 text-white/70">{content.aboutBody}</p>
   )}
 </section>
+{/* === PRO KOHO JE VEČER === */}
+<section id="for-who" className="mt-16 space-y-6">
+  <h3 className="text-xl font-semibold">Pro koho je večer?</h3>
+  <p className="text-sm text-white/70 max-w-2xl">
+    Večer je navržen tak, aby si ho užil úplně každý — bez ohledu na věk, temperament nebo zkušenosti. 
+    Hry a atmosféra přirozeně propojují všechny.
+  </p>
+
+  <div className="grid gap-6 md:grid-cols-3">
+    
+    {/* 1 — Introverti i extroverti */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">🙂</div>
+      <p className="font-semibold text-white">Pro introverty i extroverty</p>
+      <p className="mt-2 text-sm text-white/70">
+        Program je vyvážený, nenucený a skvěle rozbíjí ledy. Každý si najde své tempo.
+      </p>
+    </div>
+
+    {/* 2 — Lidé kteří chtějí nové přátele */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">🤝</div>
+      <p className="font-semibold text-white">Pro lidi, kteří chtějí nové přátele</p>
+      <p className="mt-2 text-sm text-white/70">
+        Hry přirozeně spojují a vznikají nová přátelství, skupinky i společné zážitky.
+      </p>
+    </div>
+
+    {/* 3 — Pro ty kteří nechtějí seznamky */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">❤️</div>
+      <p className="font-semibold text-white">Pro ty, kteří nechtějí seznamky</p>
+      <p className="mt-2 text-sm text-white/70">
+        Žádné swipy. Žádná přetvářka. Jen reálné emoce a přirozené propojení.
+      </p>
+    </div>
+
+    {/* 4 — Pro milovníky her a soutěží */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">🎲</div>
+      <p className="font-semibold text-white">Pro milovníky her a soutěží</p>
+      <p className="mt-2 text-sm text-white/70">
+        Kombinace týmových her, výzev a aktivit dodá večeru skvělou energii.
+      </p>
+    </div>
+
+    {/* 5 — Pro ty kteří chtějí zažít něco nového */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">✨</div>
+      <p className="font-semibold text-white">Pro ty, kteří chtějí zažít něco nového</p>
+      <p className="mt-2 text-sm text-white/70">
+        Každý večer má originální atmosféru i program. Budeš mít na co vzpomínat.
+      </p>
+    </div>
+
+    {/* 6 — Pro každého kdo nechce trávit večer doma */}
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-fuchsia-400/50 transition text-center">
+      <div className="text-3xl mb-3">🔥</div>
+      <p className="font-semibold text-white">Pro každého, kdo nechce trávit večer doma</p>
+      <p className="mt-2 text-sm text-white/70">
+        Přijď se pobavit, poznat nové lidi a zažít atmosféru, která tě vtáhne.
+      </p>
+    </div>
+
+  </div>
+</section>
 
 
 
