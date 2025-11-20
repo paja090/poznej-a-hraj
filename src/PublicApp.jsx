@@ -451,6 +451,9 @@ return (
         <section id="events" className="mt-14 space-y-12">
           <div>
             <h3 className="mb-3 text-xl font-semibold">Nadcházející akce</h3>
+            <p className="mb-6 text-white/70 text-sm">
+  Vyber si večer, který ti sedne. Každá akce má své tempo, atmosféru a originální program.
+</p>
             <div className="grid gap-6 lg:grid-cols-2">
               {upcoming.length ? (
                 upcoming.map((e) => (
