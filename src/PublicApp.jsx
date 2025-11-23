@@ -323,7 +323,7 @@ return (
 >
   🔔
 </span>
-      <span className="font-semibold">Garance skělého večara</span>
+      <span className="font-semibold">Garance skělého večera</span>
     </div>
 
     {/* NADPIS */}
