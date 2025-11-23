@@ -249,9 +249,9 @@ return (
         bg-gradient-to-r from-fuchsia-400 to-cyan-300
         drop-shadow-[0_0_6px_rgba(236,72,153,0.45)]
         whitespace-nowrap
-        max-w-[150px]
+        
         overflow-hidden
-        text-ellipsis
+        
       ">
         Poznej & Hraj
       </span>
