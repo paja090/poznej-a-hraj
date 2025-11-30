@@ -7,6 +7,8 @@ import FeedbackForm from "./components/FeedbackForm.jsx";
 import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
 import EventDetailModal from "./components/EventDetailModal.jsx";
+import ReviewForm from "./components/ReviewForm.jsx";
+import { addDoc, serverTimestamp, collection } from "firebase/firestore";
 
 // === MINI KOMPONENTY ===
 function StatCard({ label, value }) {
@@ -175,6 +177,16 @@ const [mobileMenu, setMobileMenu] = useState(false);
   }, []);
 
   // === RECENZE ===
+  // === ULOŽENÍ RECENZE Z VEŘEJNÉHO FORMULÁŘE ===
+const handlePublicReviewSubmit = async (review) => {
+  await addDoc(collection(db, "reviews"), {
+    name: review.name || "Anonym",
+    rating: Number(review.rating) || 5,
+    message: review.message.trim(),
+    approved: false, // 🔥 čekání na schválení
+    createdAt: serverTimestamp(),
+  });
+};
   useEffect(() => {
     const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snap) => {
@@ -659,6 +671,15 @@ return (
             </div>
           )}
         </section>
+      {/* FORMULÁŘ PRO ODESLÁNÍ RECENZÍ */}
+<section id="add-review" className="mt-10">
+  <h3 className="text-xl font-semibold mb-2">Chceš přidat svou recenzi?</h3>
+  <p className="text-sm text-white/70 mb-4">
+    Tvoje zkušenost pomůže dalším lidem rozhodnout se.
+  </p>
+
+  <ReviewForm onSubmit={handlePublicReviewSubmit} />
+</section>
 
         {/* === FEEDBACK === */}
         <section id="feedback" className="mt-16">
