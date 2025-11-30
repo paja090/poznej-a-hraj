@@ -8,7 +8,8 @@ import ReservationForm from "./components/ReservationForm.jsx";
 import PollSection from "./components/PollSection.jsx";
 import EventDetailModal from "./components/EventDetailModal.jsx";
 import ReviewForm from "./components/ReviewForm.jsx";
-import { addDoc, serverTimestamp, collection } from "firebase/firestore";
+
+import { addDoc, serverTimestamp } from "firebase/firestore";
 
 // === MINI KOMPONENTY ===
 function StatCard({ label, value }) {
