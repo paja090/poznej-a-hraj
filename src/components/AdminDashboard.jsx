@@ -92,6 +92,7 @@ const [newTag, setNewTag] = useState("");
   included: [],
   goals: [],
   galleryImages: [],
+  showAvailability: false,
 });
 
   // === NOVÝ CREW MEMBER ===
@@ -257,6 +258,7 @@ const handleAddEvent = async (e) => {
     included: newEvent.included,
     goals: newEvent.goals,
     galleryImages: newEvent.galleryImages,
+    showAvailability: newEvent.showAvailability || false,
 
     createdAt: serverTimestamp(),
   };
@@ -284,6 +286,7 @@ const handleAddEvent = async (e) => {
     goals: [],
 
     galleryImages: [],
+  showAvailability: false,
   });
 };
 
@@ -1827,6 +1830,7 @@ const closeEditModal = () => {
             included: editingEvent.included || [],
             goals: editingEvent.goals || [],
             galleryImages: editingEvent.galleryImages || [],
+            showAvailability: editingEvent.showAvailability || false,
 
             updatedAt: serverTimestamp(),
           });
@@ -1882,6 +1886,11 @@ const closeEditModal = () => {
           className="w-full rounded-md bg-slate-800 px-3 py-2 outline-none ring-1 ring-slate-600/60"
         />
 
+        {/* Zobrazit volná místa */}
+        <label className="flex items-center gap-2 text-xs text-slate-300 mt-2">
+          <input type="checkbox" checked={editingEvent.showAvailability} onChange={(e)=>setEditingEvent({...editingEvent, showAvailability:e.target.checked})} />
+          Zobrazit volná místa na webu
+        </label>
         {/* Místo + datum */}
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -1926,6 +1935,13 @@ const closeEditModal = () => {
     placeholder="Cena (Kč)"
   />
 </div>
+
+    {/* Zobrazit volná místa */}
+    <label className="flex items-center gap-2 text-xs text-slate-300">
+      <input type="checkbox" checked={newEvent.showAvailability} onChange={(e)=>setNewEvent({...newEvent, showAvailability:e.target.checked})} />
+      Zobrazit volná místa na webu
+    </label>
+
         {/* Popis */}
         <textarea
           rows={3}
@@ -2086,6 +2102,8 @@ function Th({ children }) {
 function Td({ children }) {
   return <td className="px-3 py-2 text-[11px]">{children}</td>;
 }
+
+
 
 
 
