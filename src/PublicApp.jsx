@@ -37,9 +37,11 @@ function EventCard({ event, onReserve, onDetail, variant = "upcoming" }) {
         {event.date && <span className="pill">📅 {event.date}</span>}
         {event.place && <span className="pill">📍 {event.place}</span>}
         {"capacity" in event && <span className="pill">Kapacita: {event.capacity}</span>}
-        {"available" in event && (
-          <span className="pill text-fuchsia-300">Volná místa: {event.available ?? "?"}</span>
-        )}
+        {event.showAvailability && ("available" in event) && (
+        <span className="pill text-fuchsia-300">
+          Volná místa: {event.available ?? "?"}
+        </span>
+      )}
         {event.price && <span className="pill text-emerald-200">💳 {event.price} Kč</span>}
       </div>
 
