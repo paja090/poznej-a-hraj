@@ -70,13 +70,13 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
         </button>
 
         {/* BANNER */}
-        <div className="h-48 w-full overflow-hidden rounded-t-3xl relative">
-          {event.bannerUrl ? (
-            <img
-              src={event.bannerUrl}
-              alt={event.title}
-              className="w-full h-full object-cover opacity-80"
-            />
+      <div className="w-full max-h-[70vh] overflow-hidden rounded-t-3xl relative">
+  {event.bannerUrl ? (
+    <img
+      src={event.bannerUrl}
+      alt={event.title}
+      className="w-full h-auto object-contain"
+    />
           ) : (
             <div className="w-full h-full grid place-items-center text-white/40 bg-white/10">
               📸 Banner akce
