@@ -282,7 +282,7 @@ export default function ReservationForm({ event, onClose }) {
                   required
                   className="mt-1"
                 />
-                <span>Souhlasím se zpracováním osobních údajů (GDPR).</span>
+                <span>Souhlasím se zpracováním osobních údajů (GDPR) a s podmínkami akce.</span>
               </label>
 
               <label className="flex items-start gap-2">
