@@ -616,17 +616,18 @@ return (
           ) : gallery.length === 0 ? (
             <p className="text-sm text-white/50">Zatím žádné fotky.</p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {gallery.map((img, i) => (
-                <img
-                  key={i}
-                  src={img.url}
-                  alt={img.name || "Momentka"}
-                  onClick={() => setSelectedImage(img.url)}
-                  className="h-40 w-full cursor-pointer rounded-2xl border border-white/10 object-cover transition hover:scale-[1.03] hover:border-fuchsia-400/50"
-                />
-              ))}
-            </div>
+            <div className="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4">
+  {gallery.map((img, i) => (
+    <img
+      key={i}
+      src={img.url}
+      alt={img.name || "Momentka"}
+      onClick={() => setSelectedImage(img.url)}
+      className="w-full mb-4 rounded-2xl cursor-pointer border border-white/10 object-cover shadow-lg 
+                 transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
+    />
+  ))}
+</div>
           )}
 
           {/* LIGHTBOX */}
