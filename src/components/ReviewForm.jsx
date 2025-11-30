@@ -80,7 +80,7 @@ export default function ReviewForm({ onSubmit, disabled }) {
           value={form.message}
           onChange={handleChange}
           rows={4}
-          placeholder="Jaký byl tvůj večer Poznej & Hraj?"
+          placeholder="Jaký byl tvůj večer Réboos?"
           className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-a1 focus:outline-none focus:ring-2 focus:ring-a1/40"
           required
         />
