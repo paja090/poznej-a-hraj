@@ -137,13 +137,13 @@ export default function EventDetailModal({ event, onClose, onReserve }) {
               </span>
             </div>
 
-            {"available" in event && (
-              <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                👥 Zbývá míst:
-                <br />
-                <span className="font-semibold text-a2">{event.available}</span>
-              </div>
-            )}
+            {event.showAvailability && ("available" in event) && (
+  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+    👥 Zbývá míst:
+    <br />
+    <span className="font-semibold text-a2">{event.available}</span>
+  </div>
+)}
           </div>
 
           {/* ⭐ PROGRAM VEČERA — opravený, bez duplikací ⭐ */}
